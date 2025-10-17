@@ -62,7 +62,7 @@ export const fmpConfig: FmpConfig = {
 Global state management with Jotai:
 
 ```typescript
-export const editorValueAtom = atom('');
+export const currentEditorValueAtom = atom('');
 export const languageAtom = atom('alloy');
 export const outputAtom = atom('');
 export const isExecutingAtom = atom(false);

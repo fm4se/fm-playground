@@ -133,7 +133,7 @@ export const fmpConfig: FmpConfig = {
 
 - `src/atoms.tsx` - Global state management with Jotai. This file defines global state atoms for managing the current tool, code content, and execution results e.g.:
     - `languageAtom` - Currently selected tool
-    - `editorValueAtom` - Current code content
+    - `currentEditorValueAtom` - Current code content
     - `outputAtom` - Execution results
     - You can add more atoms as needed for additional state management.
 - `tools/common/lspWrapperConfig.ts` - Configuration for the LSP wrapper, including language server settings and capabilities. For example, this file contains the configuration for the SMT language server, including its capabilities and supported languages.

@@ -9,7 +9,7 @@ import { getCodeByParmalink } from '@/api/playgroundApi';
 import { fmpConfig, toolExecutionMap } from '@/ToolMaps';
 import Feedback from '@/components/Utils/Feedback';
 import {
-    editorValueAtom,
+    currentEditorValueAtom,
     languageAtom,
     permalinkAtom,
     isExecutingAtom,
@@ -32,7 +32,7 @@ const Playground: React.FC<PlaygroundProps> = ({ editorTheme }) => {
     const navigate = useNavigate();
     const inputDivRef = useRef<HTMLDivElement>(null); // contains the reference to the editor area
     const outputDivRef = useRef<HTMLDivElement>(null); // contains the reference to the output area
-    const [, setEditorValue] = useAtom(editorValueAtom);
+    const [, setEditorValue] = useAtom(currentEditorValueAtom);
     const [language, setLanguage] = useAtom(languageAtom);
     const [permalink, setPermalink] = useAtom(permalinkAtom);
     const [, setOutput] = useAtom(outputAtom); // contains the output from the tool execution.

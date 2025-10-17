@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import * as monacoEditor from 'monaco-editor';
 import Editor from '@monaco-editor/react';
 import { useAtom } from 'jotai';
-import { editorValueAtom, languageAtom, lineToHighlightAtom } from '@/atoms';
+import { currentEditorValueAtom, languageAtom, lineToHighlightAtom } from '@/atoms';
 import { fmpConfig, languageConfigMap } from '@/ToolMaps';
 import '@/assets/style/Playground.css';
 
@@ -12,7 +12,7 @@ interface BasicCodeEditorProps {
 }
 
 const CodeEditor: React.FC<BasicCodeEditorProps> = (props: BasicCodeEditorProps) => {
-    const [editorValue, setEditorValue] = useAtom(editorValueAtom);
+    const [editorValue, setEditorValue] = useAtom(currentEditorValueAtom);
     const editorRef = useRef<monacoEditor.editor.IStandaloneCodeEditor | null>(null); // editor reference
     const [language, setLanguage] = useAtom(languageAtom);
     const [lineToHighlight, setLineToHighlight] = useAtom(lineToHighlightAtom);

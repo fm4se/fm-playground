@@ -8,13 +8,13 @@ import { AiOutlineFullscreen, AiOutlineFullscreenExit } from 'react-icons/ai';
 import Toggle from 'react-toggle';
 import {
     enableLspAtom,
-    editorValueAtom,
     outputAtom,
     permalinkAtom,
     languageAtom,
     isExecutingAtom,
     isFullScreenAtom,
     lineToHighlightAtom,
+    currentEditorValueAtom,
 } from '@/atoms';
 import ConfirmModal from '@/components/Utils/Modals/ConfirmModal';
 import FileUploadButton from '@/components/Utils/FileUpload';
@@ -33,7 +33,7 @@ interface InputAreaProps {
 const InputArea: React.FC<InputAreaProps> = ({ editorTheme, onRunButtonClick, onFullScreenButtonClick }) => {
     const location = useLocation();
     const [enableLsp, setEnableLsp] = useAtom(enableLspAtom);
-    const [editorValue, setEditorValue] = useAtom(editorValueAtom);
+    const [editorValue, setEditorValue] = useAtom(currentEditorValueAtom);
     const [, setOutput] = useAtom(outputAtom);
     const [permalink, setPermalink] = useAtom(permalinkAtom);
     const [language] = useAtom(languageAtom);

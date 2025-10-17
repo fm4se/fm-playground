@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
 import Select, { SingleValue } from 'react-select';
 import { useAtom } from 'jotai';
-import { editorValueAtom, alloySelectedCmdAtom, alloyCmdOptionsAtom } from '@/atoms';
+import { currentEditorValueAtom, alloySelectedCmdAtom, alloyCmdOptionsAtom } from '@/atoms';
 
 const AlloyCmdOptions = () => {
-    const [editorValue] = useAtom(editorValueAtom);
+    const [editorValue] = useAtom(currentEditorValueAtom);
     const [, setAlloySelectedCmd] = useAtom(alloySelectedCmdAtom);
     const [alloyCmdOption, setAlloyCmdOption] = useAtom(alloyCmdOptionsAtom);
 
