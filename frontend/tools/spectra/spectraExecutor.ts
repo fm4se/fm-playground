@@ -2,7 +2,7 @@ import { getLineToHighlight } from '@/../tools/common/lineHighlightingUtil';
 import { saveCode } from '@/api/playgroundApi';
 import { fmpConfig } from '@/ToolMaps';
 import {
-    editorValueAtom,
+    currentEditorValueAtom,
     jotaiStore,
     languageAtom,
     permalinkAtom,
@@ -26,7 +26,7 @@ async function executeSpectra(permalink: Permalink, command: string) {
 }
 
 export const executeSpectraTool = async () => {
-    const editorValue = jotaiStore.get(editorValueAtom);
+    const editorValue = jotaiStore.get(currentEditorValueAtom);
     const language = jotaiStore.get(languageAtom);
     const permalink = jotaiStore.get(permalinkAtom);
     const enableLsp = jotaiStore.get(enableLspAtom);

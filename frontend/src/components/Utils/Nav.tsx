@@ -18,7 +18,7 @@ import { downloadUserData, deleteProfile } from '@/api/playgroundApi';
 import axiosAuth from '@/api/axiosAuth';
 import SessionExpiredModal from '@/components/Utils/Modals//SessionExpiredModal';
 import Toggle from '@/components/Utils/Toggle';
-import { editorValueAtom, languageAtom } from '@/atoms';
+import { currentEditorValueAtom, languageAtom } from '@/atoms';
 import { fmpConfig } from '@/ToolMaps';
 import '@/assets/style/Nav.css';
 
@@ -28,7 +28,7 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ isDarkTheme, setIsDarkTheme }) => {
-    const [, setEditorValue] = useAtom(editorValueAtom);
+    const [, setEditorValue] = useAtom(currentEditorValueAtom);
     const [, setLanguage] = useAtom(languageAtom);
     const authContext = useContext(AuthContext);
     const isLoggedIn = authContext?.isLoggedIn ?? false;

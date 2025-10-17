@@ -161,7 +161,7 @@ async function executenuxmv(permalink: Permalink) {
 
 export const executenuxmvTool = async () => {
   // Get the contents of the editor, selected language, and permalink
-  const editorValue = jotaiStore.get(editorValueAtom);
+  const editorValue = jotaiStore.get(currentEditorValueAtom);
   const language = jotaiStore.get(languageAtom);
   const permalink = jotaiStore.get(permalinkAtom);
   

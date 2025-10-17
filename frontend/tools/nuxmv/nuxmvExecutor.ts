@@ -2,7 +2,7 @@ import { getLineToHighlight } from '@/../tools/common/lineHighlightingUtil';
 import { saveCode } from '@/api/playgroundApi';
 import { fmpConfig } from '@/ToolMaps';
 import {
-    editorValueAtom,
+    currentEditorValueAtom,
     jotaiStore,
     languageAtom,
     permalinkAtom,
@@ -24,7 +24,7 @@ async function executeNuxmv(permalink: Permalink) {
 }
 
 export const executeNuxmvTool = async () => {
-    const editorValue = jotaiStore.get(editorValueAtom);
+    const editorValue = jotaiStore.get(currentEditorValueAtom);
     const language = jotaiStore.get(languageAtom);
     const permalink = jotaiStore.get(permalinkAtom);
     const response = await saveCode(editorValue, language.short, permalink.permalink || null, null);

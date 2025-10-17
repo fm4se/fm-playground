@@ -2,7 +2,7 @@ import axios from 'axios';
 import { saveCode } from '@/api/playgroundApi';
 import { fmpConfig } from '@/ToolMaps';
 import {
-    editorValueAtom,
+    currentEditorValueAtom,
     jotaiStore,
     languageAtom,
     permalinkAtom,
@@ -24,7 +24,7 @@ async function getAlloyInstance(permalink: Permalink, cmd: number) {
 }
 
 export const executeAlloyTool = async () => {
-    const editorValue = jotaiStore.get(editorValueAtom);
+    const editorValue = jotaiStore.get(currentEditorValueAtom);
     const language = jotaiStore.get(languageAtom);
     const permalink = jotaiStore.get(permalinkAtom);
     const alloySelectedCmd = jotaiStore.get(alloySelectedCmdAtom);

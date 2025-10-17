@@ -4,7 +4,7 @@ import { saveCode } from '@/api/playgroundApi';
 import { Permalink } from '@/types';
 import { fmpConfig } from '@/ToolMaps';
 import {
-    editorValueAtom,
+    currentEditorValueAtom,
     jotaiStore,
     languageAtom,
     permalinkAtom,
@@ -16,7 +16,7 @@ import {
 } from '@/atoms';
 
 export const executeLimboole = async () => {
-    const editorValue = jotaiStore.get(editorValueAtom);
+    const editorValue = jotaiStore.get(currentEditorValueAtom);
     const language = jotaiStore.get(languageAtom);
     const permalink: Permalink = jotaiStore.get(permalinkAtom);
     const enableLsp = jotaiStore.get(enableLspAtom);
