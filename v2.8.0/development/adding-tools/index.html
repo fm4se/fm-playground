@@ -1,0 +1,2423 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Comprehensive documentation for the Formal Methods Playground">
+      
+      
+      
+        <link rel="canonical" href="https://play.formal-methods.net/docs/v2.8.0/development/adding-tools/">
+      
+      
+        <link rel="prev" href="../../developer-guide/empty-playground/project-structure/">
+      
+      
+        <link rel="next" href="../language-servers/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.14">
+    
+    
+      
+        <title>Adding Tools - FM Playground Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.342714a4.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#adding-new-tools" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="FM Playground Documentation" class="md-header__button md-logo" aria-label="FM Playground Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            FM Playground Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Adding Tools
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/fm4se/fm-playground" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    fm4se/fm-playground
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  User Guide
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../developer-guide/" class="md-tabs__link">
+          
+  
+  
+  Developer Guide
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../CHANGELOG/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Release Notes
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="FM Playground Documentation" class="md-nav__button md-logo" aria-label="FM Playground Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    FM Playground Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/fm4se/fm-playground" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    fm4se/fm-playground
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    User Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Developer Guide
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Developer Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer-guide/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Tailered Playground
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
+            <span class="md-nav__icon md-icon"></span>
+            Tailered Playground
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer-guide/tailered-playground/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Setup Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer-guide/tailered-playground/project-structure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Project Structure
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Empty Playground
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            Empty Playground
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer-guide/empty-playground/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Setup Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer-guide/empty-playground/project-structure/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Project Structure
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Development
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_4">
+            <span class="md-nav__icon md-icon"></span>
+            Development
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Adding Tools
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Adding Tools
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      Architecture Pattern
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-choose-your-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 1: Choose Your Tool
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 1: Choose Your Tool">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-frontend-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 2: Frontend Integration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2: Frontend Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#overview_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-a-new-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create a New Tool
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Create a New Tool">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration Options
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tool-name" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tool Name
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#display-name" class="md-nav__link">
+    <span class="md-ellipsis">
+      Display Name
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tool-id" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tool ID
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-extension" class="md-nav__link">
+    <span class="md-ellipsis">
+      File Extension
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-endpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      API Endpoint
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output-component-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      Output Component Type
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#additional-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      Additional Components
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generated-file-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Generated File Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#understanding-generated-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understanding Generated Files
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Understanding Generated Files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tool-executor" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tool Executor
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#textmate-grammar" class="md-nav__link">
+    <span class="md-ellipsis">
+      TextMate Grammar
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output-component" class="md-nav__link">
+    <span class="md-ellipsis">
+      Output Component
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#additional-input-and-output-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      Additional Input and Output Components
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#toolmapstsx-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      ToolMaps.tsx Integration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ToolMaps.tsx Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#understanding-the-mapping-objects" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understanding the Mapping Objects
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manual-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manual Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#troubleshooting-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting Integration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-create-the-api-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 3: Create the API Service
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3: Create the API Service">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#update-pyprojecttoml" class="md-nav__link">
+    <span class="md-ellipsis">
+      Update pyproject.toml
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#download-nuxmv" class="md-nav__link">
+    <span class="md-ellipsis">
+      Download nuXmv
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-the-fastapi-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create the FastAPI Service
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#implement-the-tool-execution-logic" class="md-nav__link">
+    <span class="md-ellipsis">
+      Implement the Tool Execution Logic
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#security" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Related Documentation
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_4_2" id="__nav_2_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Language Servers
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            Language Servers
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../language-servers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../langium-language-servers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Langium Implementation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../external-language-servers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    External LSP Integration
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deployment/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Deployment
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api-reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    API Reference
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../CHANGELOG/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Release Notes
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#architecture-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      Architecture Pattern
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-choose-your-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 1: Choose Your Tool
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 1: Choose Your Tool">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-frontend-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 2: Frontend Integration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 2: Frontend Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#overview_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-a-new-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create a New Tool
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Create a New Tool">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration Options
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tool-name" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tool Name
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#display-name" class="md-nav__link">
+    <span class="md-ellipsis">
+      Display Name
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tool-id" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tool ID
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-extension" class="md-nav__link">
+    <span class="md-ellipsis">
+      File Extension
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#api-endpoint" class="md-nav__link">
+    <span class="md-ellipsis">
+      API Endpoint
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output-component-type" class="md-nav__link">
+    <span class="md-ellipsis">
+      Output Component Type
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#additional-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      Additional Components
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generated-file-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Generated File Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#understanding-generated-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understanding Generated Files
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Understanding Generated Files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tool-executor" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tool Executor
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#textmate-grammar" class="md-nav__link">
+    <span class="md-ellipsis">
+      TextMate Grammar
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output-component" class="md-nav__link">
+    <span class="md-ellipsis">
+      Output Component
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#additional-input-and-output-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      Additional Input and Output Components
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#toolmapstsx-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      ToolMaps.tsx Integration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ToolMaps.tsx Integration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#understanding-the-mapping-objects" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understanding the Mapping Objects
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manual-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manual Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#troubleshooting-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting Integration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-create-the-api-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 3: Create the API Service
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 3: Create the API Service">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#update-pyprojecttoml" class="md-nav__link">
+    <span class="md-ellipsis">
+      Update pyproject.toml
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#download-nuxmv" class="md-nav__link">
+    <span class="md-ellipsis">
+      Download nuXmv
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-the-fastapi-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      Create the FastAPI Service
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#implement-the-tool-execution-logic" class="md-nav__link">
+    <span class="md-ellipsis">
+      Implement the Tool Execution Logic
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#security" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Related Documentation
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="adding-new-tools">Adding New Tools</h1>
+<p>FM Playground is designed to be extensible, allowing you to add new formal methods tools easily. This guide walks you through the process of integrating a new tool into the platform.</p>
+<h2 id="overview">Overview</h2>
+<p>Each tool in FM Playground consists of:</p>
+<ul>
+<li><strong>API Service</strong>: A containerized backend service that handles tool execution</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Web Assembly (WASM) Tools</p>
+<p>If your tool has a WebAssembly (WASM) bindings, you can skip the backend service step. WASM tools can be executed directly in the browser without a separate backend.
+See the <a href="../wasm-tools.md">WASM Tools Guide</a> for more details.</p>
+</div>
+<ul>
+<li><strong>Frontend Integration</strong>: UI components for tool interaction</li>
+<li><strong>Configuration</strong>: Tool metadata and Docker orchestration</li>
+</ul>
+<h2 id="architecture-pattern">Architecture Pattern</h2>
+<p>Integrating a new tool consists of two main steps:</p>
+<ol>
+<li>
+<p><strong>Frontend Integration</strong>: Add the tool to the frontend, allowing users to interact with it through the UI.</p>
+</li>
+<li>
+<p><strong>Backend Service</strong>: Create a backend service that executes the tool and expose APIs for interaction. You can develop a new service or use existing APIs running anywhere that can be accessed by the frontend.</p>
+</li>
+</ol>
+<h2 id="step-1-choose-your-tool">Step 1: Choose Your Tool</h2>
+<p>For this example, we will integrate <strong>nuXmv</strong>, since it is already supported in FM Playground and the simplest to set up. However, the same principles apply to any tool you wish to add.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<p>Before adding a tool, ensure:</p>
+<ul>
+<li>The tool can be automated/scripted e.g. via command line or API</li>
+<li>You understand its input/output formats</li>
+<li>Licensing allows redistribution (if including binaries)</li>
+</ul>
+<h2 id="step-2-frontend-integration">Step 2: Frontend Integration</h2>
+<p>First, we will integrate the tool into the FM Playground frontend. The frontend is where users will interact with your tool through the web interface.</p>
+<h3 id="overview_1">Overview</h3>
+<p>The easiest way to add a new tool is by using <code>fmp-tool</code> CLI. <code>fmp-tool</code> is a command-line interface (CLI) that generates boilerplate code for new formal method tools. It creates all necessary files and provides integration instructions to add your tool to the FM Playground.</p>
+<h3 id="create-a-new-tool">Create a New Tool</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># Go to the frontend directory</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nb">cd</span><span class="w"> </span>frontend
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># Create a new tool configuration</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>npx<span class="w"> </span>fmp-tool
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>You need to run this command in the <code>frontend</code> directory. Otherwise, the configuration will not be created correctly.</p>
+</div>
+<p>This command will prompt you for the tool name, description, and other metadata. It will generate a new directory under <code>frontend/tools/</code> with the necessary files.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>$ npx fmp-tool
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>🛠️  FM Tool Generator
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>Creating a new formal methods tool for fm-playground
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>? What is the name of your tool? (e.g., nuxmv, z3, alloy) nuxmv
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>? Display name for the tool: (nuxmv) nuXmv
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>ool ID (uppercase, used in maps): (NUXMV) NUXMV
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>? File extension for the language: (nuxmv) xmv
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>? Does this tool require an API endpoint? (Y/n) Y
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>? API endpoint path: (/nuxmv) /xmv
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>? Output component type: (Use arrow keys)
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>❯ TextualOutput 
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>  CustomOutput 
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>? Create additional input component (for options)? (y/N) N
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>? Create additional output component (for extra UI elements)? (y/N) Y
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>📋 Configuration:
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>Tool Name: nuxmv
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>Tool ID: NUXMV
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>File Extension: xmv
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>Target Path: ./tools
+<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>
+<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>? Proceed with creating the tool? (Y/n) Y
+<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>Looking for ToolMaps.tsx at default path: src/ToolMaps.tsx
+<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>✅ Successfully updated ToolMaps.tsx with nuxmv tool
+<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>
+<a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>✅ Tool created successfully!
+<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>
+<a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>📝 Next steps:
+<a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>1. Update ToolMaps.tsx to register your new tool (see TOOLMAPS_INTEGRATION.md)
+<a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>2. Add language configuration to the monaco editor setup if needed
+<a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>3. Implement the API endpoint if needed
+<a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>4. Customize the generated files to fit your tool&#39;s requirements
+</code></pre></div>
+<h4 id="configuration-options">Configuration Options</h4>
+<h5 id="tool-name">Tool Name</h5>
+<ul>
+<li><strong>Purpose</strong>: Internal identifier for your tool</li>
+<li><strong>Format</strong>: Lowercase, alphanumeric, underscores allowed</li>
+<li><strong>Examples</strong>: <code>prolog</code>, <code>coq</code>, <code>lean</code>, <code>isabelle</code></li>
+<li><strong>Used for</strong>: File names, directory names, internal references</li>
+</ul>
+<h5 id="display-name">Display Name</h5>
+<ul>
+<li><strong>Purpose</strong>: User-facing name shown in the interface</li>
+<li><strong>Format</strong>: Any readable string</li>
+<li><strong>Examples</strong>: <code>Prolog Interpreter</code>, <code>Coq Proof Assistant</code>, <code>Lean 4</code></li>
+<li><strong>Used for</strong>: UI labels, component names</li>
+</ul>
+<h5 id="tool-id">Tool ID</h5>
+<ul>
+<li><strong>Purpose</strong>: Uppercase identifier for tool mappings</li>
+<li><strong>Format</strong>: Uppercase letters, underscores allowed</li>
+<li><strong>Examples</strong>: <code>PROLOG</code>, <code>COQ</code>, <code>LEAN_4</code></li>
+<li><strong>Used for</strong>: ToolMaps.tsx keys, internal configurations, permalink <code>check</code> values, database entries </li>
+</ul>
+<h5 id="file-extension">File Extension</h5>
+<ul>
+<li><strong>Purpose</strong>: File extension for your tool's language</li>
+<li><strong>Format</strong>: Lowercase, no dot prefix</li>
+<li><strong>Examples</strong>: <code>pl</code>, <code>v</code>, <code>lean</code>, <code>thy</code></li>
+<li><strong>Used for</strong>: Monaco editor language association, file operations</li>
+</ul>
+<h5 id="api-endpoint">API Endpoint</h5>
+<ul>
+<li><strong>Purpose</strong>: Backend endpoint for tool execution</li>
+<li><strong>Default</strong>: <code>/{tool-name}</code></li>
+<li><strong>Examples</strong>: <code>/prolog</code>, <code>/coq/verify</code>, <code>/lean/check</code></li>
+<li><strong>Used for</strong>: Frontend-backend communication</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code>fmp-tool</code> CLI will create a default API endpoint for you. If your tool requires a custom API, you can modify the generated code later.</p>
+</div>
+<h5 id="output-component-type">Output Component Type</h5>
+<ul>
+<li><strong>TextualOutput</strong>: For tools that produce plain text output</li>
+<li><strong>CustomOutput</strong>: Advanced formatting with custom components, e.g., graphs, tables, etc.</li>
+</ul>
+<h5 id="additional-components">Additional Components</h5>
+<ul>
+<li><strong>Input Component</strong>: For tool-specific options and parameters</li>
+<li><strong>Output Component</strong>: For specialized result visualization</li>
+</ul>
+<h4 id="generated-file-structure">Generated File Structure</h4>
+<p>After running <code>fmp-tool</code>, you'll get:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>frontend/src/tools/your-tool/
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>├── nuxmvExecutor.ts           # Core execution logic
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>├── nuxmvTextMateGrammar.ts    # Syntax highlighting
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>└── nuxmvOutput.tsx            # Output component (optional)
+</code></pre></div>
+<h4 id="understanding-generated-files">Understanding Generated Files</h4>
+<h5 id="tool-executor">Tool Executor</h5>
+<p>This file contains the logic to execute your tool. It typically includes an API call to your backend service, handling the tool's input and output. And export a function that can be called from the frontend to execute the tool.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">nuxmvExecutor.ts</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-3-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-3-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-3-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-3-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-3-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-3-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-3-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-3-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-3-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-3-10">10</a></span>
+<span class="normal"><a href="#__codelineno-3-11">11</a></span>
+<span class="normal"><a href="#__codelineno-3-12">12</a></span>
+<span class="normal"><a href="#__codelineno-3-13">13</a></span>
+<span class="normal"><a href="#__codelineno-3-14">14</a></span>
+<span class="normal"><a href="#__codelineno-3-15">15</a></span>
+<span class="normal"><a href="#__codelineno-3-16">16</a></span>
+<span class="normal"><a href="#__codelineno-3-17">17</a></span>
+<span class="normal"><a href="#__codelineno-3-18">18</a></span>
+<span class="normal"><a href="#__codelineno-3-19">19</a></span>
+<span class="normal"><a href="#__codelineno-3-20">20</a></span>
+<span class="normal"><a href="#__codelineno-3-21">21</a></span>
+<span class="normal"><a href="#__codelineno-3-22">22</a></span>
+<span class="normal"><a href="#__codelineno-3-23">23</a></span>
+<span class="normal"><a href="#__codelineno-3-24">24</a></span>
+<span class="normal"><a href="#__codelineno-3-25">25</a></span>
+<span class="normal"><a href="#__codelineno-3-26">26</a></span>
+<span class="normal"><a href="#__codelineno-3-27">27</a></span>
+<span class="normal"><a href="#__codelineno-3-28">28</a></span>
+<span class="normal"><a href="#__codelineno-3-29">29</a></span>
+<span class="normal"><a href="#__codelineno-3-30">30</a></span>
+<span class="normal"><a href="#__codelineno-3-31">31</a></span>
+<span class="normal"><a href="#__codelineno-3-32">32</a></span>
+<span class="normal"><a href="#__codelineno-3-33">33</a></span>
+<span class="normal"><a href="#__codelineno-3-34">34</a></span>
+<span class="normal"><a href="#__codelineno-3-35">35</a></span>
+<span class="normal"><a href="#__codelineno-3-36">36</a></span>
+<span class="normal"><a href="#__codelineno-3-37">37</a></span>
+<span class="normal"><a href="#__codelineno-3-38">38</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1"></a><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">executenuxmv</span><span class="p">(</span><span class="nx">permalink</span><span class="o">:</span><span class="w"> </span><span class="kt">Permalink</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2"></a><span class="hll"><span class="w">  </span><span class="kd">let</span><span class="w"> </span><span class="nx">url</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sb">`/nuxmv/run/?check=</span><span class="si">${</span><span class="nx">permalink</span><span class="p">.</span><span class="nx">check</span><span class="si">}</span><span class="sb">&amp;p=</span><span class="si">${</span><span class="nx">permalink</span><span class="p">.</span><span class="nx">permalink</span><span class="si">}</span><span class="sb">`</span><span class="p">;</span>
+</span><a id="__codelineno-3-3" name="__codelineno-3-3"></a><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">axios</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">url</span><span class="p">);</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4"></a><span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">data</span><span class="p">;</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5"></a><span class="p">}</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6"></a>
+<a id="__codelineno-3-7" name="__codelineno-3-7"></a><span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">executenuxmvTool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8"></a><span class="w">  </span><span class="c1">// Get the contents of the editor, selected language, and permalink</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9"></a><span class="hll"><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">editorValue</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">jotaiStore</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">editorValueAtom</span><span class="p">);</span>
+</span><a id="__codelineno-3-10" name="__codelineno-3-10"></a><span class="hll"><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">language</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">jotaiStore</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">languageAtom</span><span class="p">);</span>
+</span><a id="__codelineno-3-11" name="__codelineno-3-11"></a><span class="hll"><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">permalink</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">jotaiStore</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">permalinkAtom</span><span class="p">);</span>
+</span><a id="__codelineno-3-12" name="__codelineno-3-12"></a>
+<a id="__codelineno-3-13" name="__codelineno-3-13"></a><span class="w">  </span><span class="c1">// Save the code to the database</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14"></a><span class="w">  </span><span class="c1">// This will return the permalink object with the permalink and check</span>
+<a id="__codelineno-3-15" name="__codelineno-3-15"></a><span class="hll"><span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">saveCode</span><span class="p">(</span><span class="nx">editorValue</span><span class="p">,</span><span class="w"> </span><span class="nx">language</span><span class="p">.</span><span class="kr">short</span><span class="p">,</span><span class="w"> </span><span class="nx">permalink</span><span class="p">.</span><span class="nx">permalink</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"> </span><span class="kc">null</span><span class="p">);</span>
+</span><a id="__codelineno-3-16" name="__codelineno-3-16"></a><span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">response</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-17" name="__codelineno-3-17"></a><span class="w">    </span><span class="nx">jotaiStore</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">permalinkAtom</span><span class="p">,</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">data</span><span class="p">);</span>
+<a id="__codelineno-3-18" name="__codelineno-3-18"></a><span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-19" name="__codelineno-3-19"></a><span class="w">    </span><span class="nx">jotaiStore</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span>
+<a id="__codelineno-3-20" name="__codelineno-3-20"></a><span class="w">      </span><span class="nx">outputAtom</span><span class="p">,</span>
+<a id="__codelineno-3-21" name="__codelineno-3-21"></a><span class="w">      </span><span class="sb">`error handling ...`</span>
+<a id="__codelineno-3-22" name="__codelineno-3-22"></a><span class="w">    </span><span class="p">);</span>
+<a id="__codelineno-3-23" name="__codelineno-3-23"></a><span class="w">    </span><span class="nx">jotaiStore</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">isExecutingAtom</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">);</span>
+<a id="__codelineno-3-24" name="__codelineno-3-24"></a><span class="w">    </span><span class="k">return</span><span class="p">;</span>
+<a id="__codelineno-3-25" name="__codelineno-3-25"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-3-26" name="__codelineno-3-26"></a>
+<a id="__codelineno-3-27" name="__codelineno-3-27"></a><span class="w">  </span><span class="c1">// With the returned permalink, we can now execute the tool</span>
+<a id="__codelineno-3-28" name="__codelineno-3-28"></a><span class="w">  </span><span class="k">try</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-29" name="__codelineno-3-29"></a><span class="hll"><span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">res</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">executenuxmv</span><span class="p">(</span><span class="nx">response</span><span class="o">?</span><span class="p">.</span><span class="nx">data</span><span class="p">);</span>
+</span><a id="__codelineno-3-30" name="__codelineno-3-30"></a><span class="w">    </span><span class="nx">jotaiStore</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">outputAtom</span><span class="p">,</span><span class="w"> </span><span class="nx">res</span><span class="p">);</span>
+<a id="__codelineno-3-31" name="__codelineno-3-31"></a><span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="nx">err</span><span class="o">:</span><span class="w"> </span><span class="kt">any</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-3-32" name="__codelineno-3-32"></a><span class="w">    </span><span class="nx">jotaiStore</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span>
+<a id="__codelineno-3-33" name="__codelineno-3-33"></a><span class="w">      </span><span class="nx">outputAtom</span><span class="p">,</span>
+<a id="__codelineno-3-34" name="__codelineno-3-34"></a><span class="w">      </span><span class="sb">`error handling ...`</span>
+<a id="__codelineno-3-35" name="__codelineno-3-35"></a><span class="w">    </span><span class="p">);</span>
+<a id="__codelineno-3-36" name="__codelineno-3-36"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-3-37" name="__codelineno-3-37"></a><span class="w">  </span><span class="nx">jotaiStore</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">isExecutingAtom</span><span class="p">,</span><span class="w"> </span><span class="kc">false</span><span class="p">);</span>
+<a id="__codelineno-3-38" name="__codelineno-3-38"></a><span class="p">};</span>
+</code></pre></div></td></tr></table></div>
+<ul>
+<li>
+<p><strong>Line 2:</strong> We define a proxy in the <code>vite.config.ts</code> file to redirect requests to the backend service. This allows us to call the API without worrying about CORS issues. You can modify the URL to point to your backend service if it's hosted elsewhere.</p>
+</li>
+<li>
+<p><strong>Lines 9-11:</strong> The <code>executenuxmvTool</code> function retrieves the current editor value, language, and permalink from the state. It then saves the code to the database and executes the tool using the permalink.</p>
+</li>
+<li>
+<p><strong>Line 15:</strong> Makes an API call to the backend service to save the specification and get the gereated permalink. This permalink is then used to execute the tool.</p>
+</li>
+<li>
+<p><strong>Line 29:</strong> Calling the <code>executenuxmv</code> function with the permalink to execute the tool and retrieve the results.</p>
+</li>
+</ul>
+<h5 id="textmate-grammar">TextMate Grammar</h5>
+<p>This file defines the syntax highlighting rules for your tool's language using TextMate grammar. It allows the Monaco editor to provide proper syntax highlighting when users write code in your tool's language.</p>
+<p>You can refer to the <a href="https://microsoft.github.io/monaco-editor/monarch.html">Monaco Editor documentation</a> for details on how to define your language's syntax.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">nuxmvTextMateGrammar.ts</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-4-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-4-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-4-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-4-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-4-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-4-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-4-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-4-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-4-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-4-10">10</a></span>
+<span class="normal"><a href="#__codelineno-4-11">11</a></span>
+<span class="normal"><a href="#__codelineno-4-12">12</a></span>
+<span class="normal"><a href="#__codelineno-4-13">13</a></span>
+<span class="normal"><a href="#__codelineno-4-14">14</a></span>
+<span class="normal"><a href="#__codelineno-4-15">15</a></span>
+<span class="normal"><a href="#__codelineno-4-16">16</a></span>
+<span class="normal"><a href="#__codelineno-4-17">17</a></span>
+<span class="normal"><a href="#__codelineno-4-18">18</a></span>
+<span class="normal"><a href="#__codelineno-4-19">19</a></span>
+<span class="normal"><a href="#__codelineno-4-20">20</a></span>
+<span class="normal"><a href="#__codelineno-4-21">21</a></span>
+<span class="normal"><a href="#__codelineno-4-22">22</a></span>
+<span class="normal"><a href="#__codelineno-4-23">23</a></span>
+<span class="normal"><a href="#__codelineno-4-24">24</a></span>
+<span class="normal"><a href="#__codelineno-4-25">25</a></span>
+<span class="normal"><a href="#__codelineno-4-26">26</a></span>
+<span class="normal"><a href="#__codelineno-4-27">27</a></span>
+<span class="normal"><a href="#__codelineno-4-28">28</a></span>
+<span class="normal"><a href="#__codelineno-4-29">29</a></span>
+<span class="normal"><a href="#__codelineno-4-30">30</a></span>
+<span class="normal"><a href="#__codelineno-4-31">31</a></span>
+<span class="normal"><a href="#__codelineno-4-32">32</a></span>
+<span class="normal"><a href="#__codelineno-4-33">33</a></span>
+<span class="normal"><a href="#__codelineno-4-34">34</a></span>
+<span class="normal"><a href="#__codelineno-4-35">35</a></span>
+<span class="normal"><a href="#__codelineno-4-36">36</a></span>
+<span class="normal"><a href="#__codelineno-4-37">37</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1"></a><span class="c1">// Language configuration for Monaco Editor</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2"></a><span class="hll"><span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">nuxmvConf</span><span class="o">:</span><span class="w"> </span><span class="kt">languages.LanguageConfiguration</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+</span><a id="__codelineno-4-3" name="__codelineno-4-3"></a><span class="w">  </span><span class="nx">brackets</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4"></a><span class="w">    </span><span class="p">[</span><span class="s1">&#39;{&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;}&#39;</span><span class="p">],</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5"></a><span class="w">    </span><span class="p">...</span><span class="w"> </span><span class="c1">// other brackets</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6"></a><span class="w">  </span><span class="p">],</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7"></a><span class="w">  </span><span class="nx">autoClosingPairs</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8"></a><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nx">open</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;{&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">close</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;}&#39;</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9"></a><span class="w">    </span><span class="p">...</span><span class="w"> </span><span class="c1">// other pairs</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10"></a><span class="w">  </span><span class="p">],</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11"></a><span class="w">  </span><span class="nx">surroundingPairs</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12"></a><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="nx">open</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;{&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">close</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;}&#39;</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-4-13" name="__codelineno-4-13"></a><span class="w">    </span><span class="p">...</span><span class="w"> </span><span class="c1">// other pairs</span>
+<a id="__codelineno-4-14" name="__codelineno-4-14"></a><span class="w">  </span><span class="p">]</span>
+<a id="__codelineno-4-15" name="__codelineno-4-15"></a><span class="p">};</span>
+<a id="__codelineno-4-16" name="__codelineno-4-16"></a>
+<a id="__codelineno-4-17" name="__codelineno-4-17"></a><span class="c1">// TextMate grammar for syntax highlighting</span>
+<a id="__codelineno-4-18" name="__codelineno-4-18"></a><span class="hll"><span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">nuxmvLang</span><span class="o">:</span><span class="w"> </span><span class="kt">languages.IMonarchLanguage</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+</span><a id="__codelineno-4-19" name="__codelineno-4-19"></a><span class="w">  </span><span class="nx">keywords</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;DEFINE&#39;</span><span class="p">,</span><span class="s1">&#39;E&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;EBF&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;EBG&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;EF&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;EG&#39;</span><span class="p">,</span><span class="s1">&#39;F&#39;</span><span class="p">],</span>
+<a id="__codelineno-4-20" name="__codelineno-4-20"></a><span class="w">  </span><span class="nx">operators</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="s1">&#39;:&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;=&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;-&gt;&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&lt;-&gt;&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;∀&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;∃&#39;</span><span class="p">],</span>
+<a id="__codelineno-4-21" name="__codelineno-4-21"></a><span class="w">  </span><span class="nx">symbols</span><span class="o">:</span><span class="w"> </span><span class="sr">/[=&gt;&lt;!~?:&amp;|+\-*\/\^%]+/</span><span class="p">,</span>
+<a id="__codelineno-4-22" name="__codelineno-4-22"></a>
+<a id="__codelineno-4-23" name="__codelineno-4-23"></a><span class="w">  </span><span class="nx">tokenizer</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-24" name="__codelineno-4-24"></a><span class="w">    </span><span class="nx">root</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<a id="__codelineno-4-25" name="__codelineno-4-25"></a><span class="w">      </span><span class="p">[</span><span class="sr">/[a-zA-Z_$][\w$]*/</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-26" name="__codelineno-4-26"></a><span class="w">        </span><span class="nx">cases</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-4-27" name="__codelineno-4-27"></a><span class="w">          </span><span class="s1">&#39;@keywords&#39;</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;keyword&#39;</span><span class="p">,</span>
+<a id="__codelineno-4-28" name="__codelineno-4-28"></a><span class="w">          </span><span class="s1">&#39;@default&#39;</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;identifier&#39;</span>
+<a id="__codelineno-4-29" name="__codelineno-4-29"></a><span class="w">        </span><span class="p">}</span>
+<a id="__codelineno-4-30" name="__codelineno-4-30"></a><span class="w">      </span><span class="p">}],</span>
+<a id="__codelineno-4-31" name="__codelineno-4-31"></a><span class="w">      </span><span class="p">[</span><span class="sr">/\d+/</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;number&#39;</span><span class="p">],</span>
+<a id="__codelineno-4-32" name="__codelineno-4-32"></a><span class="w">      </span><span class="p">[</span><span class="sr">/&quot;([^&quot;\\]|\\.)*$/</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;string.invalid&#39;</span><span class="p">],</span>
+<a id="__codelineno-4-33" name="__codelineno-4-33"></a><span class="w">      </span><span class="p">[</span><span class="sr">/&quot;/</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;string&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;@string&#39;</span><span class="p">]</span>
+<a id="__codelineno-4-34" name="__codelineno-4-34"></a><span class="w">    </span><span class="p">],</span>
+<a id="__codelineno-4-35" name="__codelineno-4-35"></a><span class="w">    </span><span class="c1">// ... more tokenization rules</span>
+<a id="__codelineno-4-36" name="__codelineno-4-36"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-4-37" name="__codelineno-4-37"></a><span class="p">};</span>
+</code></pre></div></td></tr></table></div>
+<ul>
+<li><strong>Line 2:</strong> Defines the language configuration for Monaco Editor, including brackets and auto-closing pairs.</li>
+<li><strong>Line 18:</strong> Defines the TextMate grammar for syntax highlighting, including keywords, operators, and tokenization rules.</li>
+</ul>
+<h5 id="output-component">Output Component</h5>
+<p>For <code>? Output component type:</code>, if you selected <code>CustomOutput</code>, instead of a simple text output, a new file <code>nuxmvOutput.tsx</code> will be created. This file can contain custom React components to display the output of your tool in a more user-friendly way.</p>
+<h5 id="additional-input-and-output-components">Additional Input and Output Components</h5>
+<p>If you selected <code>Y</code> for creating an additional input and/or output component, a new file <code>nuxmvInput.tsx</code>and/or <code>nuxmvOutput.tsx</code> will be created. These files can contain custom React components to handle tool-specific input options and display results in a structured way.</p>
+<p>For example, we choose to create an additional output component, <code>nuxmvOutput.tsx</code> might look like this:
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">nuxmvOutput.tsx</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-5-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-5-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-5-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-5-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-5-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-5-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-5-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-5-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-5-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-5-10">10</a></span>
+<span class="normal"><a href="#__codelineno-5-11">11</a></span>
+<span class="normal"><a href="#__codelineno-5-12">12</a></span>
+<span class="normal"><a href="#__codelineno-5-13">13</a></span>
+<span class="normal"><a href="#__codelineno-5-14">14</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1"></a><span class="kd">const</span><span class="w"> </span><span class="nx">nuxmvOutput</span><span class="o">:</span><span class="w"> </span><span class="kt">React.FC</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2"></a><span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">(</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3"></a><span class="w">    </span><span class="p">&lt;</span><span class="nt">MDBContainer</span><span class="w"> </span><span class="na">className</span><span class="o">=</span><span class="s">&quot;p-3&quot;</span><span class="p">&gt;</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4"></a><span class="w">      </span><span class="p">&lt;</span><span class="nt">MDBRow</span><span class="p">&gt;</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5"></a><span class="w">        </span><span class="p">&lt;</span><span class="nt">MDBCol</span><span class="w"> </span><span class="na">md</span><span class="o">=</span><span class="s">&quot;12&quot;</span><span class="p">&gt;</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6"></a><span class="w">          </span><span class="p">&lt;</span><span class="nt">div</span><span class="w"> </span><span class="na">className</span><span class="o">=</span><span class="s">&quot;border rounded p-3 bg-light&quot;</span><span class="p">&gt;</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7"></a><span class="w">            </span><span class="p">&lt;</span><span class="nt">h6</span><span class="w"> </span><span class="na">className</span><span class="o">=</span><span class="s">&quot;mb-2&quot;</span><span class="p">&gt;</span><span class="nx">nuxmv</span><span class="w"> </span><span class="nx">Information</span><span class="p">&lt;/</span><span class="nt">h6</span><span class="p">&gt;</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8"></a><span class="w">          </span><span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9"></a><span class="w">        </span><span class="p">&lt;/</span><span class="nt">MDBCol</span><span class="p">&gt;</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10"></a><span class="w">      </span><span class="p">&lt;/</span><span class="nt">MDBRow</span><span class="p">&gt;</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11"></a><span class="w">    </span><span class="p">&lt;/</span><span class="nt">MDBContainer</span><span class="p">&gt;</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12"></a><span class="w">  </span><span class="p">);</span>
+<a id="__codelineno-5-13" name="__codelineno-5-13"></a><span class="p">};</span>
+<a id="__codelineno-5-14" name="__codelineno-5-14"></a><span class="k">export</span><span class="w"> </span><span class="k">default</span><span class="w"> </span><span class="nx">nuxmvOutput</span><span class="p">;</span>
+</code></pre></div></td></tr></table></div></p>
+<h3 id="toolmapstsx-integration">ToolMaps.tsx Integration</h3>
+<p>The <code>ToolMaps.tsx</code> file serves as the central registry that connects all tool components and configurations within the FM Playground frontend. When you generate a new tool using the <code>fmp-tool</code> CLI, this file is automatically updated to include your tool's configuration. Understanding this integration is crucial for customizing tool behavior and troubleshooting integration issues.</p>
+<p>The <code>fmp-tool</code> CLI automatically updates the <code>ToolMaps.tsx</code> file with the new tool configuration, but it's important to understand what each mapping does:</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">ToolMaps.tsx</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-6-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-6-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-6-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-6-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-6-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-6-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-6-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-6-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-6-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-6-10">10</a></span>
+<span class="normal"><a href="#__codelineno-6-11">11</a></span>
+<span class="normal"><a href="#__codelineno-6-12">12</a></span>
+<span class="normal"><a href="#__codelineno-6-13">13</a></span>
+<span class="normal"><a href="#__codelineno-6-14">14</a></span>
+<span class="normal"><a href="#__codelineno-6-15">15</a></span>
+<span class="normal"><a href="#__codelineno-6-16">16</a></span>
+<span class="normal"><a href="#__codelineno-6-17">17</a></span>
+<span class="normal"><a href="#__codelineno-6-18">18</a></span>
+<span class="normal"><a href="#__codelineno-6-19">19</a></span>
+<span class="normal"><a href="#__codelineno-6-20">20</a></span>
+<span class="normal"><a href="#__codelineno-6-21">21</a></span>
+<span class="normal"><a href="#__codelineno-6-22">22</a></span>
+<span class="normal"><a href="#__codelineno-6-23">23</a></span>
+<span class="normal"><a href="#__codelineno-6-24">24</a></span>
+<span class="normal"><a href="#__codelineno-6-25">25</a></span>
+<span class="normal"><a href="#__codelineno-6-26">26</a></span>
+<span class="normal"><a href="#__codelineno-6-27">27</a></span>
+<span class="normal"><a href="#__codelineno-6-28">28</a></span>
+<span class="normal"><a href="#__codelineno-6-29">29</a></span>
+<span class="normal"><a href="#__codelineno-6-30">30</a></span>
+<span class="normal"><a href="#__codelineno-6-31">31</a></span>
+<span class="normal"><a href="#__codelineno-6-32">32</a></span>
+<span class="normal"><a href="#__codelineno-6-33">33</a></span>
+<span class="normal"><a href="#__codelineno-6-34">34</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1"></a><span class="hll"><span class="k">import</span><span class="w"> </span><span class="nx">TextualOutput</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">&#39;@/components/Playground/TextualOutput&#39;</span><span class="p">;</span>
+</span><a id="__codelineno-6-2" name="__codelineno-6-2"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">nuxmvConf</span><span class="p">,</span><span class="w"> </span><span class="nx">nuxmvLang</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">&#39;@/../tools/nuxmv/nuxmvTextMateGrammar&#39;</span><span class="p">;</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3"></a><span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">executenuxmvTool</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">&#39;@/../tools/nuxmv/nuxmvExecutor&#39;</span><span class="p">;</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4"></a><span class="k">import</span><span class="w"> </span><span class="nx">nuxmvOutput</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">&#39;@/../tools/nuxmv/nuxmvOutput&#39;</span><span class="p">;</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5"></a><span class="k">import</span><span class="w"> </span><span class="kr">type</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">FmpConfig</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">&#39;@/types&#39;</span><span class="p">;</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6"></a>
+<a id="__codelineno-6-7" name="__codelineno-6-7"></a><span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">additionalInputAreaUiMap</span><span class="o">:</span><span class="w"> </span><span class="kt">Record</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">React</span><span class="p">.</span><span class="nx">FC</span><span class="o">&lt;</span><span class="nx">any</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{};</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8"></a><span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">additonalOutputAreaUiMap</span><span class="o">:</span><span class="w"> </span><span class="kt">Record</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">React</span><span class="p">.</span><span class="nx">FC</span><span class="o">&lt;</span><span class="nx">any</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9"></a><span class="w">  </span><span class="nx">XMV</span><span class="o">:</span><span class="w"> </span><span class="kt">nuxmvOutput</span><span class="p">,</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10"></a><span class="p">};</span>
+<a id="__codelineno-6-11" name="__codelineno-6-11"></a><span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">toolExecutionMap</span><span class="o">:</span><span class="w"> </span><span class="kt">Record</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="ow">void</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-12" name="__codelineno-6-12"></a><span class="w">  </span><span class="nx">XMV</span><span class="o">:</span><span class="w"> </span><span class="kt">executenuxmvTool</span><span class="p">,</span>
+<a id="__codelineno-6-13" name="__codelineno-6-13"></a><span class="p">};</span>
+<a id="__codelineno-6-14" name="__codelineno-6-14"></a><span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">toolOutputMap</span><span class="o">:</span><span class="w"> </span><span class="kt">Record</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">React</span><span class="p">.</span><span class="nx">FC</span><span class="o">&lt;</span><span class="nx">any</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-15" name="__codelineno-6-15"></a><span class="w">  </span><span class="nx">XMV</span><span class="o">:</span><span class="w"> </span><span class="kt">TextualOutput</span><span class="p">,</span>
+<a id="__codelineno-6-16" name="__codelineno-6-16"></a><span class="p">};</span>
+<a id="__codelineno-6-17" name="__codelineno-6-17"></a>
+<a id="__codelineno-6-18" name="__codelineno-6-18"></a><span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">languageConfigMap</span><span class="o">:</span><span class="w"> </span><span class="kt">Record</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">tokenProvider</span><span class="o">:</span><span class="w"> </span><span class="kt">any</span><span class="p">;</span><span class="w"> </span><span class="nx">configuration</span><span class="o">:</span><span class="w"> </span><span class="kt">any</span><span class="w"> </span><span class="p">}</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-19" name="__codelineno-6-19"></a><span class="w">  </span><span class="nx">XMV</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">tokenProvider</span><span class="o">:</span><span class="w"> </span><span class="kt">nuxmvLang</span><span class="p">,</span><span class="w"> </span><span class="nx">configuration</span><span class="o">:</span><span class="w"> </span><span class="kt">nuxmvConf</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-6-20" name="__codelineno-6-20"></a><span class="p">};</span>
+<a id="__codelineno-6-21" name="__codelineno-6-21"></a>
+<a id="__codelineno-6-22" name="__codelineno-6-22"></a><span class="c1">// Configuration for LSP (Language Server Protocol) support by tool</span>
+<a id="__codelineno-6-23" name="__codelineno-6-23"></a><span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">lspSupportMap</span><span class="o">:</span><span class="w"> </span><span class="kt">Record</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">boolean</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-24" name="__codelineno-6-24"></a><span class="w">  </span><span class="nx">XMV</span><span class="o">:</span><span class="w"> </span><span class="kt">false</span><span class="p">,</span>
+<a id="__codelineno-6-25" name="__codelineno-6-25"></a><span class="p">};</span>
+<a id="__codelineno-6-26" name="__codelineno-6-26"></a>
+<a id="__codelineno-6-27" name="__codelineno-6-27"></a><span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">fmpConfig</span><span class="o">:</span><span class="w"> </span><span class="kt">FmpConfig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-28" name="__codelineno-6-28"></a><span class="w">  </span><span class="nx">title</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;FM Playground&#39;</span><span class="p">,</span>
+<a id="__codelineno-6-29" name="__codelineno-6-29"></a><span class="w">  </span><span class="nx">repository</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;https://github.com/se-buw/fm-playground&#39;</span><span class="p">,</span>
+<a id="__codelineno-6-30" name="__codelineno-6-30"></a><span class="w">  </span><span class="nx">issues</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;https://github.com/se-buw/fm-playground/issues&#39;</span><span class="p">,</span>
+<a id="__codelineno-6-31" name="__codelineno-6-31"></a><span class="w">  </span><span class="nx">tools</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-6-32" name="__codelineno-6-32"></a><span class="w">    </span><span class="nx">nuxmv</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;nuxmv&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">extension</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;XMV&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">shortName</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;XMV&#39;</span><span class="w"> </span><span class="p">},</span>
+<a id="__codelineno-6-33" name="__codelineno-6-33"></a><span class="w">  </span><span class="p">},</span>
+<a id="__codelineno-6-34" name="__codelineno-6-34"></a><span class="p">};</span>
+</code></pre></div></td></tr></table></div>
+<h4 id="understanding-the-mapping-objects">Understanding the Mapping Objects</h4>
+<p><strong>1. <code>additionalInputAreaUiMap</code></strong></p>
+<ul>
+<li><strong>Purpose</strong>: Maps tool IDs to custom input components that appear below the code editor</li>
+<li><strong>Usage</strong>: For tools requiring specific configuration options, parameter inputs, or command-line flags</li>
+<li><strong>Example</strong>: Alloy's command selection, Spectra's CLI options</li>
+<li><strong>When to use</strong>: When your tool needs user-configurable parameters before execution</li>
+</ul>
+<p><strong>2. <code>additonalOutputAreaUiMap</code></strong></p>
+<ul>
+<li><strong>Purpose</strong>: Maps tool IDs to additional UI components that appear in the output area</li>
+<li><strong>Usage</strong>: For supplementary information, tool credits, copyright notices, or interactive result exploration</li>
+<li><strong>Example</strong>: nuXmv's copyright notice, Alloy's instance navigation controls</li>
+<li><strong>When to use</strong>: When you need to display non-result information alongside tool output</li>
+</ul>
+<p><strong>3. <code>toolExecutionMap</code></strong></p>
+<ul>
+<li><strong>Purpose</strong>: Maps tool IDs to their execution functions</li>
+<li><strong>Critical</strong>: This is the core mapping that enables tool execution</li>
+<li><strong>Function signature</strong>: <code>() =&gt; void</code> - typically async functions that handle the complete execution flow</li>
+<li><strong>Responsibility</strong>: Manages editor content saving, API calls, result handling, and error management</li>
+</ul>
+<p><strong>4. <code>toolOutputMap</code></strong></p>
+<ul>
+<li><strong>Purpose</strong>: Maps tool IDs to their primary output rendering components</li>
+<li><strong>Default</strong>: <code>TextualOutput</code> for simple text-based results</li>
+<li><strong>Custom options</strong>: <code>AlloyOutput</code> for graph visualization, custom components for structured data</li>
+<li><strong>When to customize</strong>: When tool results require special formatting, visualization, or interaction</li>
+</ul>
+<p><strong>5. <code>languageConfigMap</code></strong></p>
+<ul>
+<li><strong>Purpose</strong>: Configures Monaco Editor language support for each tool</li>
+<li>
+<p><strong>Components</strong>: </p>
+<ul>
+<li><code>tokenProvider</code>: Defines syntax highlighting rules (TextMate grammar)</li>
+<li><code>configuration</code>: Sets language behavior (brackets, auto-completion, indentation)</li>
+</ul>
+</li>
+<li>
+<p><strong>Impact</strong>: Directly affects the code editing experience and syntax highlighting quality</p>
+</li>
+</ul>
+<p><strong>6. <code>lspSupportMap</code></strong></p>
+<ul>
+<li><strong>Purpose</strong>: Indicates whether a tool supports Language Server Protocol features</li>
+<li><strong>Features enabled</strong>: Real-time error checking, intelligent auto-completion, semantic highlighting</li>
+<li><strong>Current support</strong>: Limboole, SMT (partial), Spectra</li>
+<li><strong>Development</strong>: New tools can implement LSP for enhanced editing experience</li>
+</ul>
+<p><strong>7. <code>fmpConfig</code></strong></p>
+<ul>
+<li><strong>Purpose</strong>: Central configuration object defining all available tools</li>
+<li>
+<p><strong>Structure</strong>: Each tool entry contains:</p>
+<ul>
+<li><code>name</code>: Internal identifier for the tool</li>
+<li><code>extension</code>: File extension and language identifier for Monaco Editor</li>
+<li><code>shortName</code>: Uppercase identifier used in all mapping objects</li>
+</ul>
+</li>
+<li>
+<p><strong>Consistency</strong>: The <code>shortName</code> must match across all mapping objects for proper tool registration</p>
+</li>
+</ul>
+<h4 id="manual-configuration">Manual Configuration</h4>
+<p>While <code>fmp-tool</code> automates most of the integration, you may need to manually adjust configurations for advanced features:</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">ToolMaps.tsx</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-7-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-7-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-7-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-7-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-7-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-7-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-7-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-7-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-7-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-7-10">10</a></span>
+<span class="normal"><a href="#__codelineno-7-11">11</a></span>
+<span class="normal"><a href="#__codelineno-7-12">12</a></span>
+<span class="normal"><a href="#__codelineno-7-13">13</a></span>
+<span class="normal"><a href="#__codelineno-7-14">14</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1"></a><span class="c1">// Adding custom input component</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2"></a><span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">additionalInputAreaUiMap</span><span class="o">:</span><span class="w"> </span><span class="kt">Record</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">React</span><span class="p">.</span><span class="nx">FC</span><span class="o">&lt;</span><span class="nx">any</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3"></a><span class="w">  </span><span class="nx">NUXMV</span><span class="o">:</span><span class="w"> </span><span class="kt">NuxmvModelOptions</span><span class="p">,</span><span class="w"> </span><span class="c1">// Custom component for model checking options</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4"></a><span class="p">};</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5"></a>
+<a id="__codelineno-7-6" name="__codelineno-7-6"></a><span class="c1">// Enabling LSP support (requires separate LSP server implementation)</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7"></a><span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">lspSupportMap</span><span class="o">:</span><span class="w"> </span><span class="kt">Record</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="kt">boolean</span><span class="o">&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8"></a><span class="w">  </span><span class="nx">NUXMV</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span><span class="w"> </span><span class="c1">// Enable after implementing LSP server</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9"></a><span class="p">};</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10"></a>
+<a id="__codelineno-7-11" name="__codelineno-7-11"></a><span class="c1">// Using custom output renderer</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12"></a><span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">toolOutputMap</span><span class="o">:</span><span class="w"> </span><span class="kt">Record</span><span class="o">&lt;</span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">React</span><span class="p">.</span><span class="nx">FC</span><span class="o">&lt;</span><span class="nx">any</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-7-13" name="__codelineno-7-13"></a><span class="w">  </span><span class="nx">NUXMV</span><span class="o">:</span><span class="w"> </span><span class="kt">NuxmvGraphOutput</span><span class="p">,</span><span class="w"> </span><span class="c1">// Custom component for counterexample visualization</span>
+<a id="__codelineno-7-14" name="__codelineno-7-14"></a><span class="p">};</span>
+</code></pre></div></td></tr></table></div>
+<h4 id="troubleshooting-integration">Troubleshooting Integration</h4>
+<p><strong>Common Issues:</strong></p>
+<ol>
+<li><strong>Tool not appearing in interface</strong>: Check that the tool is properly added to <code>fmpConfig.tools</code></li>
+<li><strong>Execution not working</strong>: Verify <code>toolExecutionMap</code> contains the correct function reference</li>
+<li><strong>Syntax highlighting missing</strong>: Ensure <code>languageConfigMap</code> includes both <code>tokenProvider</code> and <code>configuration</code></li>
+<li><strong>Custom components not loading</strong>: Check import statements and component exports</li>
+</ol>
+<p><strong>Validation Steps:</strong></p>
+<ol>
+<li>Verify all imports resolve correctly</li>
+<li>Ensure tool ID consistency across all mappings</li>
+<li>Test that execution function is properly exported</li>
+<li>Confirm language grammar is syntactically correct</li>
+</ol>
+<p>This mapping system provides a clean separation between tool logic and platform integration, enabling the FM Playground to support diverse formal methods tools while maintaining a consistent user experience.</p>
+<h2 id="step-3-create-the-api-service">Step 3: Create the API Service</h2>
+<p>We will create a new <a href="https://fastapi.tiangolo.com/">FastAPI</a> service that wraps the nuXmv tool, allowing it to be executed via HTTP requests.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you have an existing API for the tool, you can skip this step and directly integrate it into the frontend.</p>
+</div>
+<p>We will utilize poetry to manage our Python dependencies and create a FastAPI service that will execute the nuXmv tool.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="c1"># Install Poetry if not already installed</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="n">poetry</span> <span class="n">new</span> <span class="n">nuxmv</span><span class="o">-</span><span class="n">api</span>
+</code></pre></div>
+<p>This will create a new directory <code>nuxmv-api</code> with the following structure:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>nuxmv-api/
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>├── nuxmv_api/
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>│   ├── __init__.py
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>│   └── main.py
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>├── tests/
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>│   └── __init__.py
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a>├── pyproject.toml
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a>└── README.md
+</code></pre></div>
+<p>Now, we will add the necessary dependencies and implement the service.</p>
+<h3 id="update-pyprojecttoml">Update <code>pyproject.toml</code></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="k">[tool.poetry.dependencies]</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="n">python</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;^3.10&quot;</span><span class="w"> </span><span class="c1"># Adjust based on your Python version</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="n">fastapi</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">extras</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;standard&quot;</span><span class="p">],</span><span class="w"> </span><span class="n">version</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s2">&quot;^0.115.2&quot;</span><span class="p">}</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="n">httpx</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;^0.27.0&quot;</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="n">pytest</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;^8.3.2&quot;</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="n">pytest-asyncio</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;^0.23.8&quot;</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="n">requests</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;^2.32.3&quot;</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="n">uvicorn</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;^0.30.5&quot;</span>
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="n">redis</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;^5.0.8&quot;</span>
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="n">python-dotenv</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;^1.0.1&quot;</span>
+<a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="n">python-redis-cache</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;^4.0.1&quot;</span>
+</code></pre></div>
+<p>Install the dependencies:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nb">cd</span><span class="w"> </span>nuxmv-api
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>poetry<span class="w"> </span>install
+</code></pre></div>
+<h3 id="download-nuxmv">Download nuXmv</h3>
+<p>Create a <code>lib/</code> directory in the <code>nuxmv-api</code> folder to store the nuXmv binary:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>mkdir<span class="w"> </span>nuxmv_api/lib
+</code></pre></div>
+<p>Download the <a href="https://nuxmv.fbk.eu/download.html">nuXmv binary</a> and place the executables in the <code>nuxmv_api/lib/</code> directory. Ensure the binary is executable:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>chmod<span class="w"> </span>+x<span class="w"> </span>nuxmv_api/lib/nuxmv
+</code></pre></div>
+<h3 id="create-the-fastapi-service">Create the FastAPI Service</h3>
+<p>Create <code>nuxmv_api/main.py</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># nuxmv_api/main.py</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="c1"># ... </span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">()</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="c1"># Route to run nuXmv</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/xmv/run/&quot;</span><span class="p">,</span> <span class="n">response_model</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a><span class="k">def</span><span class="w"> </span><span class="nf">code</span><span class="p">(</span><span class="n">check</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>    <span class="n">code</span> <span class="o">=</span> <span class="n">get_code_by_permalink</span><span class="p">(</span><span class="n">check</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a>        <span class="k">return</span> <span class="n">run_nuxmv</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a>    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+<a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a>        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Error running code&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>This service will expose an endpoint <code>/xmv/run/</code> that accepts a <code>check</code> and <code>p</code> parameter, retrieves the code associated with those parameters, and runs the nuXmv tool on it. For the sake of this example, we will assume that <code>get_code_by_permalink</code> is a function that retrieves the code based on the provided parameters. For a complete implementation, see the <a href="https://github.com/fm4se/fm-playground/blob/main/nuxmv-api/main.py">nuXmv API</a></p>
+<h3 id="implement-the-tool-execution-logic">Implement the Tool Execution Logic</h3>
+<p>Create <code>nuxmv_api/nuxmv.py</code>:</p>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">run_nuxmv</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>    <span class="n">tmp_file</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>    <span class="n">tmp_file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">code</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>    <span class="n">tmp_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a>
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a>    <span class="n">NU_XMV_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;lib&quot;</span><span class="p">,</span> <span class="s2">&quot;nuxmv&quot;</span><span class="p">)</span>
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a>    <span class="n">command</span> <span class="o">=</span> <span class="p">[</span><span class="n">NU_XMV_PATH</span><span class="p">,</span> <span class="s2">&quot;-dynamic&quot;</span><span class="p">,</span> <span class="n">tmp_file</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a>    <span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a>        <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a>        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">tmp_file</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a>        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+<a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a>            <span class="k">return</span> <span class="n">prettify_error</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+<a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a>        <span class="k">return</span> <span class="n">prettify_output</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span> <span class="o">+</span> <span class="n">prettify_error</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+<a id="__codelineno-15-14" name="__codelineno-15-14" href="#__codelineno-15-14"></a>    <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">TimeoutExpired</span><span class="p">:</span>
+<a id="__codelineno-15-15" name="__codelineno-15-15" href="#__codelineno-15-15"></a>        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">tmp_file</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<a id="__codelineno-15-16" name="__codelineno-15-16" href="#__codelineno-15-16"></a>        <span class="k">return</span> <span class="s2">&quot;&lt;i style=&#39;color: red;&#39;&gt;Timeout: Process timed out after 60 seconds.&lt;/i&gt;&quot;</span>
+</code></pre></div>
+This function creates a temporary file with the provided code, runs the nuXmv tool on it, and returns the output. It handles errors and timeouts gracefully.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This is an example implementation with minimal effort to keep it simple. In a production environment, you should handle security, input validation, and error handling more robustly. Our primary focus is on demonstrating the integration pattern in the FM Playground.</p>
+</div>
+<h2 id="best-practices">Best Practices</h2>
+<h3 id="security">Security</h3>
+<ul>
+<li><strong>Timeout Execution</strong>: Always set timeouts for tool execution</li>
+<li><strong>Resource Limits</strong>: Use Docker resource constraints</li>
+<li><strong>Input Validation</strong>: Sanitize user inputs</li>
+<li><strong>Sandboxing</strong>: Run tools in isolated containers</li>
+</ul>
+<h3 id="performance">Performance</h3>
+<ul>
+<li><strong>Caching</strong>: Cache tool binaries and dependencies</li>
+<li><strong>Parallel Execution</strong>: Design for concurrent requests</li>
+<li><strong>Resource Management</strong>: Clean up temporary files</li>
+</ul>
+<h2 id="related-documentation">Related Documentation</h2>
+<ul>
+<li><a href="../../development/development-guide.md">Development Guide</a> - Advanced development patterns</li>
+<li><a href="../../development/api-reference.md">API Reference</a> - Backend API documentation</li>
+<li><a href="../../development/contributing.md">Contributing Guide</a> - Contributing your tool back to the project</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/fm4se/fm-playground" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8M97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.youtube.com/playlist?list=PLGyeoukah9NYq9ULsIuADG2r2QjX530nf" target="_blank" rel="noopener" title="www.youtube.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M549.655 124.083c-6.281-23.65-24.787-42.276-48.284-48.597C458.781 64 288 64 288 64S117.22 64 74.629 75.486c-23.497 6.322-42.003 24.947-48.284 48.597-11.412 42.867-11.412 132.305-11.412 132.305s0 89.438 11.412 132.305c6.281 23.65 24.787 41.5 48.284 47.821C117.22 448 288 448 288 448s170.78 0 213.371-11.486c23.497-6.321 42.003-24.171 48.284-47.821 11.412-42.867 11.412-132.305 11.412-132.305s0-89.438-11.412-132.305m-317.51 213.508V175.185l142.739 81.205z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.sections", "navigation.expand", "navigation.top", "search.highlight", "search.share", "content.code.copy"], "search": "../../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.13a4f30d.min.js"></script>
+      
+    
+  </body>
+</html>
