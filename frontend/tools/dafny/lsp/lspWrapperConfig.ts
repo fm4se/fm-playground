@@ -1,14 +1,14 @@
 import getKeybindingsServiceOverride from '@codingame/monaco-vscode-keybindings-service-override';
 import getLifecycleServiceOverride from '@codingame/monaco-vscode-lifecycle-service-override';
 import getLocalizationServiceOverride from '@codingame/monaco-vscode-localization-service-override';
-import { createDefaultLocaleConfiguration } from 'monaco-languageclient/vscode/services';
-import { LogLevel } from 'vscode/services';
+import { createDefaultLocaleConfiguration } from 'monaco-languageclient/vscodeApiLocales';
+import { LogLevel } from '@codingame/monaco-vscode-api';
 import { BrowserMessageReader, BrowserMessageWriter } from 'vscode-languageclient/browser.js';
-import { WrapperConfig } from 'monaco-editor-wrapper';
 import { configureMonacoWorkers } from '../../limboole/langium/utils';
 import { createDafnyWebSocketWorker } from './dafnyWebSocketClient';
 import dafnyLanguageConfig from './dafny-configuration.json?raw';
 import dafnyGrammar from './dafny-grammar.json?raw';
+import type { LspConfig } from '@/../tools/common/lspTypes';
 
 // Build WebSocket URL dynamically based on current host
 function getDafnyLspUrl(): string {
@@ -17,7 +17,7 @@ function getDafnyLspUrl(): string {
     return `${protocol}//${host}/lsp-dafny/lsp`;
 }
 
-export const createDafnyLspConfig = async (): Promise<WrapperConfig> => {
+export const createDafnyLspConfig = async (): Promise<LspConfig> => {
     // Load the extension files for Dafny
     const dafnyExtensionFilesOrContents = new Map<string, string | URL>();
     dafnyExtensionFilesOrContents.set(`/dafny-configuration.json`, dafnyLanguageConfig);
@@ -44,76 +44,22 @@ export const createDafnyLspConfig = async (): Promise<WrapperConfig> => {
     const dafnyWriter = new BrowserMessageWriter(dafnyChannel.port1);
 
     return {
-        id: '42',
-        logLevel: LogLevel.Debug,
-        serviceConfig: {
-            userServices: {
+        vscodeApiConfig: {
+            $type: 'extended',
+            viewsConfig: { $type: 'EditorService' },
+            logLevel: LogLevel.Debug,
+            serviceOverrides: {
                 ...getKeybindingsServiceOverride(),
                 ...getLifecycleServiceOverride(),
                 ...getLocalizationServiceOverride(createDefaultLocaleConfiguration()),
             },
-        },
-        editorAppConfig: {
-            $type: 'extended',
-            editorOptions: {
-                minimap: {
-                    enabled: false,
-                },
-                automaticLayout: true,
-                mouseWheelZoom: true,
-                bracketPairColorization: {
-                    enabled: true,
-                    independentColorPoolPerBracketType: true,
-                },
-                glyphMargin: true,
-                lineNumbers: 'on',
-                // Enable completion and suggestions
-                quickSuggestions: true,
-                suggestOnTriggerCharacters: true,
-                acceptSuggestionOnCommitCharacter: true,
-                acceptSuggestionOnEnter: 'on',
-                wordBasedSuggestions: 'off', // Disable Monaco's word-based suggestions to rely on LSP
-                // Configure completion behavior
-                suggest: {
-                    showKeywords: true,
-                    showSnippets: true,
-                    showFunctions: true,
-                    showConstructors: true,
-                    showFields: true,
-                    showVariables: true,
-                    showClasses: true,
-                    showStructs: true,
-                    showInterfaces: true,
-                    showModules: true,
-                    showProperties: true,
-                    showEvents: true,
-                    showOperators: true,
-                    showUnits: true,
-                    showValues: true,
-                    showConstants: true,
-                    showEnums: true,
-                    showEnumMembers: true,
-                    showColors: true,
-                    showFiles: true,
-                    showReferences: true,
-                    showFolders: true,
-                    showTypeParameters: true,
-                },
-            },
-            codeResources: {
-                main: {
-                    text: '',
-                    fileExt: 'dfy',
-                },
-            },
-            useDiffEditor: false,
             extensions: [
                 {
                     config: {
                         name: 'dafny-example',
                         publisher: 'soaibuzzaman',
                         version: '1.0.0',
-                        engine: {
+                        engines: {
                             vscode: '*',
                         },
                         contributes: {
@@ -148,17 +94,70 @@ export const createDafnyLspConfig = async (): Promise<WrapperConfig> => {
             },
             monacoWorkerFactory: configureMonacoWorkers,
         },
-        languageClientConfigs: {
-            dafny: {
-                languageId: 'dafny',
-                connection: {
-                    options: {
-                        $type: 'WorkerDirect',
-                        worker: dafnyWorker as any,
-                        messagePort: dafnyChannel.port1,
-                    },
-                    messageTransports: { reader: dafnyReader, writer: dafnyWriter },
+        editorAppConfig: {
+            editorOptions: {
+                minimap: {
+                    enabled: false,
                 },
+                automaticLayout: true,
+                mouseWheelZoom: true,
+                bracketPairColorization: {
+                    enabled: true,
+                    independentColorPoolPerBracketType: true,
+                },
+                glyphMargin: true,
+                lineNumbers: 'on',
+                quickSuggestions: true,
+                suggestOnTriggerCharacters: true,
+                acceptSuggestionOnCommitCharacter: true,
+                acceptSuggestionOnEnter: 'on',
+                wordBasedSuggestions: 'off',
+                suggest: {
+                    showKeywords: true,
+                    showSnippets: true,
+                    showFunctions: true,
+                    showConstructors: true,
+                    showFields: true,
+                    showVariables: true,
+                    showClasses: true,
+                    showStructs: true,
+                    showInterfaces: true,
+                    showModules: true,
+                    showProperties: true,
+                    showEvents: true,
+                    showOperators: true,
+                    showUnits: true,
+                    showValues: true,
+                    showConstants: true,
+                    showEnums: true,
+                    showEnumMembers: true,
+                    showColors: true,
+                    showFiles: true,
+                    showReferences: true,
+                    showFolders: true,
+                    showTypeParameters: true,
+                },
+            },
+            codeResources: {
+                modified: {
+                    text: '',
+                    uri: '/workspace/example.dfy',
+                },
+            },
+            useDiffEditor: false,
+        },
+        languageClientConfig: {
+            languageId: 'dafny',
+            connection: {
+                options: {
+                    $type: 'WorkerDirect',
+                    worker: dafnyWorker as any,
+                    messagePort: dafnyChannel.port1,
+                },
+                messageTransports: { reader: dafnyReader, writer: dafnyWriter },
+            },
+            clientOptions: {
+                documentSelector: ['dafny'],
             },
         },
     };

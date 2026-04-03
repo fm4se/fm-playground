@@ -1,14 +1,13 @@
 import getKeybindingsServiceOverride from '@codingame/monaco-vscode-keybindings-service-override';
 import getLifecycleServiceOverride from '@codingame/monaco-vscode-lifecycle-service-override';
 import getLocalizationServiceOverride from '@codingame/monaco-vscode-localization-service-override';
-import { createDefaultLocaleConfiguration } from 'monaco-languageclient/vscode/services';
-import { LogLevel } from 'vscode/services';
+import { createDefaultLocaleConfiguration } from 'monaco-languageclient/vscodeApiLocales';
 import { BrowserMessageReader, BrowserMessageWriter } from 'vscode-languageclient/browser.js';
-import { WrapperConfig } from 'monaco-editor-wrapper';
 import spectraLanguageConfig from './language-configuration.json?raw';
 import responseSpectraTm from '../syntaxes/spectra.tmLanguage.json?raw';
 import { configureMonacoWorkers } from '../utils';
 import workerPortUrlSpectra from '../worker/spectra-server-port?worker&url';
+import type { LspConfig } from '@/../tools/common/lspTypes';
 
 const loadLangiumWorkerPort = () => {
     return new Worker(workerPortUrlSpectra, {
@@ -17,7 +16,7 @@ const loadLangiumWorkerPort = () => {
     });
 };
 
-export const createLangiumSpectraConfig = async (): Promise<WrapperConfig> => {
+export const createLangiumSpectraConfig = async (): Promise<LspConfig> => {
     const extensionFilesOrContents = new Map<string, string | URL>();
     extensionFilesOrContents.set(`/spectra-configuration.json`, spectraLanguageConfig);
     extensionFilesOrContents.set(`/spectra-grammar.json`, responseSpectraTm);
@@ -31,42 +30,21 @@ export const createLangiumSpectraConfig = async (): Promise<WrapperConfig> => {
     const writer = new BrowserMessageWriter(channel.port1);
 
     return {
-        logLevel: LogLevel.Error,
-        serviceConfig: {
-            userServices: {
+        vscodeApiConfig: {
+            $type: 'extended',
+            viewsConfig: { $type: 'EditorService' },
+            serviceOverrides: {
                 ...getKeybindingsServiceOverride(),
                 ...getLifecycleServiceOverride(),
                 ...getLocalizationServiceOverride(createDefaultLocaleConfiguration()),
             },
-        },
-        editorAppConfig: {
-            $type: 'extended',
-            editorOptions: {
-                minimap: {
-                    enabled: false,
-                },
-                automaticLayout: true,
-                mouseWheelZoom: true,
-                bracketPairColorization: {
-                    enabled: true,
-                    independentColorPoolPerBracketType: true,
-                },
-                glyphMargin: false,
-            },
-            codeResources: {
-                main: {
-                    text: '',
-                    fileExt: 'spectra',
-                },
-            },
-            useDiffEditor: false,
             extensions: [
                 {
                     config: {
                         name: 'spectra-example',
                         publisher: 'soaibuzzaman',
                         version: '1.0.0',
-                        engine: {
+                        engines: {
                             vscode: '*',
                         },
                         contributes: {
@@ -126,17 +104,39 @@ export const createLangiumSpectraConfig = async (): Promise<WrapperConfig> => {
             },
             monacoWorkerFactory: configureMonacoWorkers,
         },
-        languageClientConfigs: {
-            spectra: {
-                languageId: 'spectra',
-                connection: {
-                    options: {
-                        $type: 'WorkerDirect',
-                        worker: spectraWorkerPort,
-                        messagePort: channel.port1,
-                    },
-                    messageTransports: { reader, writer },
+        editorAppConfig: {
+            editorOptions: {
+                minimap: {
+                    enabled: false,
                 },
+                automaticLayout: true,
+                mouseWheelZoom: true,
+                bracketPairColorization: {
+                    enabled: true,
+                    independentColorPoolPerBracketType: true,
+                },
+                glyphMargin: false,
+            },
+            codeResources: {
+                modified: {
+                    text: '',
+                    uri: '/workspace/example.spectra',
+                },
+            },
+            useDiffEditor: false,
+        },
+        languageClientConfig: {
+            languageId: 'spectra',
+            connection: {
+                options: {
+                    $type: 'WorkerDirect',
+                    worker: spectraWorkerPort,
+                    messagePort: channel.port1,
+                },
+                messageTransports: { reader, writer },
+            },
+            clientOptions: {
+                documentSelector: ['spectra'],
             },
         },
     };

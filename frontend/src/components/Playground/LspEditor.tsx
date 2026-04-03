@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
-import * as vscode from 'vscode';
-import { createModelReference } from 'vscode/monaco';
-import { MonacoEditorLanguageClientWrapper } from 'monaco-editor-wrapper';
+import { MonacoVscodeApiWrapper } from 'monaco-languageclient/vscodeApiWrapper';
+import { LanguageClientWrapper } from 'monaco-languageclient/lcwrapper';
+import { EditorApp } from 'monaco-languageclient/editorApp';
+import { registerExtension, ExtensionHostKind } from '@codingame/monaco-vscode-api/extensions';
+import { encodeStringOrUrlToDataUrl } from 'monaco-languageclient/common';
 import { createDynamicLspConfig } from '@/../tools/common/dynamicLspWrapperConfig';
 import '../../assets/style/Playground.css';
 import '@codingame/monaco-vscode-theme-defaults-default-extension';
 import type { LanguageProps } from './Tools';
-import { fmpConfig } from '@/ToolMaps';
 import * as monaco from 'monaco-editor';
 import { useAtom } from 'jotai';
 import {
@@ -32,11 +33,16 @@ type LspEditorProps = {
     editorTheme?: string;
 };
 
-// Create wrapper instance only when needed
-let wrapperInstance: MonacoEditorLanguageClientWrapper | null = null;
+// Global instances for v10 API
+let apiWrapper: MonacoVscodeApiWrapper | null = null;
+let apiStarted = false;
+let lcWrapperInstance: LanguageClientWrapper | null = null;
+let editorAppInstance: EditorApp | null = null;
+const registeredExtensions = new Set<string>();
 
 const LspEditor: React.FC<LspEditorProps> = (props) => {
     const editorRef = useRef<any>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
     const prevLanguageRef = useRef<LanguageProps | null>(null);
     const isInitializedRef = useRef<boolean>(false);
     const [lspFailed, setLspFailed] = useState<boolean>(false); // Track LSP initialization failure
@@ -52,10 +58,6 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
     const [targetAssertionRange] = useAtom(targetAssertionRangeAtom);
     const [minimalSetRanges] = useAtom(minimalSetRangesAtom);
 
-    const getExtensionById = (id: string): string | undefined => {
-        const tool = Object.values(fmpConfig.tools).find((tool) => tool.extension.toLowerCase() === id.toLowerCase());
-        return tool?.extension;
-    };
     const handleCodeChange = (value: string) => {
         props.setEditorValue(value);
         props.setLineToHighlight([]);
@@ -71,103 +73,133 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
             return;
         }
 
-        // Initialize wrapper if not already done
-        if (!wrapperInstance) {
-            wrapperInstance = new MonacoEditorLanguageClientWrapper();
-        }
-
         const startEditor = async () => {
-            if (wrapperInstance?.isStarted()) {
-                console.warn('Editor already started, disposing first...');
-                await wrapperInstance.dispose();
-                isInitializedRef.current = false;
+            // Abort if container not available (e.g. fallback rendered)
+            if (!containerRef.current) {
+                return;
             }
 
-            if (!isInitializedRef.current) {
-                try {
-                    const langiumGlobalConfig = await createDynamicLspConfig(props.language.short);
+            // Dispose existing instances
+            if (lcWrapperInstance) {
+                await lcWrapperInstance.dispose();
+                lcWrapperInstance = null;
+            }
+            if (editorAppInstance?.isStarted()) {
+                await editorAppInstance.dispose();
+                editorAppInstance = null;
+            }
+            isInitializedRef.current = false;
 
-                    if (!langiumGlobalConfig) {
-                        console.warn(`LSP not available for ${props.language.short}, falling back to basic editor`);
-                        setLspFailed(true);
-                        return;
-                    }
+            try {
+                const lspConfig = await createDynamicLspConfig(props.language.short);
 
-                    await wrapperInstance!.initAndStart(
-                        langiumGlobalConfig,
-                        document.getElementById('monaco-editor-root')
-                    );
-
-                    const currentExtension = getExtensionById(props.language?.id ?? '');
-                    const uri = vscode.Uri.parse(`/workspace/example.${currentExtension}`);
-                    const modelRef = await createModelReference(uri, props.editorValue);
-                    wrapperInstance!.updateEditorModels({
-                        modelRef,
-                    });
-
-                    editorRef.current = wrapperInstance!.getEditor();
-                    setLspFailed(false); // LSP initialized successfully
-
-                    // Dispose old cursor listener if exists
-                    if (cursorListenerRef.current) {
-                        cursorListenerRef.current.dispose();
-                    }
-
-                    // Track cursor position changes
-                    cursorListenerRef.current = editorRef.current.onDidChangeCursorPosition((e: any) => {
-                        const lineNumber = e.position.lineNumber;
-                        const column = e.position.column;
-                        setCursorLine(lineNumber);
-                        setCursorColumn(column);
-                    });
-
-                    // Track selection changes
-                    editorRef.current.onDidChangeCursorSelection((e: any) => {
-                        const model = editorRef.current.getModel();
-                        if (model) {
-                            const selection = e.selection;
-                            const selectedText = model.getValueInRange(selection);
-                            setSelectedText(selectedText);
-
-                            // Store the selection range
-                            setSelectionRange({
-                                startLine: selection.startLineNumber,
-                                startColumn: selection.startColumn,
-                                endLine: selection.endLineNumber,
-                                endColumn: selection.endColumn,
-                            });
-                        }
-                    });
-
-                    editorRef.current.onDidChangeModelContent(() => {
-                        handleCodeChange(editorRef.current.getValue());
-                    });
-
-                    const code = localStorage.getItem('editorValue');
-                    if (code) {
-                        editorRef.current.setValue(code);
-                    } else {
-                        editorRef.current.setValue(props.editorValue);
-                    }
-
-                    // Initialize cursor position AFTER setting value (setValue resets cursor to line 1)
-                    const currentPosition = editorRef.current.getPosition();
-                    if (currentPosition) {
-                        setCursorLine(currentPosition.lineNumber);
-                    }
-
-                    isInitializedRef.current = true;
-                    prevLanguageRef.current = props.language;
-                } catch (error) {
-                    console.error('Error initializing LSP editor, falling back to basic editor:', error);
+                if (!lspConfig) {
+                    console.warn(`LSP not available for ${props.language.short}, falling back to basic editor`);
                     setLspFailed(true);
-                    // Clean up failed LSP instance
-                    if (wrapperInstance?.isStarted()) {
-                        await wrapperInstance.dispose();
-                    }
-                    wrapperInstance = null;
-                    isInitializedRef.current = false;
+                    return;
                 }
+
+                // Initialize vscode API (only once globally)
+                if (!apiStarted) {
+                    apiWrapper = new MonacoVscodeApiWrapper(lspConfig.vscodeApiConfig);
+                    await apiWrapper.start();
+                    apiStarted = true;
+                    // Track extensions registered during first start
+                    for (const ext of lspConfig.vscodeApiConfig.extensions ?? []) {
+                        const extId = `${ext.config.publisher}.${ext.config.name}`;
+                        registeredExtensions.add(extId);
+                    }
+                } else {
+                    // Register new language extensions dynamically for subsequent switches
+                    for (const ext of lspConfig.vscodeApiConfig.extensions ?? []) {
+                        const extId = `${ext.config.publisher}.${ext.config.name}`;
+                        if (!registeredExtensions.has(extId)) {
+                            const result = registerExtension(ext.config, ExtensionHostKind.LocalProcess);
+                            if (ext.filesOrContents) {
+                                for (const [path, content] of ext.filesOrContents) {
+                                    (result as any).registerFileUrl(path, encodeStringOrUrlToDataUrl(content));
+                                }
+                            }
+                            await result.whenReady();
+                            registeredExtensions.add(extId);
+                        }
+                    }
+                }
+
+                // Create and start language client
+                lcWrapperInstance = new LanguageClientWrapper(lspConfig.languageClientConfig);
+                await lcWrapperInstance.start();
+
+                // Create and start editor app
+                editorAppInstance = new EditorApp(lspConfig.editorAppConfig);
+                await editorAppInstance.start(containerRef.current);
+
+                editorRef.current = editorAppInstance.getEditor();
+                setLspFailed(false);
+
+                // Dispose old cursor listener if exists
+                if (cursorListenerRef.current) {
+                    cursorListenerRef.current.dispose();
+                }
+
+                // Track cursor position changes
+                cursorListenerRef.current = editorRef.current!.onDidChangeCursorPosition((e: any) => {
+                    const lineNumber = e.position.lineNumber;
+                    const column = e.position.column;
+                    setCursorLine(lineNumber);
+                    setCursorColumn(column);
+                });
+
+                // Track selection changes
+                editorRef.current!.onDidChangeCursorSelection((e: any) => {
+                    const model = editorRef.current!.getModel();
+                    if (model) {
+                        const selection = e.selection;
+                        const selectedText = model.getValueInRange(selection);
+                        setSelectedText(selectedText);
+
+                        // Store the selection range
+                        setSelectionRange({
+                            startLine: selection.startLineNumber,
+                            startColumn: selection.startColumn,
+                            endLine: selection.endLineNumber,
+                            endColumn: selection.endColumn,
+                        });
+                    }
+                });
+
+                editorRef.current!.onDidChangeModelContent(() => {
+                    handleCodeChange(editorRef.current!.getValue());
+                });
+
+                const code = localStorage.getItem('editorValue');
+                if (code) {
+                    editorRef.current!.setValue(code);
+                } else {
+                    editorRef.current!.setValue(props.editorValue);
+                }
+
+                // Initialize cursor position AFTER setting value (setValue resets cursor to line 1)
+                const currentPosition = editorRef.current!.getPosition();
+                if (currentPosition) {
+                    setCursorLine(currentPosition.lineNumber);
+                }
+
+                isInitializedRef.current = true;
+                prevLanguageRef.current = props.language;
+            } catch (error) {
+                console.error('Error initializing LSP editor, falling back to basic editor:', error);
+                setLspFailed(true);
+                // Clean up failed instances
+                if (lcWrapperInstance) {
+                    await lcWrapperInstance.dispose();
+                    lcWrapperInstance = null;
+                }
+                if (editorAppInstance?.isStarted()) {
+                    await editorAppInstance.dispose();
+                    editorAppInstance = null;
+                }
+                isInitializedRef.current = false;
             }
         };
 
@@ -181,87 +213,18 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
             }
 
             // Clean up on unmount
-            if (wrapperInstance?.isStarted()) {
-                wrapperInstance.dispose();
-                wrapperInstance = null;
-                isInitializedRef.current = false;
-            }
+            const lc = lcWrapperInstance;
+            const ea = editorAppInstance;
+            lcWrapperInstance = null;
+            editorAppInstance = null;
+            isInitializedRef.current = false;
+
+            Promise.all([
+                lc?.dispose(),
+                ea?.dispose()
+            ]).catch(console.error);
         };
     }, [props.language?.id]); // Only depend on language ID for initialization
-
-    useEffect(() => {
-        // Only update if editor is initialized and language has changed
-        if (!isInitializedRef.current || !editorRef.current || !props.language?.id || !wrapperInstance) {
-            return;
-        }
-
-        // Check if language actually changed
-        if (prevLanguageRef.current?.id === props.language.id) {
-            return;
-        }
-
-        // Update the code resources for the new language
-        wrapperInstance.updateCodeResources({
-            main: {
-                text: props.editorValue,
-                fileExt: getExtensionById(props.language.id) ?? '',
-            },
-        });
-
-        // Update the model reference with new language extension
-        const updateModel = async () => {
-            console.log('[LspEditor] Updating model for language:', props.language.id);
-            const currentExtension = getExtensionById(props.language.id);
-            const uri = vscode.Uri.parse(`/workspace/example.${currentExtension}`);
-            const modelRef = await createModelReference(uri, props.editorValue);
-            wrapperInstance!.updateEditorModels({
-                modelRef,
-            });
-
-            // Re-establish cursor tracking after model update
-            editorRef.current = wrapperInstance!.getEditor();
-
-            // Dispose old cursor listener if exists
-            if (cursorListenerRef.current) {
-                cursorListenerRef.current.dispose();
-            }
-
-            // Track cursor position changes
-            cursorListenerRef.current = editorRef.current.onDidChangeCursorPosition((e: any) => {
-                const lineNumber = e.position.lineNumber;
-                const column = e.position.column;
-                setCursorLine(lineNumber);
-                setCursorColumn(column);
-            });
-
-            // Track selection changes
-            editorRef.current.onDidChangeCursorSelection((e: any) => {
-                const model = editorRef.current.getModel();
-                if (model) {
-                    const selection = e.selection;
-                    const selectedText = model.getValueInRange(selection);
-                    setSelectedText(selectedText);
-
-                    // Store the selection range
-                    setSelectionRange({
-                        startLine: selection.startLineNumber,
-                        startColumn: selection.startColumn,
-                        endLine: selection.endLineNumber,
-                        endColumn: selection.endColumn,
-                    });
-                }
-            });
-
-            // Initialize cursor position to current position
-            const currentPosition = editorRef.current.getPosition();
-            if (currentPosition) {
-                setCursorLine(currentPosition.lineNumber);
-            }
-        };
-
-        updateModel();
-        prevLanguageRef.current = props.language;
-    }, [props.language?.id]);
     useEffect(() => {
         if (isInitializedRef.current && editorRef.current) {
             setEditorValue(props.editorValue);
@@ -378,7 +341,7 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
 
     return (
         <div className='custom-code-editor'>
-            <div id='monaco-editor-root' style={{ height: props.height }} />
+            <div ref={containerRef} id='monaco-editor-root' style={{ height: props.height }} />
         </div>
     );
 };
