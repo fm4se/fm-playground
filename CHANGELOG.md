@@ -1,5 +1,11 @@
 # Change Log
 
+## v2.12.9[2026-03-19]
+
+- 🐛 Fixed SMT Redundancy not detecting trivial redundant assertions
+- 📌 Bump Python dependencies
+- 📌 Bump npm dependencies
+
 ## v2.12.0[2025-12-06]
 
 - ✨ Updated Alloy vizualization with contex menu, better layout, and legend

@@ -94,14 +94,21 @@ def split(lst, n):
     return lst[:split_size], lst[split_size:]
 
 
-def quick_explain(test: Callable, A, B=[]) -> list:
+def quick_explain(test: Callable, A, B=None) -> list:
     """
     test: Callable. A function that takes a list of expressions and returns PASS or FAIL
     A = analyzed set
     B = Background set
     """
+    if B is None:
+        B = []
+
+    # If background alone already preserves the property, the minimal set is empty.
+    if test(list(B)) == FAIL:
+        return []
+
     if test(list(A) + list(B)) == PASS:
-        return PASS
+        return []
     elif len(A) == 0:
         return []
     else:
