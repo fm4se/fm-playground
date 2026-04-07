@@ -1,4 +1,4 @@
-import { WrapperConfig } from 'monaco-editor-wrapper';
+import type { LspConfig } from './lspTypes';
 import { createLangiumLimbooleConfig as createLimbooleConfig } from '../limboole/langium/config/wrapperLimbooleConfig';
 import { createLangiumSmtConfig as createSmtConfig } from '../smt/langium/config/wrapperSmtConfig';
 import { createLangiumSpectraConfig as createSpectraConfig } from '../spectra/langium/config/wrapperSpectraConfig';
@@ -8,7 +8,7 @@ import { createDafnyLspConfig as createDafnyConfig } from '../dafny/lsp/lspWrapp
 
 // Type for language configuration
 interface LanguageConfig {
-    configCreator: (params?: any) => Promise<WrapperConfig>;
+    configCreator: (params?: any) => Promise<LspConfig>;
     languageId: string;
 }
 
@@ -37,7 +37,7 @@ const languageConfigMap: Record<string, LanguageConfig | null> = {
     },
 };
 
-export const createDynamicLspConfig = async (languageShort: string): Promise<WrapperConfig | null> => {
+export const createDynamicLspConfig = async (languageShort: string): Promise<LspConfig | null> => {
     const languageConfig = languageConfigMap[languageShort as keyof typeof languageConfigMap];
 
     if (!languageConfig) {

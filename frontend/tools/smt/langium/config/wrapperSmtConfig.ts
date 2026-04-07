@@ -1,14 +1,13 @@
 import getKeybindingsServiceOverride from '@codingame/monaco-vscode-keybindings-service-override';
 import getLifecycleServiceOverride from '@codingame/monaco-vscode-lifecycle-service-override';
 import getLocalizationServiceOverride from '@codingame/monaco-vscode-localization-service-override';
-import { createDefaultLocaleConfiguration } from 'monaco-languageclient/vscode/services';
-import { LogLevel } from 'vscode/services';
+import { createDefaultLocaleConfiguration } from 'monaco-languageclient/vscodeApiLocales';
 import { BrowserMessageReader, BrowserMessageWriter } from 'vscode-languageclient/browser.js';
-import { WrapperConfig } from 'monaco-editor-wrapper';
 import smtLanguageConfig from './language-configuration.json?raw';
 import responseSmtTm from '../syntaxes/smt.tmLanguage.json?raw';
 import { configureMonacoWorkers } from '../utils';
 import workerPortUrlSmt from '../worker/smt-server-port?worker&url';
+import type { LspConfig } from '@/../tools/common/lspTypes';
 
 const loadLangiumWorkerPort = () => {
     return new Worker(workerPortUrlSmt, {
@@ -17,7 +16,7 @@ const loadLangiumWorkerPort = () => {
     });
 };
 
-export const createLangiumSmtConfig = async (): Promise<WrapperConfig> => {
+export const createLangiumSmtConfig = async (): Promise<LspConfig> => {
     const extensionFilesOrContents = new Map<string, string | URL>();
     extensionFilesOrContents.set(`/smt-configuration.json`, smtLanguageConfig);
     extensionFilesOrContents.set(`/smt-grammar.json`, responseSmtTm);
@@ -31,42 +30,21 @@ export const createLangiumSmtConfig = async (): Promise<WrapperConfig> => {
     const writer = new BrowserMessageWriter(channel.port1);
 
     return {
-        logLevel: LogLevel.Error,
-        serviceConfig: {
-            userServices: {
+        vscodeApiConfig: {
+            $type: 'extended',
+            viewsConfig: { $type: 'EditorService' },
+            serviceOverrides: {
                 ...getKeybindingsServiceOverride(),
                 ...getLifecycleServiceOverride(),
                 ...getLocalizationServiceOverride(createDefaultLocaleConfiguration()),
             },
-        },
-        editorAppConfig: {
-            $type: 'extended',
-            editorOptions: {
-                minimap: {
-                    enabled: false,
-                },
-                automaticLayout: true,
-                mouseWheelZoom: true,
-                bracketPairColorization: {
-                    enabled: true,
-                    independentColorPoolPerBracketType: true,
-                },
-                glyphMargin: false,
-            },
-            codeResources: {
-                main: {
-                    text: '',
-                    fileExt: 'smt2',
-                },
-            },
-            useDiffEditor: false,
             extensions: [
                 {
                     config: {
                         name: 'smt',
                         publisher: 'soaibuzzaman',
                         version: '1.0.0',
-                        engine: {
+                        engines: {
                             vscode: '*',
                         },
                         contributes: {
@@ -101,17 +79,39 @@ export const createLangiumSmtConfig = async (): Promise<WrapperConfig> => {
             },
             monacoWorkerFactory: configureMonacoWorkers,
         },
-        languageClientConfigs: {
-            smt: {
-                languageId: 'smt',
-                connection: {
-                    options: {
-                        $type: 'WorkerDirect',
-                        worker: smtWorkerPort,
-                        messagePort: channel.port1,
-                    },
-                    messageTransports: { reader, writer },
+        editorAppConfig: {
+            editorOptions: {
+                minimap: {
+                    enabled: false,
                 },
+                automaticLayout: true,
+                mouseWheelZoom: true,
+                bracketPairColorization: {
+                    enabled: true,
+                    independentColorPoolPerBracketType: true,
+                },
+                glyphMargin: false,
+            },
+            codeResources: {
+                modified: {
+                    text: '',
+                    uri: '/workspace/example.smt2',
+                },
+            },
+            useDiffEditor: false,
+        },
+        languageClientConfig: {
+            languageId: 'smt',
+            connection: {
+                options: {
+                    $type: 'WorkerDirect',
+                    worker: smtWorkerPort,
+                    messagePort: channel.port1,
+                },
+                messageTransports: { reader, writer },
+            },
+            clientOptions: {
+                documentSelector: ['smt'],
             },
         },
     };

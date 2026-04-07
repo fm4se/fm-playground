@@ -1,8 +1,15 @@
 import path from 'path';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import vsixPlugin from '@codingame/monaco-vscode-rollup-vsix-plugin';
 
 export default defineConfig({
+    legacy: {
+        // Vite 8 changed CJS interop: default imports from CJS modules in ESM
+        // packages now return module.exports instead of module.exports.default.
+        // This restores the previous behavior for packages like react-toggle.
+        inconsistentCjsInterop: true,
+    },
     plugins: [
         {
             // Plugin code is from https://github.com/chaosprint/vite-plugin-cross-origin-isolation
@@ -16,6 +23,7 @@ export default defineConfig({
             },
         },
         react(),
+        vsixPlugin(),
     ],
     resolve: {
         alias: {
@@ -149,5 +157,8 @@ export default defineConfig({
                 rewrite: (path) => path.replace(/^\/lsp-dafny/, ''),
             },
         },
+    },
+    worker: {
+        format: 'es',
     },
 });

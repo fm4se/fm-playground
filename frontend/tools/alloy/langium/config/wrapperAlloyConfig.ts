@@ -1,14 +1,13 @@
 import getKeybindingsServiceOverride from '@codingame/monaco-vscode-keybindings-service-override';
 import getLifecycleServiceOverride from '@codingame/monaco-vscode-lifecycle-service-override';
 import getLocalizationServiceOverride from '@codingame/monaco-vscode-localization-service-override';
-import { createDefaultLocaleConfiguration } from 'monaco-languageclient/vscode/services';
-import { LogLevel } from 'vscode/services';
+import { createDefaultLocaleConfiguration } from 'monaco-languageclient/vscodeApiLocales';
 import { BrowserMessageReader, BrowserMessageWriter } from 'vscode-languageclient/browser.js';
-import { WrapperConfig } from 'monaco-editor-wrapper';
 import alloyLanguageConfig from './language-configuration.json?raw';
 import responseAlloyTm from '../syntaxes/alloy.tmLanguage.json?raw';
 import { configureMonacoWorkers } from '../utils';
 import workerPortUrlAlloy from '../worker/alloy-server-port?worker&url';
+import type { LspConfig } from '@/../tools/common/lspTypes';
 
 const loadLangiumWorkerPort = () => {
     return new Worker(workerPortUrlAlloy, {
@@ -17,7 +16,7 @@ const loadLangiumWorkerPort = () => {
     });
 };
 
-export const createLangiumAlloyConfig = async (): Promise<WrapperConfig> => {
+export const createLangiumAlloyConfig = async (): Promise<LspConfig> => {
     const extensionFilesOrContents = new Map<string, string | URL>();
     extensionFilesOrContents.set(`/alloy-configuration.json`, alloyLanguageConfig);
     extensionFilesOrContents.set(`/alloy-grammar.json`, responseAlloyTm);
@@ -31,42 +30,21 @@ export const createLangiumAlloyConfig = async (): Promise<WrapperConfig> => {
     const writer = new BrowserMessageWriter(channel.port1);
 
     return {
-        logLevel: LogLevel.Error,
-        serviceConfig: {
-            userServices: {
+        vscodeApiConfig: {
+            $type: 'extended',
+            viewsConfig: { $type: 'EditorService' },
+            serviceOverrides: {
                 ...getKeybindingsServiceOverride(),
                 ...getLifecycleServiceOverride(),
                 ...getLocalizationServiceOverride(createDefaultLocaleConfiguration()),
             },
-        },
-        editorAppConfig: {
-            $type: 'extended',
-            editorOptions: {
-                minimap: {
-                    enabled: false,
-                },
-                automaticLayout: true,
-                mouseWheelZoom: true,
-                bracketPairColorization: {
-                    enabled: true,
-                    independentColorPoolPerBracketType: true,
-                },
-                glyphMargin: false,
-            },
-            codeResources: {
-                main: {
-                    text: '',
-                    fileExt: 'als',
-                },
-            },
-            useDiffEditor: false,
             extensions: [
                 {
                     config: {
                         name: 'alloy',
                         publisher: 'soaibuzzaman',
                         version: '1.0.0',
-                        engine: {
+                        engines: {
                             vscode: '*',
                         },
                         contributes: {
@@ -101,17 +79,39 @@ export const createLangiumAlloyConfig = async (): Promise<WrapperConfig> => {
             },
             monacoWorkerFactory: configureMonacoWorkers,
         },
-        languageClientConfigs: {
-            alloy: {
-                languageId: 'alloy',
-                connection: {
-                    options: {
-                        $type: 'WorkerDirect',
-                        worker: alloyWorkerPort,
-                        messagePort: channel.port1,
-                    },
-                    messageTransports: { reader, writer },
+        editorAppConfig: {
+            editorOptions: {
+                minimap: {
+                    enabled: false,
                 },
+                automaticLayout: true,
+                mouseWheelZoom: true,
+                bracketPairColorization: {
+                    enabled: true,
+                    independentColorPoolPerBracketType: true,
+                },
+                glyphMargin: false,
+            },
+            codeResources: {
+                modified: {
+                    text: '',
+                    uri: '/workspace/example.als',
+                },
+            },
+            useDiffEditor: false,
+        },
+        languageClientConfig: {
+            languageId: 'alloy',
+            connection: {
+                options: {
+                    $type: 'WorkerDirect',
+                    worker: alloyWorkerPort,
+                    messagePort: channel.port1,
+                },
+                messageTransports: { reader, writer },
+            },
+            clientOptions: {
+                documentSelector: ['alloy'],
             },
         },
     };

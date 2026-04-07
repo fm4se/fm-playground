@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAtom } from 'jotai';
 import { Stack } from '@mui/material';
@@ -66,6 +66,18 @@ const InputArea: React.FC<InputAreaProps> = ({ editorTheme, onRunButtonClick, on
 
     // Check if current language supports LSP using the configuration from ToolMaps
     const isLspSupported = lspSupportMap[language.short] ?? false;
+
+    // Keep LspEditor mounted permanently once first used, to preserve
+    // the global monaco-vscode-api state that can't be re-initialized.
+    // When a non-LSP tool is selected, LspEditor is hidden (not unmounted)
+    // and receives the last LSP-supported language to avoid re-initialization.
+    const lastLspLanguageRef = useRef(isLspSupported ? language : null);
+    const lspMountedRef = useRef(false);
+    if (enableLsp && isLspSupported) {
+        lastLspLanguageRef.current = language;
+        lspMountedRef.current = true;
+    }
+    const shouldShowLsp = enableLsp && isLspSupported;
 
     // Calculate editor height based on screen size and fullscreen state
     const getEditorHeight = () => {
@@ -224,17 +236,20 @@ const InputArea: React.FC<InputAreaProps> = ({ editorTheme, onRunButtonClick, on
                     </div>
                 </div>
             </div>
-            {enableLsp && isLspSupported ? (
-                <LspEditor
-                    height={getEditorHeight()}
-                    editorTheme={editorTheme}
-                    setEditorValue={setEditorValue}
-                    editorValue={editorValue}
-                    language={language}
-                    lineToHighlight={lineToHighlight}
-                    setLineToHighlight={setLineToHighlight}
-                />
-            ) : (
+            {lspMountedRef.current && (
+                <div style={{ display: shouldShowLsp ? undefined : 'none' }}>
+                    <LspEditor
+                        height={getEditorHeight()}
+                        editorTheme={editorTheme}
+                        setEditorValue={setEditorValue}
+                        editorValue={editorValue}
+                        language={lastLspLanguageRef.current!}
+                        lineToHighlight={lineToHighlight}
+                        setLineToHighlight={setLineToHighlight}
+                    />
+                </div>
+            )}
+            {!shouldShowLsp && (
                 <Editor height={getEditorHeight()} editorTheme={editorTheme} />
             )}
 
