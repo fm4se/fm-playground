@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "limboole-diff-api"
-version = "2.12.9"
+version = "2.13.0"
 description = "Limboole Diff API for FM Playground"
 authors = ["Soaibuzzaman <soaibuzzaman@uni-weimar.de>"]
 license = "MIT"

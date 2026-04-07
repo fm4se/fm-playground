@@ -1,5 +1,11 @@
 # Change Log
 
+## v2.13.0[2026-04-07]
+
+- 📌 Upgraded monaco-languageclient to 10.7.0
+- 📌 Upgraded Vite 8
+ 
+
 ## v2.12.9[2026-03-19]
 
 - 🐛 Fixed SMT Redundancy not detecting trivial redundant assertions
