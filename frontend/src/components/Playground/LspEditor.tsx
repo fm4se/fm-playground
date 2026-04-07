@@ -74,7 +74,7 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
         }
 
         const startEditor = async () => {
-            // Abort if container not available (e.g. fallback rendered)
+            // Abort if container not available
             if (!containerRef.current) {
                 return;
             }
@@ -98,6 +98,10 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
                     setLspFailed(true);
                     return;
                 }
+
+                // Reset lspFailed so the container div becomes visible
+                // before Monaco tries to render into it.
+                setLspFailed(false);
 
                 // Initialize vscode API (only once globally)
                 if (!apiStarted) {
@@ -190,15 +194,14 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
             } catch (error) {
                 console.error('Error initializing LSP editor, falling back to basic editor:', error);
                 setLspFailed(true);
-                // Clean up failed instances
+                // Clean up failed language client
                 if (lcWrapperInstance) {
                     await lcWrapperInstance.dispose();
                     lcWrapperInstance = null;
                 }
-                if (editorAppInstance?.isStarted()) {
-                    await editorAppInstance.dispose();
-                    editorAppInstance = null;
-                }
+                // We do not dispose editorAppInstance here — it preserves the
+                // global monaco-vscode-api state. It will be properly
+                // disposed on the next startEditor call.
                 isInitializedRef.current = false;
             }
         };
@@ -212,17 +215,12 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
                 cursorListenerRef.current = null;
             }
 
-            // Clean up on unmount
+            // Only dispose the language client on unmount/language change.
             const lc = lcWrapperInstance;
-            const ea = editorAppInstance;
             lcWrapperInstance = null;
-            editorAppInstance = null;
             isInitializedRef.current = false;
 
-            Promise.all([
-                lc?.dispose(),
-                ea?.dispose()
-            ]).catch(console.error);
+            lc?.dispose().catch(console.error);
         };
     }, [props.language?.id]); // Only depend on language ID for initialization
     useEffect(() => {
@@ -334,14 +332,17 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
         }
     };
 
-    // If LSP failed, fall back to basic editor
-    if (lspFailed) {
-        return <Editor height={props.height} editorTheme={props.editorTheme || 'vs-dark'} />;
-    }
-
+    // Always keep the container div in the DOM so containerRef stays valid.
+    // When LSP fails, show the fallback editor on top while keeping
+    // the container available for future re-initialization attempts.
     return (
         <div className='custom-code-editor'>
-            <div ref={containerRef} id='monaco-editor-root' style={{ height: props.height }} />
+            <div
+                ref={containerRef}
+                id='monaco-editor-root'
+                style={{ height: props.height, display: lspFailed ? 'none' : undefined }}
+            />
+            {lspFailed && <Editor height={props.height} editorTheme={props.editorTheme || 'vs-dark'} />}
         </div>
     );
 };
