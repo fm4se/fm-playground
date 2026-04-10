@@ -25,7 +25,7 @@ const defaultLanguage = Object.entries(fmpConfig.tools).map(([key, tool]) => ({
 }))[0];
 
 export const isDarkThemeAtom = atomWithStorage('isDarkTheme', false);
-export const editorValueAtom = atomWithStorage('editorValue', '', rawStringStorage);
+export const editorValueAtom = atom('');
 export const languageAtom = atomWithStorage('language', defaultLanguage);
 export const permalinkAtom = atom<{ check: string | null; permalink: string | null }>({ check: null, permalink: null });
 export const isExecutingAtom = atom(false);

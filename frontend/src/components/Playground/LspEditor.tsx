@@ -73,6 +73,10 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
             return;
         }
 
+        // Cancellation flag: set to true when cleanup runs so stale async
+        // initializations bail out instead of completing on a stale language.
+        let cancelled = false;
+
         const startEditor = async () => {
             // Abort if container not available
             if (!containerRef.current) {
@@ -84,14 +88,20 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
                 await lcWrapperInstance.dispose();
                 lcWrapperInstance = null;
             }
+            if (cancelled) return;
+
             if (editorAppInstance?.isStarted()) {
                 await editorAppInstance.dispose();
                 editorAppInstance = null;
             }
+            if (cancelled) return;
+
             isInitializedRef.current = false;
 
             try {
                 const lspConfig = await createDynamicLspConfig(props.language.short);
+
+                if (cancelled) return;
 
                 if (!lspConfig) {
                     console.warn(`LSP not available for ${props.language.short}, falling back to basic editor`);
@@ -107,6 +117,7 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
                 if (!apiStarted) {
                     apiWrapper = new MonacoVscodeApiWrapper(lspConfig.vscodeApiConfig);
                     await apiWrapper.start();
+                    if (cancelled) return;
                     apiStarted = true;
                     // Track extensions registered during first start
                     for (const ext of lspConfig.vscodeApiConfig.extensions ?? []) {
@@ -125,6 +136,7 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
                                 }
                             }
                             await result.whenReady();
+                            if (cancelled) return;
                             registeredExtensions.add(extId);
                         }
                     }
@@ -133,10 +145,18 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
                 // Create and start language client
                 lcWrapperInstance = new LanguageClientWrapper(lspConfig.languageClientConfig);
                 await lcWrapperInstance.start();
+                if (cancelled) return;
 
                 // Create and start editor app
                 editorAppInstance = new EditorApp(lspConfig.editorAppConfig);
                 await editorAppInstance.start(containerRef.current);
+
+                // If cancelled after start, tear down immediately and bail out
+                if (cancelled) {
+                    editorAppInstance.dispose().catch(console.error);
+                    editorAppInstance = null;
+                    return;
+                }
 
                 editorRef.current = editorAppInstance.getEditor();
                 setLspFailed(false);
@@ -176,12 +196,7 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
                     handleCodeChange(editorRef.current!.getValue());
                 });
 
-                const code = localStorage.getItem('editorValue');
-                if (code) {
-                    editorRef.current!.setValue(code);
-                } else {
-                    editorRef.current!.setValue(props.editorValue);
-                }
+                editorRef.current!.setValue(props.editorValue);
 
                 // Initialize cursor position AFTER setting value (setValue resets cursor to line 1)
                 const currentPosition = editorRef.current!.getPosition();
@@ -192,6 +207,7 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
                 isInitializedRef.current = true;
                 prevLanguageRef.current = props.language;
             } catch (error) {
+                if (cancelled) return;
                 console.error('Error initializing LSP editor, falling back to basic editor:', error);
                 setLspFailed(true);
                 // Clean up failed language client
@@ -209,6 +225,9 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
         startEditor();
 
         return () => {
+            // Signal any in-progress async initialization to abort
+            cancelled = true;
+
             // Clean up cursor listener
             if (cursorListenerRef.current) {
                 cursorListenerRef.current.dispose();
