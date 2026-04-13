@@ -11,6 +11,7 @@ import type { LanguageProps } from './Tools';
 import * as monaco from 'monaco-editor';
 import { useAtom } from 'jotai';
 import {
+    editorValueAtom,
     cursorLineAtom,
     cursorColumnAtom,
     greenHighlightAtom,
@@ -196,7 +197,8 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
                     handleCodeChange(editorRef.current!.getValue());
                 });
 
-                editorRef.current!.setValue(props.editorValue);
+                const currentValue = jotaiStore.get(editorValueAtom) || props.editorValue;
+                editorRef.current!.setValue(currentValue);
 
                 // Initialize cursor position AFTER setting value (setValue resets cursor to line 1)
                 const currentPosition = editorRef.current!.getPosition();
