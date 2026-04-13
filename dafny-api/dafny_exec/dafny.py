@@ -88,10 +88,11 @@ def run_in_gvisor(code: str) -> str:
 
 
 def run_dafny(code: str) -> str:
-    use_gvisor = os.getenv("USE_GVISOR", "false").lower() == "true"
+    # FIXME: Temporarily disable gVisor execution until we can optimize and reduce overhead.
+    # use_gvisor = os.getenv("USE_GVISOR", "false").lower() == "true"
 
-    if use_gvisor:
-        return run_in_gvisor(code)
+    # if use_gvisor:
+    #     return run_in_gvisor(code)
 
     # Fallback to direct execution
     tmp_file = tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".dfy")
