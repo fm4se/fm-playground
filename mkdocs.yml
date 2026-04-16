@@ -12,12 +12,8 @@ nav:
   - User Guide: index.md
   - Developer Guide:
     - Overview: developer-guide/index.md
-    - Tailered Playground:
-      - Setup Guide: developer-guide/tailered-playground/index.md
-      - Project Structure: developer-guide/tailered-playground/project-structure.md
-    - Empty Playground:
-      - Setup Guide: developer-guide/empty-playground/index.md
-      - Project Structure: developer-guide/empty-playground/project-structure.md
+    - Setup Guide: developer-guide/tailered-playground/index.md
+    - Project Structure: developer-guide/tailered-playground/project-structure.md
     - Development:
       - Adding Tools: development/adding-tools.md
       - Language Servers:

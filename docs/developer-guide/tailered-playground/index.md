@@ -6,7 +6,7 @@ This guide covers setting up your FM Playground by forking the existing reposito
 
 The existing project approach is ideal when you:
 
-- Want all formal method tools (Alloy, Limboole, nuXmv, SMT/Z3, Spectra) currently available on the FM Playground
+- Want all formal method tools (Alloy, Limboole, nuXmv, SMT/Z3, Spectra, Dafny) currently available on the FM Playground
 - Need a comprehensive starting point with full features
 - Plan to contribute back to the main project
 - Want to learn from existing tool implementations
@@ -248,6 +248,29 @@ cd spectra-api
 poetry install --no-root  
 # This will set up the Python environment and install necessary packages for Spectra
 ```
+
+#### Dafny
+Dafny consists of two services: an execution API and a Language Server Protocol (LSP) proxy. The Dafny API handles code verification, execution, and translation to other languages. The LSP proxy provides real-time editing features via WebSocket.
+
+```bash
+# Navigate to Dafny API directory
+cd dafny-api
+# Install Dafny API dependencies
+poetry install --no-root
+```
+
+!!! note "Note"
+    The Dafny API requires Dafny 4.x and .NET 8.0 SDK to be installed locally for development without Docker. The Dockerfile handles these installations automatically for containerized deployment.
+
+```bash
+# Navigate to Dafny LSP proxy directory
+cd dafny-lsp-proxy
+# Install LSP proxy dependencies
+poetry install --no-root
+```
+
+!!! note "Note"
+    The Dafny LSP proxy requires the `dafny server` command to be available. The Dockerfile installs Dafny automatically. For local development, ensure Dafny is installed and available in your PATH.
 
 ## Step 4: Start Development Environment
 

@@ -40,6 +40,7 @@ Language servers in FM Playground provide:
 
 | Language | Location | Features |
 |----------|----------|----------|
+| **Dafny** | `dafny-lsp-proxy/` | Full Dafny language support via `dafny server`, multi-session WebSocket proxy |
 | **SMT** | [feature/dolmen-lsp](https://github.com/fm4se/fm-playground/blob/feature/dolmen-lsp/frontend/tools/smt/dolmen/dolmenWebSocketClient.ts) branch | Full SMT-LIB syntax support, external solver integration |
 
 

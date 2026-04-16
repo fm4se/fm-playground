@@ -207,6 +207,84 @@ For the lspWrapperConfig configuration, you can refer to the [Langium-based Lang
 This example serves as a complete working reference for external language server integration. Since LSP is a standardized protocol, the same patterns can be applied to other language servers with minimal adjustments. The key is to ensure the WebSocket communication adheres to the LSP message format and that the client-side implementation can handle the specific language server's capabilities and features.
 
 
+## Real-World Example: Dafny LSP
+
+FM Playground also includes a production integration of the Dafny language server. Unlike the Dolmen/SMT example which uses OCaml, the Dafny LSP proxy uses the native `dafny server` command which natively speaks the LSP protocol via stdin/stdout.
+
+### Architecture
+
+The Dafny LSP integration uses a multi-session architecture where each connected user gets their own isolated `dafny server` process:
+
+```
+Browser (Monaco Editor)
+    ↕ WebSocket
+Dafny LSP Proxy (FastAPI)
+    ↕ stdin/stdout (per session)
+dafny server (one process per user)
+```
+
+### Key Differences from Dolmen
+
+| Aspect | Dolmen (SMT) | Dafny |
+|--------|-------------|-------|
+| **LSP Binary** | `dolmenls` (OCaml) | `dafny server` (.NET) |
+| **Session Model** | Shared process, multiple clients | Isolated process per user |
+| **Session Management** | Client-managed | Server-managed with REST API |
+| **Cleanup** | Manual | Automatic idle session cleanup |
+
+### Session Management
+
+The Dafny proxy provides REST endpoints for session lifecycle management:
+
+```python
+# Create a session explicitly
+POST /sessions → {"session_id": "uuid", "status": "created"}
+
+# Connect via WebSocket (with or without existing session)
+WebSocket /lsp?session_id={id}
+
+# Sessions are automatically cleaned up after inactivity
+```
+
+### Protocol Translation
+
+The proxy translates between WebSocket JSON and LSP Content-Length format, similar to the Dolmen proxy:
+
+```python
+async def send_to_lsp(self, message: Dict[str, Any]):
+    message_str = json.dumps(message)
+    content = f"Content-Length: {len(message_str)}\r\n\r\n{message_str}"
+    self.dafny_process.stdin.write(content.encode("utf-8"))
+    await self.dafny_process.stdin.drain()
+```
+
+### Docker Configuration
+
+The Dafny LSP proxy Docker container requires Dafny and .NET SDK:
+
+```yaml
+# compose.yml
+dafny-lsp:
+  build:
+    context: ./dafny-lsp-proxy
+  container_name: fmp-dafny-lsp
+  ports:
+    - "8080:8080"
+```
+
+For the frontend integration with Vite proxy:
+
+```typescript
+// vite.config.ts
+'/lsp-dafny': {
+    target: 'ws://fmp-dafny-lsp:8080',
+    changeOrigin: true,
+    secure: false,
+    ws: true,
+    rewrite: (path) => path.replace(/^\/lsp-dafny/, ''),
+},
+```
+
 
 ## Resources
 

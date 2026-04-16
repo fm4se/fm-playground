@@ -7,65 +7,34 @@ Formal Methods (FM) Playground is a web platform for running and experimenting w
 
 This guide will help you to set up your own instance of the FM Playground and add/modify tools.
 
-There are two main approaches to develop your own FM Playground instance, depending on your needs and preferences:
-
-## 🍴 Working with Tailered Playground
+## 🍴 Setting Up Your Playground
 
 **Best for:** Developers who want access to all existing tools and prefer a complete codebase as starting point.
 
-If you want to start with all existing formal method tools (Alloy, Limboole, nuXmv, SMT/Z3, Spectra) and build upon them, this approach gives you the full codebase to work with.
+Fork the existing repository to get all formal method tools (Alloy, Limboole, nuXmv, SMT/Z3, Spectra, Dafny) and build upon them. This approach gives you the full codebase to work with.
 
-**[📖 Read the detailed guide →](tailered-playground/)**
-
----
-
-## 🚀 Start from Scratch  
-
-**Best for:** Developers who want a minimal setup and prefer to add only the tools they need.
-
-If you want a clean, minimal starting point and only need specific formal method tools, this approach lets you create a customized playground from the ground up.
-
-**[📖 Read the detailed guide →](empty-playground/)**
+**[📖 Read the setup guide →](tailered-playground/index.md)**
 
 ---
 
 ## 🛠️ Adding Custom Tools
 
-Both approaches support adding custom tools using the `fmp-tool` CLI. This powerful tool generator helps you create new formal method tools with minimal effort.
+Once your playground is set up, you can extend it with your own formal methods tools. Each tool integration involves creating frontend components and a backend API service.
 
 ### Key Features
 
-- **Interactive Setup**: Guided configuration for your tool
-- **Template Generation**: Automatic creation of all necessary files
-- **Integration Support**: Built-in ToolMaps.tsx integration
-- **Flexible Options**: Support for custom input/output components
-
-### Quick Start
-
-```bash
-npx fmp-tool
-```
+- **Template-based**: Follow existing tool patterns to create new integrations
+- **Modular Architecture**: Each tool runs as an independent microservice
+- **Flexible Options**: Support for custom input/output components and language servers
 
 **[📖 Learn more about tool development →](../development/adding-tools.md)**
 
 ---
 
-## 🎯 Choose Your Path
-
-| Aspect | Tailered Playground | Empty Playground |
-|--------|------------------|-------------------|
-| **Setup Time** | Quick (fork & clone) | Medium (guided setup) |
-| **Initial Tools** | All tools included | Select only what you need |
-| **Codebase Size** | Full codebase | Minimal, focused |
-| **Customization** | Modify existing | Build from ground up |
-| **Learning Curve** | Steeper (more code) | Gentler (less complexity) |
-
----
-
 ## Quick Navigation
 
-- **[Tailered Playground →](tailered-playground/)** - Fork and extend the full repository
-- **[Empty Playground →](empty-playground/)** - Create a minimal, custom playground  
+- **[Setup Guide →](tailered-playground/index.md)** - Fork and extend the full repository
+- **[Project Structure →](tailered-playground/project-structure.md)** - Understand the codebase architecture
 - **[Development Guide →](../development/adding-tools.md)** - Learn about tool development
 - **[API Reference →](../development/api-reference.md)** - Technical documentation
 - **[Main Repository →](https://github.com/fm4se/fm-playground)** - Source code and issues

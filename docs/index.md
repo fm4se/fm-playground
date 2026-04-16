@@ -11,10 +11,10 @@ The FM Playground offers the following tools by default:
 - **nuXmv**: A symbolic model checker for the finite-state and infinite-state systems.
 - **Alloy**: A declarative modeling language for software systems.
 - **Spectra**: A synthesis tool for reactive systems.
+- **Dafny**: A verification-aware programming language for writing correct-by-construction software.
 
 !!! tip "More Tools"
-    The FM Playground is designed to be extensible, allowing users to add their own tools and configurations. If you have a tool that you want to integrate into the FM Playground, follow the guide on how to add a new tool.
-    TODO: Add guide on how to add a new tool.
+    The FM Playground is designed to be extensible, allowing users to add their own tools and configurations. If you have a tool that you want to integrate into the FM Playground, follow the [guide on how to add a new tool](development/adding-tools.md).
 
 ## Overview and Examples
 
@@ -45,7 +45,7 @@ There also some examples for each tool available in the bottom of the page. You 
 
 !!! warning "LSP Support"
     Not all tools support Language Server Protocol (LSP) features like auto-completion and error detection. We are working on improving this feature for all tools.
-    Currently, **Limboole, SMT (in beta), and Spectra** support LSP features. 
+    Currently, **Limboole, SMT (in beta), Spectra, and Dafny** support LSP features. 
 
 ### Running Specification
 

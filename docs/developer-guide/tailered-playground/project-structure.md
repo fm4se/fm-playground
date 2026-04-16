@@ -23,6 +23,9 @@ fm-playground/
 │   │   ├── smt/                # SMT/Z3 tool implementation
 │   │   ├── nuxmv/              # nuXmv tool implementation
 │   │   ├── spectra/            # Spectra tool implementation
+│   │   ├── dafny/              # Dafny tool implementation
+│   │   ├── smt-diff/           # SMT semantic diff
+│   │   ├── limboole-diff/      # Limboole semantic diff
 │   │   └── common/             # Shared utilities
 │   ├── public/                 # Static assets
 │   ├── .env.example            # Environment variables example
@@ -74,6 +77,25 @@ fm-playground/
 │   ├── tests/                  # Unit tests
 │   ├── lib/                    # Spectra binaries
 │   ├── pyproject.toml          # Poetry configuration
+│   └── Dockerfile              # Container configuration
+├── dafny-api/                  # Dafny backend service (Python)
+│   ├── dafny_exec/             # Dafny execution logic
+│   │   └── dafny.py            # Verify, run, and translate functions
+│   ├── main.py                 # FastAPI application
+│   ├── pyproject.toml          # Poetry configuration
+│   └── Dockerfile              # Container configuration (includes .NET 8.0 + Dafny)
+├── dafny-lsp-proxy/            # Dafny LSP proxy service (Python)
+│   ├── dafny_lsp_proxy.py      # LSP session management and protocol translation
+│   ├── main.py                 # FastAPI + WebSocket application
+│   ├── pyproject.toml          # Poetry configuration
+│   └── Dockerfile              # Container configuration (includes Dafny server)
+├── smt-diff-api/               # SMT semantic diff service (Python)
+│   ├── smt_diff/               # Diff logic
+│   ├── main.py                 # FastAPI application
+│   └── Dockerfile              # Container configuration
+├── limboole-diff-api/          # Limboole semantic diff service (Python)
+│   ├── limboole_diff/          # Diff logic
+│   ├── main.py                 # FastAPI application
 │   └── Dockerfile              # Container configuration
 ├── .github/                    # GitHub Actions workflows
 │   └── workflows/
@@ -201,6 +223,19 @@ proxy: {
       secure: false,
       rewrite: (path) => path.replace(/^\/spectra/, ''),
   },
+  '/dafny': {
+      target: 'http://fmp-dafny-api:8080',
+      changeOrigin: true,
+      secure: false,
+      rewrite: (path) => path.replace(/^\/dafny/, ''),
+  },
+  '/lsp-dafny': {
+      target: 'ws://fmp-dafny-lsp:8080',
+      changeOrigin: true,
+      secure: false,
+      ws: true,
+      rewrite: (path) => path.replace(/^\/lsp-dafny/, ''),
+  },
 },
 ```
 
@@ -215,7 +250,11 @@ Backend Services
 ├── Limboole API (FastAPI)        # SAT solver
 ├── nuXmv API (FastAPI)           # Model checker
 ├── Spectra API (FastAPI)         # Reactive synthesis
-└── Alloy API (Spring Boot)       # Relational modeling
+├── Alloy API (Spring Boot)       # Relational modeling
+├── Dafny API (FastAPI)           # Verification & translation
+├── Dafny LSP Proxy (FastAPI)     # Language server for Dafny
+├── SMT Diff API (FastAPI)        # Semantic diff for SMT
+└── Limboole Diff API (FastAPI)   # Semantic diff for Limboole
 ```
 
 #### Key Files
@@ -223,7 +262,7 @@ Backend Services
 - `config.py` - Application configuration, including logging, rate limiting, database and OAuth settings
 - `routes/authentication.py` - OAuth login, session management
 - `routes/playground.py` - Core API endpoints for saving/loading code, user history etc.
-Look at the API documentation (#TODO) for more details on the available endpoints and their usage.
+Look at the [API Reference](../../development/api-reference.md) for more details on the available endpoints and their usage.
 
 
 
@@ -280,6 +319,41 @@ def run_nuxmv(code: str) -> str:
 ```
 
 - `lib/` - Tool binaries and dependencies. This directory contains the tool binaries, such as the Limboole binary, nuXmv binary, and Z3 solver, which are required for executing the respective tools. These binaries are not included in the repository (except Spectra) but can be downloaded from the respective tool websites and placed in this directory.
+
+#### dafny-api (Python)
+
+The Dafny API provides verification, execution, and code translation capabilities. It supports translating Dafny code to Python, C#, Java, Go, and JavaScript.
+
+##### Key Files
+- `main.py` - FastAPI application with three main endpoints:
+    - `/dfy/verify/` - Verify Dafny code for correctness
+    - `/dfy/run/` - Execute Dafny programs
+    - `/dfy/translate/{target_language}` - Translate Dafny code to other languages (py, cs, java, go, js)
+
+- `dafny_exec/dafny.py` - Core execution logic that runs Dafny commands via subprocess. Uses Docker with gVisor for secure sandboxed execution in production.
+
+##### Architecture Notes
+- Requires .NET 8.0 SDK and Dafny 4.x
+- Uses Docker-in-Docker with optional gVisor sandboxing for secure code execution
+- Translation endpoint returns a zip file containing the translated source files
+- Execution timeout: 60 seconds
+
+#### dafny-lsp-proxy (Python)
+
+The Dafny LSP Proxy provides real-time language features (diagnostics, completions, hover info) for Dafny via WebSocket connections. It manages isolated LSP sessions for concurrent users.
+
+##### Key Files
+- `main.py` - FastAPI application with WebSocket and REST endpoints:
+    - `WebSocket /lsp?session_id={id}` - LSP communication channel
+    - `POST /sessions` - Create a new LSP session
+    - `DELETE /sessions/{session_id}` - Remove a session
+    - `GET /sessions` - List active sessions
+    - `GET /health` - Health check
+
+- `dafny_lsp_proxy.py` - Session management and protocol translation:
+    - Manages multiple concurrent `dafny server` subprocesses
+    - Translates between WebSocket JSON messages and LSP Content-Length protocol
+    - Automatic session cleanup for inactive sessions
 
 
 

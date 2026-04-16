@@ -14,6 +14,8 @@ Tool APIs (Development):
 - nuXmv API: http://localhost:8003
 - Spectra API: http://localhost:8004
 - Alloy API: http://localhost:8005
+- Dafny API: http://localhost:8085
+- Dafny LSP Proxy: http://localhost:8080 (WebSocket)
 ```
 
 ## Authentication
@@ -96,7 +98,7 @@ Content-Type: application/json
 
 {
   "code": "string",           // The source Specification
-  "check": "string",          // Tool type (SAT, SMT, XMV, SPECTRA, ALS)
+  "check": "string",          // Tool type (SAT, SMT, XMV, SPECTRA, ALS, DFY)
   "parent": "string|null",    // Parent permalink for versioning
   "meta": "object|null"       // Additional metadata
 }
@@ -285,7 +287,7 @@ GET /api/metadata?check={check_type}&p={permalink}
 ```
 
 **Parameters:**
-- `check` (required): Tool type (SAT, SMT, XMV, SPECTRA, ALS)
+- `check` (required): Tool type (SAT, SMT, XMV, SPECTRA, ALS, DFY)
 - `p` (required): Permalink identifier
 
 **Response (200 OK):**
@@ -298,5 +300,159 @@ GET /api/metadata?check={check_type}&p={permalink}
 }
 ```
 
+
+## Tool-Specific API Endpoints
+
+### Dafny API
+
+The Dafny API provides verification, execution, and code translation capabilities.
+
+#### Verify Dafny Code
+```http
+GET /dfy/verify/?check=DFY&p={permalink}
+```
+
+**Parameters:**
+- `check` (required): Must be `DFY`
+- `p` (required): Permalink identifier
+
+**Response (200 OK):** Returns verification result as text.
+
+#### Run Dafny Code
+```http
+GET /dfy/run/?check=DFY&p={permalink}
+```
+
+**Parameters:**
+- `check` (required): Must be `DFY`
+- `p` (required): Permalink identifier
+
+**Response (200 OK):** Returns execution output as text.
+
+#### Translate Dafny Code
+```http
+GET /dfy/translate/{target_language}?check=DFY&p={permalink}
+```
+
+**Parameters:**
+- `target_language` (required): Target language (`py`, `cs`, `java`, `go`, `js`)
+- `check` (required): Must be `DFY`
+- `p` (required): Permalink identifier
+
+**Response (200 OK):** Returns a zip file containing the translated source files.
+
+**Response (400 Bad Request):**
+```json
+{
+  "detail": "Unsupported target language: xyz. Supported: py, cs, java, go, js"
+}
+```
+
+### Dafny LSP Proxy
+
+The Dafny LSP Proxy enables real-time language features for Dafny via WebSocket.
+
+#### WebSocket LSP Connection
+```
+WebSocket /lsp?session_id={session_id}
+```
+
+**Parameters:**
+- `session_id` (optional): Reuse an existing session. If omitted, a new session is created automatically.
+
+**Protocol:** Standard LSP JSON-RPC messages over WebSocket.
+
+#### Create Session
+```http
+POST /sessions
+```
+
+**Response (200 OK):**
+```json
+{
+  "session_id": "uuid-string",
+  "status": "created"
+}
+```
+
+#### Delete Session
+```http
+DELETE /sessions/{session_id}
+```
+
+#### List Sessions
+```http
+GET /sessions
+```
+
+#### Health Check
+```http
+GET /health
+```
+
+**Response (200 OK):**
+```json
+{
+  "status": "healthy",
+  "service": "dafny-lsp-proxy",
+  "version": "2.0.0",
+  "multi_user": true,
+  "active_sessions": 3
+}
+```
+
+### nuXmv API
+
+#### Run nuXmv
+```http
+GET /xmv/run/?check=XMV&p={permalink}
+```
+
+**Parameters:**
+- `check` (required): Must be `XMV`
+- `p` (required): Permalink identifier
+
+**Response (200 OK):** Returns model checking result as HTML-formatted text.
+
+### Z3 (SMT) API
+
+#### Run SMT
+```http
+GET /smt/run/?check=SMT&p={permalink}
+```
+
+**Parameters:**
+- `check` (required): Must be `SMT`
+- `p` (required): Permalink identifier
+
+**Response (200 OK):** Returns solver result as text.
+
+### Spectra API
+
+#### Run Spectra
+```http
+GET /spectra/run/?check=SPECTRA&p={permalink}
+```
+
+**Parameters:**
+- `check` (required): Must be `SPECTRA`
+- `p` (required): Permalink identifier
+
+**Response (200 OK):** Returns synthesis result as text.
+
+### Alloy API
+
+#### Run Alloy
+```http
+GET /alloy/run/?check=ALS&p={permalink}
+```
+
+**Parameters:**
+- `check` (required): Must be `ALS`  
+- `p` (required): Permalink identifier
+
+**Response (200 OK):** Returns Alloy analysis result (may include instance data for visualization).
+
+---
 
 API versioning follows semantic versioning principles with backward compatibility maintained.

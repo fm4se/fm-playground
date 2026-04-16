@@ -4,7 +4,7 @@ This guide shows you how to deploy the FM Playground for development and product
 
 ## Prerequisites
 
-If you haven't already setup the project, please follow the setup guide of either the [Tailered](../developer-guide/tailered-playground/index.md) or [Empty](../developer-guide/empty-playground/index.md) playground.
+If you haven't already setup the project, please follow the [setup guide](../developer-guide/tailered-playground/index.md).
 
 ## Quick Start
 
@@ -176,6 +176,38 @@ spectra:
 - **Purpose**: Spectra reactive synthesis
 - **Technology**: Python + Spectra tools
 - **Dependencies**: Redis for caching
+
+#### Dafny Verification (`fmp-dafny-api`)
+```yaml
+dafny-api:
+  build:
+    context: ./dafny-api
+  container_name: fmp-dafny-api
+  environment:
+    API_URL: http://fmp-backend:8000/
+    USE_GVISOR: "true"
+  volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+```
+
+- **Purpose**: Dafny code verification, execution, and translation
+- **Technology**: Python + Dafny 4.x + .NET 8.0
+- **Port**: 8085
+- **Features**: Verify, run, and translate Dafny code to py/cs/java/go/js
+- **Security**: Uses Docker with gVisor for sandboxed code execution
+
+#### Dafny LSP Proxy (`fmp-dafny-lsp`)
+```yaml
+dafny-lsp:
+  build:
+    context: ./dafny-lsp-proxy
+  container_name: fmp-dafny-lsp
+```
+
+- **Purpose**: Language Server Protocol proxy for Dafny
+- **Technology**: Python + Dafny server
+- **Port**: 8080
+- **Features**: Real-time diagnostics, completions, and hover info via WebSocket
 
 ### Supporting Services
 
@@ -360,6 +392,27 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
     }
+
+    # Dafny LSP WebSocket proxy
+    location /lsp-dafny/ {
+        proxy_pass http://localhost:8080/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Dafny API proxy
+    location /dafny/ {
+        proxy_pass http://localhost:8085/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
 }
 ```
 
@@ -376,4 +429,4 @@ server {
 docker-compose up --scale z3=3 --scale alloy=2 -d
 ```
 
-*← Back to [Development Guide](./index.md)*
+*← Back to [Developer Guide](../developer-guide/index.md)*

@@ -8,8 +8,7 @@ Each tool in FM Playground consists of:
 
 - **API Service**: A containerized backend service that handles tool execution
 !!! warning "Web Assembly (WASM) Tools"
-    If your tool has a WebAssembly (WASM) bindings, you can skip the backend service step. WASM tools can be executed directly in the browser without a separate backend.
-    See the [WASM Tools Guide](../wasm-tools.md) for more details.
+    If your tool has WebAssembly (WASM) bindings, you can skip the backend service step. WASM tools can be executed directly in the browser without a separate backend. Examples in FM Playground include Z3 (SMT) and Limboole, which use WASM as the primary execution method with a backend service as fallback.
 - **Frontend Integration**: UI components for tool interaction
 - **Configuration**: Tool metadata and Docker orchestration
 
@@ -40,107 +39,20 @@ Before adding a tool, ensure:
 First, we will integrate the tool into the FM Playground frontend. The frontend is where users will interact with your tool through the web interface.
 
 ### Overview
-The easiest way to add a new tool is by using `fmp-tool` CLI. `fmp-tool` is a command-line interface (CLI) that generates boilerplate code for new formal method tools. It creates all necessary files and provides integration instructions to add your tool to the FM Playground.
+To add a new tool, you need to create the tool's frontend files manually and register it in the central `ToolMaps.tsx` configuration. Each tool requires an executor (for API calls), a TextMate grammar (for syntax highlighting), and optionally custom input/output components.
 
-### Create a New Tool
+### Create Tool Files
+
+Create a new directory for your tool under `frontend/tools/`:
 
 ```bash
-# Go to the frontend directory
-cd frontend
-# Create a new tool configuration
-npx fmp-tool
-```
-!!! warning "Warning"
-    You need to run this command in the `frontend` directory. Otherwise, the configuration will not be created correctly.
-
-This command will prompt you for the tool name, description, and other metadata. It will generate a new directory under `frontend/tools/` with the necessary files.
-
-```
-$ npx fmp-tool
-
-🛠️  FM Tool Generator
-Creating a new formal methods tool for fm-playground
-
-? What is the name of your tool? (e.g., nuxmv, z3, alloy) nuxmv
-? Display name for the tool: (nuxmv) nuXmv
-ool ID (uppercase, used in maps): (NUXMV) NUXMV
-? File extension for the language: (nuxmv) xmv
-? Does this tool require an API endpoint? (Y/n) Y
-? API endpoint path: (/nuxmv) /xmv
-? Output component type: (Use arrow keys)
-❯ TextualOutput 
-  CustomOutput 
-? Create additional input component (for options)? (y/N) N
-? Create additional output component (for extra UI elements)? (y/N) Y
-
-📋 Configuration:
-Tool Name: nuxmv
-Tool ID: NUXMV
-File Extension: xmv
-Target Path: ./tools
-
-? Proceed with creating the tool? (Y/n) Y
-Looking for ToolMaps.tsx at default path: src/ToolMaps.tsx
-✅ Successfully updated ToolMaps.tsx with nuxmv tool
-
-✅ Tool created successfully!
-
-📝 Next steps:
-1. Update ToolMaps.tsx to register your new tool (see TOOLMAPS_INTEGRATION.md)
-2. Add language configuration to the monaco editor setup if needed
-3. Implement the API endpoint if needed
-4. Customize the generated files to fit your tool's requirements
+mkdir -p frontend/tools/nuxmv
 ```
 
-#### Configuration Options
-
-##### Tool Name
-- **Purpose**: Internal identifier for your tool
-- **Format**: Lowercase, alphanumeric, underscores allowed
-- **Examples**: `prolog`, `coq`, `lean`, `isabelle`
-- **Used for**: File names, directory names, internal references
-
-##### Display Name  
-- **Purpose**: User-facing name shown in the interface
-- **Format**: Any readable string
-- **Examples**: `Prolog Interpreter`, `Coq Proof Assistant`, `Lean 4`
-- **Used for**: UI labels, component names
-
-##### Tool ID
-- **Purpose**: Uppercase identifier for tool mappings
-- **Format**: Uppercase letters, underscores allowed
-- **Examples**: `PROLOG`, `COQ`, `LEAN_4`
-- **Used for**: ToolMaps.tsx keys, internal configurations, permalink `check` values, database entries 
-
-##### File Extension
-- **Purpose**: File extension for your tool's language
-- **Format**: Lowercase, no dot prefix
-- **Examples**: `pl`, `v`, `lean`, `thy`
-- **Used for**: Monaco editor language association, file operations
-
-##### API Endpoint
-- **Purpose**: Backend endpoint for tool execution
-- **Default**: `/{tool-name}`
-- **Examples**: `/prolog`, `/coq/verify`, `/lean/check`
-- **Used for**: Frontend-backend communication
-
-!!! note "Note"
-    The `fmp-tool` CLI will create a default API endpoint for you. If your tool requires a custom API, you can modify the generated code later.
-
-##### Output Component Type
-- **TextualOutput**: For tools that produce plain text output
-- **CustomOutput**: Advanced formatting with custom components, e.g., graphs, tables, etc.
-
-
-##### Additional Components
-- **Input Component**: For tool-specific options and parameters
-- **Output Component**: For specialized result visualization
-
-#### Generated File Structure
-After running `fmp-tool`, you'll get:
+You'll create the following files:
 
 ```
-frontend/src/tools/your-tool/
+frontend/tools/nuxmv/
 ├── nuxmvExecutor.ts           # Core execution logic
 ├── nuxmvTextMateGrammar.ts    # Syntax highlighting
 └── nuxmvOutput.tsx            # Output component (optional)
@@ -280,9 +192,9 @@ export default nuxmvOutput;
 
 ### ToolMaps.tsx Integration
 
-The `ToolMaps.tsx` file serves as the central registry that connects all tool components and configurations within the FM Playground frontend. When you generate a new tool using the `fmp-tool` CLI, this file is automatically updated to include your tool's configuration. Understanding this integration is crucial for customizing tool behavior and troubleshooting integration issues.
+The `ToolMaps.tsx` file serves as the central registry that connects all tool components and configurations within the FM Playground frontend. Understanding this integration is crucial for customizing tool behavior and troubleshooting integration issues.
 
-The `fmp-tool` CLI automatically updates the `ToolMaps.tsx` file with the new tool configuration, but it's important to understand what each mapping does:
+After creating your tool files, you need to register them in `ToolMaps.tsx`:
 
 ```typescript hl_lines="1" linenums="1" title="ToolMaps.tsx"
 import TextualOutput from '@/components/Playground/TextualOutput';
@@ -365,7 +277,7 @@ export const fmpConfig: FmpConfig = {
 
 - **Purpose**: Indicates whether a tool supports Language Server Protocol features
 - **Features enabled**: Real-time error checking, intelligent auto-completion, semantic highlighting
-- **Current support**: Limboole, SMT (partial), Spectra
+- **Current support**: Limboole, SMT (partial), Spectra, Dafny (external LSP)
 - **Development**: New tools can implement LSP for enhanced editing experience
 
 **7. `fmpConfig`**
@@ -379,9 +291,9 @@ export const fmpConfig: FmpConfig = {
     
 - **Consistency**: The `shortName` must match across all mapping objects for proper tool registration
 
-#### Manual Configuration
+#### Advanced Configuration
 
-While `fmp-tool` automates most of the integration, you may need to manually adjust configurations for advanced features:
+You may need to adjust configurations for advanced features:
 
 ```typescript title="ToolMaps.tsx" linenums="1"
 // Adding custom input component
@@ -551,6 +463,6 @@ This function creates a temporary file with the provided code, runs the nuXmv to
 
 ## Related Documentation
 
-- [Development Guide](../../development/development-guide.md) - Advanced development patterns
-- [API Reference](../../development/api-reference.md) - Backend API documentation
-- [Contributing Guide](../../development/contributing.md) - Contributing your tool back to the project
+- [API Reference](api-reference.md) - Backend API documentation
+- [Deployment Guide](deployment.md) - Deploying the application
+- [Language Servers](language-servers.md) - Adding LSP support to your tool
