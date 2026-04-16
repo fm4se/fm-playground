@@ -22,32 +22,35 @@ def run_in_gvisor(code: str) -> str:
 
         os.chmod(code_file, 0o644)
         os.chmod(tmpdir, 0o755)
-
-        # Prepare the dafny command - copy to /tmp for writable access
+        
         dafny_cmd = f"cp /input/program.dfy /tmp/ && cd /tmp && dafny run program.dfy"
-
-        # DEBUG:
-        # Check if gVisor runtime is available
-        # runtime_check = subprocess.run(
-        #     ["docker", "info"],
-        #     capture_output=True,
-        #     text=True
-        # )
-        # use_gvisor = "runsc" in runtime_check.stdout
+        
+        runtime = os.getenv("DAFNY_DOCKER_RUNTIME", "runsc")
+        memory = os.getenv("DAFNY_DOCKER_MEMORY", "4g")
+        memory_swap = os.getenv("DAFNY_DOCKER_MEMORY_SWAP", "4g")
+        cpus = os.getenv("DAFNY_DOCKER_CPUS", "0")
+        pids_limit = os.getenv("DAFNY_DOCKER_PIDS_LIMIT", "1000")
+        tmpfs_opts = os.getenv("DAFNY_DOCKER_TMPFS_OPTS", "rw,exec,size=2g")
 
         docker_args = [
             "docker",
             "run",
             "--rm",
-            "--runtime=runsc",  # gVisor runtime for sandboxing
-            "--memory=2g",  # Increased memory for C# compilation
-            "--memory-swap=2g",  # Prevent swap usage
-            "--cpus=0",  # Limit to single CPU
-            "--pids-limit=200",  # Increased process limit for compilation
+            f"--runtime={runtime}",
+            f"--memory={memory}",
+            f"--memory-swap={memory_swap}",
+            f"--cpus={cpus}",
+            f"--pids-limit={pids_limit}",
             "-v",
-            f"{tmpdir}:/input:ro",  # Mount code as read-only
+            f"{tmpdir}:/input:ro",
             "--tmpfs",
-            "/tmp:rw,exec,size=500m",  # Larger tmpfs for compilation artifacts
+            f"/tmp:{tmpfs_opts}",
+            
+            # DEBUG: diagnostic environment variables for gVisor and .NET runtime
+            # "-e", "DOTNET_CLI_HOME=/tmp",
+            # "-e", "HOME=/tmp",
+            # "-e", "COREHOST_TRACE=1",          
+            # "-e", "DOTNET_EnableCrashReport=1",
         ]
 
         # Allow configuring the image via environment variable so remote images
@@ -64,7 +67,13 @@ def run_in_gvisor(code: str) -> str:
             result = subprocess.run(
                 docker_args, capture_output=True, text=True, timeout=60  # Increased timeout for gVisor overhead
             )
-            return result.stdout + result.stderr
+            output = result.stdout + result.stderr
+            
+            # If the container crashed or was killed, append the reason
+            if result.returncode != 0:
+                output += f"\n\n--- EXECUTION FAILED ---\nContainer Exit Code: {result.returncode}"
+                
+            return output
         except subprocess.TimeoutExpired:
             # Kill the container that's still running
             try:
@@ -88,11 +97,10 @@ def run_in_gvisor(code: str) -> str:
 
 
 def run_dafny(code: str) -> str:
-    # FIXME: Temporarily disable gVisor execution until we can optimize and reduce overhead.
-    # use_gvisor = os.getenv("USE_GVISOR", "false").lower() == "true"
+    use_gvisor = os.getenv("USE_GVISOR", "false").lower() == "true"
 
-    # if use_gvisor:
-    #     return run_in_gvisor(code)
+    if use_gvisor:
+        return run_in_gvisor(code)
 
     # Fallback to direct execution
     tmp_file = tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".dfy")
@@ -153,7 +161,7 @@ def translate_dafny(code: str, permalink: str, target_language: str) -> str:
                 # These create directories
                 output_dir = os.path.join(tmp_dir, f"{permalink}-{target_language}")
                 if os.path.exists(output_dir):
-                    for root, dirs, files in os.walk(output_dir):
+                    for root, _, files in os.walk(output_dir):
                         for file in files:
                             file_path = os.path.join(root, file)
                             arcname = os.path.relpath(file_path, tmp_dir)
