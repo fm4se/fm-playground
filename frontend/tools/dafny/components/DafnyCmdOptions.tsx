@@ -8,7 +8,7 @@ const DafnyCliOptions = () => {
     const options = [
         //['py', 'cs', 'java', 'go', 'js']
         { value: 'verify', label: 'Verify' },
-        { value: 'run', label: 'Run (slow)' },
+        { value: 'run', label: 'Run' },
         { value: 'translate-cs', label: 'Translate to C#' },
         { value: 'translate-py', label: 'Translate to Python' },
         { value: 'translate-java', label: 'Translate to Java' },
