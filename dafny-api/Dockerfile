@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
     zip \
     && rm -rf /var/lib/apt/lists/*
 
-    # Install .NET 8.0 SDK (Required by Dafny 4.x)
+# Install .NET 8.0 SDK (Required by Dafny 4.x)
 RUN wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh \
     && chmod +x ./dotnet-install.sh \
     && ./dotnet-install.sh --channel 8.0 --install-dir /usr/share/dotnet \
@@ -26,15 +26,22 @@ RUN wget "https://github.com/dafny-lang/dafny/releases/download/v${DAFNY_VERSION
 
 ENV PATH=$PATH:/opt/dafny-sdk
 
-# Install Poetry
-ENV POETRY_VERSION=1.8.3 POETRY_HOME=/opt/poetry
-RUN curl -sSL https://install.python-poetry.org | python - --version "$POETRY_VERSION" \
-	&& ln -s /opt/poetry/bin/poetry /usr/local/bin/poetry
+ENV POETRY_HOME="/opt/poetry"
+ENV PATH="$POETRY_HOME/bin:$PATH"
+
+RUN curl -sSL https://install.python-poetry.org | python3 -
+
 WORKDIR /app
+
 COPY pyproject.toml poetry.lock* ./
-RUN poetry install --no-root
+RUN poetry config virtualenvs.create false \
+    && poetry install --no-root --no-interaction
+
 COPY . .
 
 EXPOSE 8080
 
-CMD ["poetry", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
+ENTRYPOINT ["/app/entrypoint.sh"]
