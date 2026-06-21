@@ -111,7 +111,7 @@ export class MonacoCollabBinding {
                 }
 
                 if (edits.length > 0) {
-                    this.model.applyEdits(edits);
+                    this.editor.executeEdits('collab', edits);
                 }
             } finally {
                 this.isApplyingYjsChanges = false;
