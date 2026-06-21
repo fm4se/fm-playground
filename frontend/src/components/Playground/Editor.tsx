@@ -21,6 +21,8 @@ import '@/assets/style/Playground.css';
 interface BasicCodeEditorProps {
     height: string;
     editorTheme: string;
+    /** Optional callback fired when the editor instance is ready */
+    onEditorReady?: (editor: monacoEditor.editor.IStandaloneCodeEditor, monaco: typeof monacoEditor) => void;
 }
 
 const CodeEditor: React.FC<BasicCodeEditorProps> = (props: BasicCodeEditorProps) => {
@@ -212,6 +214,9 @@ const CodeEditor: React.FC<BasicCodeEditorProps> = (props: BasicCodeEditorProps)
         });
 
         monaco.editor.setTheme('spectraTheme');
+
+        // Notify parent that the editor is ready (used for collab binding)
+        props.onEditorReady?.(editor, monaco);
     }
 
     useEffect(() => {
@@ -259,3 +264,4 @@ const CodeEditor: React.FC<BasicCodeEditorProps> = (props: BasicCodeEditorProps)
 };
 
 export default CodeEditor;
+

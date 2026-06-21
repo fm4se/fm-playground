@@ -32,6 +32,8 @@ type LspEditorProps = {
     lineToHighlight: number[];
     setLineToHighlight: (line: number[]) => void;
     editorTheme?: string;
+    /** Optional callback fired when the editor instance is ready */
+    onEditorReady?: (editor: any, monacoModule: any) => void;
 };
 
 // Global instances for v10 API
@@ -208,6 +210,11 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
 
                 isInitializedRef.current = true;
                 prevLanguageRef.current = props.language;
+
+                // Notify parent that the editor is ready
+                if (props.onEditorReady) {
+                    props.onEditorReady(editorRef.current, monaco);
+                }
             } catch (error) {
                 if (cancelled) return;
                 console.error('Error initializing LSP editor, falling back to basic editor:', error);

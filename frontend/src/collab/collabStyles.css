@@ -1,0 +1,409 @@
+/* ===== Collaborative Editing Styles ===== */
+
+/* --- Remote Cursor Styles --- */
+.collab-cursor {
+    position: relative;
+}
+
+.collab-cursor-line {
+    border-left: 2px solid #ff6b6b;
+    margin-left: -1px;
+    position: relative;
+    z-index: 10;
+}
+
+.collab-cursor-label {
+    position: relative;
+    z-index: 20;
+}
+
+.collab-selection {
+    opacity: 0.3;
+    min-width: 4px;
+}
+
+/* --- Collab Toolbar Styles --- */
+.collab-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.collab-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 4px;
+    flex-shrink: 0;
+}
+
+.collab-status-dot.connected {
+    background-color: #4caf50;
+    box-shadow: 0 0 6px rgba(76, 175, 80, 0.6);
+    animation: collabPulse 2s infinite;
+}
+
+.collab-status-dot.disconnected {
+    background-color: #9e9e9e;
+}
+
+.collab-status-dot.loading {
+    background-color: #ff9800;
+    animation: collabPulse 1s infinite;
+}
+
+@keyframes collabPulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* --- Session Info Badge --- */
+.collab-session-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    letter-spacing: 0.5px;
+    border: 1px solid;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+[data-theme='dark'] .collab-session-badge {
+    background: rgba(76, 175, 80, 0.12);
+    border-color: rgba(76, 175, 80, 0.3);
+    color: #81c784;
+}
+
+[data-theme='light'] .collab-session-badge {
+    background: rgba(76, 175, 80, 0.08);
+    border-color: rgba(76, 175, 80, 0.25);
+    color: #388e3c;
+}
+
+.collab-session-code {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    font-weight: 700;
+}
+
+.collab-user-count {
+    font-size: 0.72rem;
+    opacity: 0.8;
+}
+
+/* --- Collab Buttons --- */
+.collab-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid;
+    font-size: 0.78rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: transparent;
+    white-space: nowrap;
+}
+
+.collab-btn:hover {
+    transform: translateY(-1px);
+}
+
+.collab-btn.collab-start-btn {
+    border-color: rgba(102, 126, 234, 0.4);
+    color: #667eea;
+}
+
+.collab-btn.collab-start-btn:hover {
+    background: rgba(102, 126, 234, 0.1);
+    border-color: rgba(102, 126, 234, 0.6);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+}
+
+.collab-btn.collab-join-btn {
+    border-color: rgba(78, 205, 196, 0.4);
+    color: #4ecdc4;
+}
+
+.collab-btn.collab-join-btn:hover {
+    background: rgba(78, 205, 196, 0.1);
+    border-color: rgba(78, 205, 196, 0.6);
+    box-shadow: 0 2px 8px rgba(78, 205, 196, 0.2);
+}
+
+.collab-btn.collab-leave-btn {
+    border-color: rgba(244, 67, 54, 0.3);
+    color: #ef5350;
+    font-size: 0.72rem;
+    padding: 2px 8px;
+}
+
+.collab-btn.collab-leave-btn:hover {
+    background: rgba(244, 67, 54, 0.1);
+    border-color: rgba(244, 67, 54, 0.5);
+}
+
+/* --- Join Modal Styles --- */
+.collab-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: collabFadeIn 0.2s ease;
+}
+
+@keyframes collabFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.collab-modal {
+    background: var(--bg-primary, #ffffff);
+    border-radius: 12px;
+    padding: 28px 32px;
+    width: 380px;
+    max-width: 90vw;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: collabSlideUp 0.3s ease;
+}
+
+[data-theme='dark'] .collab-modal {
+    background: #1e1e2e;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='light'] .collab-modal {
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+@keyframes collabSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.collab-modal-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+[data-theme='dark'] .collab-modal-title {
+    color: #e4e4e7;
+}
+
+[data-theme='light'] .collab-modal-title {
+    color: #18181b;
+}
+
+.collab-modal-subtitle {
+    font-size: 0.85rem;
+    opacity: 0.65;
+    margin-bottom: 20px;
+}
+
+.collab-modal-input {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 2px solid;
+    font-size: 1.2rem;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    letter-spacing: 6px;
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: 700;
+    outline: none;
+    transition: border-color 0.2s ease;
+    box-sizing: border-box;
+}
+
+[data-theme='dark'] .collab-modal-input {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.15);
+    color: #e4e4e7;
+}
+
+[data-theme='dark'] .collab-modal-input:focus {
+    border-color: #667eea;
+}
+
+[data-theme='light'] .collab-modal-input {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.15);
+    color: #18181b;
+}
+
+[data-theme='light'] .collab-modal-input:focus {
+    border-color: #667eea;
+}
+
+.collab-modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.collab-modal-actions button {
+    flex: 1;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.collab-modal-actions .collab-modal-cancel {
+    background: transparent;
+    border: 1px solid rgba(128, 128, 128, 0.3);
+}
+
+[data-theme='dark'] .collab-modal-actions .collab-modal-cancel {
+    color: #a1a1aa;
+}
+
+[data-theme='light'] .collab-modal-actions .collab-modal-cancel {
+    color: #71717a;
+}
+
+.collab-modal-actions .collab-modal-cancel:hover {
+    background: rgba(128, 128, 128, 0.1);
+}
+
+.collab-modal-actions .collab-modal-join {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.collab-modal-actions .collab-modal-join:hover {
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    transform: translateY(-1px);
+}
+
+.collab-modal-actions .collab-modal-join:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.collab-modal-error {
+    color: #ef5350;
+    font-size: 0.78rem;
+    margin-top: 8px;
+    text-align: center;
+}
+
+/* --- Created Session Modal --- */
+.collab-created-code {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 8px;
+    text-align: center;
+    padding: 16px;
+    border-radius: 8px;
+    margin: 16px 0;
+    user-select: all;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+[data-theme='dark'] .collab-created-code {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    border: 2px dashed rgba(102, 126, 234, 0.3);
+}
+
+[data-theme='light'] .collab-created-code {
+    background: rgba(102, 126, 234, 0.05);
+    color: #5a67d8;
+    border: 2px dashed rgba(102, 126, 234, 0.2);
+}
+
+.collab-created-code:hover {
+    border-style: solid;
+}
+
+.collab-created-hint {
+    font-size: 0.8rem;
+    text-align: center;
+    opacity: 0.6;
+    margin-bottom: 8px;
+}
+
+.collab-copied-toast {
+    font-size: 0.75rem;
+    text-align: center;
+    color: #4caf50;
+    font-weight: 600;
+    margin-top: 4px;
+    animation: collabFadeIn 0.2s ease;
+}
+
+/* --- User Avatars in Badge --- */
+.collab-user-avatars {
+    display: flex;
+    align-items: center;
+    margin-left: 4px;
+}
+
+.collab-user-avatar {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.55rem;
+    font-weight: 700;
+    color: white;
+    margin-left: -4px;
+    border: 1.5px solid;
+    text-transform: uppercase;
+}
+
+[data-theme='dark'] .collab-user-avatar {
+    border-color: #1e1e2e;
+}
+
+[data-theme='light'] .collab-user-avatar {
+    border-color: #ffffff;
+}
+
+.collab-user-avatar:first-child {
+    margin-left: 0;
+}

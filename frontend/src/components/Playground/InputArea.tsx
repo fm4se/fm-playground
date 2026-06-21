@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAtom } from 'jotai';
 import { Stack } from '@mui/material';
@@ -26,6 +26,16 @@ import LspEditor from './LspEditor';
 import Editor from './Editor';
 import { additionalInputAreaUiMap, lspSupportMap } from '@/ToolMaps';
 
+// Collaborative editing — lazy-loaded and gated behind env var
+// const COLLAB_ENABLED = import.meta.env.VITE_COLLAB_ENABLED === 'true';
+const COLLAB_ENABLED = 'true';
+const CollabToolbar = COLLAB_ENABLED
+    ? React.lazy(() => import('@/collab/CollabToolbar'))
+    : null;
+const CollabEditorBridge = COLLAB_ENABLED
+    ? React.lazy(() => import('@/collab/CollabEditorBridge'))
+    : null;
+
 interface InputAreaProps {
     editorTheme: string;
     onRunButtonClick: () => void;
@@ -47,6 +57,17 @@ const InputArea: React.FC<InputAreaProps> = ({ editorTheme, onRunButtonClick, on
 
     const [isNewSpecModalOpen, setIsNewSpecModalOpen] = useState(false); // state to control the new spec modal
     const [isMobile, setIsMobile] = useState(false);
+
+    // Track the active Monaco editor instance for collab binding
+    const activeEditorRef = useRef<any>(null);
+    const activeMonacoRef = useRef<any>(null);
+    const [editorInstanceKey, setEditorInstanceKey] = useState(0);
+
+    const handleBasicEditorReady = (editor: any, monaco: any) => {
+        activeEditorRef.current = editor;
+        activeMonacoRef.current = monaco;
+        setEditorInstanceKey((prev) => prev + 1);
+    };
 
     // Check screen size on mount and resize for mobile detection
     useEffect(() => {
@@ -235,6 +256,13 @@ const InputArea: React.FC<InputAreaProps> = ({ editorTheme, onRunButtonClick, on
                         </Stack>
                     </div>
                 </div>
+                {CollabToolbar && (
+                    <div className='d-flex justify-content-end mb-1'>
+                        <Suspense fallback={null}>
+                            <CollabToolbar />
+                        </Suspense>
+                    </div>
+                )}
             </div>
             {lspMountedRef.current && (
                 <div style={{ display: shouldShowLsp ? undefined : 'none' }}>
@@ -246,11 +274,26 @@ const InputArea: React.FC<InputAreaProps> = ({ editorTheme, onRunButtonClick, on
                         language={lastLspLanguageRef.current!}
                         lineToHighlight={lineToHighlight}
                         setLineToHighlight={setLineToHighlight}
+                        onEditorReady={handleBasicEditorReady}
                     />
                 </div>
             )}
             {!shouldShowLsp && (
-                <Editor height={getEditorHeight()} editorTheme={editorTheme} />
+                <Editor
+                    height={getEditorHeight()}
+                    editorTheme={editorTheme}
+                    onEditorReady={handleBasicEditorReady}
+                />
+            )}
+
+            {CollabEditorBridge && (
+                <Suspense fallback={null}>
+                    <CollabEditorBridge
+                        getEditor={() => activeEditorRef.current}
+                        getMonaco={() => activeMonacoRef.current}
+                        editorInstanceKey={editorInstanceKey}
+                    />
+                </Suspense>
             )}
 
             <div className='additional-input-ui'>{AdditionalUi && <AdditionalUi />}</div>

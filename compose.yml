@@ -172,6 +172,17 @@ services:
       API_URL: ${API_URL:-http://fmp-backend:8000/}
     networks:
       - my_network
+
+  # Optional: Collaborative editing server (set VITE_COLLAB_ENABLED=true in frontend to enable)
+  collab-server:
+    build:
+      context: ./collab-server
+    container_name: fmp-collab-server
+    ports:
+      - "4444:4444"
+    networks:
+      - my_network
+    restart: unless-stopped
       
   redis:
     image: redis:alpine
