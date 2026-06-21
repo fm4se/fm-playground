@@ -132,10 +132,15 @@ export class CollabManager {
      * Create a new collaboration session.
      * Generates a unique code and connects to the WebSocket server.
      * @param initialContent - The current editor content to seed the room with
+     * @param userName - Optional custom name for the local user
      * @returns The generated session code
      */
-    createSession(initialContent: string): string {
+    createSession(initialContent: string, userName?: string): string {
         this.disconnect();
+
+        if (userName && userName.trim()) {
+            this.localName = userName.trim();
+        }
 
         const code = generateSessionCode();
         this.sessionCode = code;
@@ -154,9 +159,14 @@ export class CollabManager {
     /**
      * Join an existing collaboration session by code.
      * @param code - The session code to join
+     * @param userName - Optional custom name for the local user
      */
-    joinSession(code: string): void {
+    joinSession(code: string, userName?: string): void {
         this.disconnect();
+
+        if (userName && userName.trim()) {
+            this.localName = userName.trim();
+        }
 
         this.sessionCode = code.toUpperCase().trim();
         this.ydoc = new Y.Doc();

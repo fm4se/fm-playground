@@ -71,9 +71,9 @@ export interface UseCollaborationReturn {
     /** Error message */
     error: string | null;
     /** Create a new session — returns the generated code */
-    createSession: () => string;
+    createSession: (userName?: string) => string;
     /** Join an existing session by code */
-    joinSession: (code: string) => void;
+    joinSession: (code: string, userName?: string) => void;
     /** Leave the current session */
     leaveSession: () => void;
     /** Bind a Monaco editor to the current Yjs session */
@@ -104,7 +104,7 @@ export function useCollaboration(): UseCollaborationReturn {
     }, []);
 
     /** Create a new collaboration session */
-    const createSession = useCallback((): string => {
+    const createSession = useCallback((userName?: string): string => {
         const manager = getManager();
         setLoading(true);
         setError(null);
@@ -118,14 +118,14 @@ export function useCollaboration(): UseCollaborationReturn {
             globalBinding = null;
         }
 
-        const code = manager.createSession(currentContent);
+        const code = manager.createSession(currentContent, userName);
         setSessionId(code);
         return code;
     }, [setSessionId, setLoading, setError]);
 
     /** Join an existing session by code */
     const joinSession = useCallback(
-        (code: string): void => {
+        (code: string, userName?: string): void => {
             const manager = getManager();
 
             if (!code || code.trim().length < 4) {
@@ -142,7 +142,7 @@ export function useCollaboration(): UseCollaborationReturn {
                 globalBinding = null;
             }
 
-            manager.joinSession(code);
+            manager.joinSession(code, userName);
             setSessionId(code.toUpperCase().trim());
         },
         [setSessionId, setLoading, setError]

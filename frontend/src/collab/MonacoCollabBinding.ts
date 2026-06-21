@@ -200,8 +200,7 @@ export class MonacoCollabBinding {
             if (clientId === localClientId) return;
             if (!state.user) return;
 
-            // const userColor = state.user.color || '#888888';
-            // const userName = state.user.name || `User ${clientId}`;
+            const userName = state.user.name || `User ${clientId}`;
 
             // Cursor decoration
             if (state.cursor) {
@@ -212,30 +211,14 @@ export class MonacoCollabBinding {
                     const maxColumn = this.model.getLineMaxColumn(lineNumber);
                     const safeColumn = Math.min(column, maxColumn);
 
-                    // Cursor line (thin colored bar)
+                    // Cursor line and name tag (via ::after pseudo-element in injected CSS)
                     decorations.push({
                         range: new this.monacoModule.Range(lineNumber, safeColumn, lineNumber, safeColumn + 1),
                         options: {
                             className: `collab-cursor`,
-                            beforeContentClassName: `collab-cursor-line`,
+                            beforeContentClassName: `collab-cursor-line collab-cursor-${clientId}`,
                             stickiness: 1, // NeverGrowsWhenTypingAtEdges
-                            // Use inline style via hoverMessage for color since CSS classes
-                            // can't have dynamic colors. We use CSS custom properties via
-                            // the data attribute approach.
-                        },
-                    });
-
-                    // Cursor label (name tag above cursor)
-                    decorations.push({
-                        range: new this.monacoModule.Range(lineNumber, safeColumn, lineNumber, safeColumn),
-                        options: {
-                            after: {
-                                content: '\u200B', // zero-width space to create attachment point
-                                inlineClassName: `collab-cursor-label`,
-                            },
-                            // We'll use the hoverMessage to identify the user for CSS targeting
-                            hoverMessage: { value: String(state.user.name ?? '') },
-                            stickiness: 1,
+                            hoverMessage: { value: userName },
                         },
                     });
                 }
@@ -254,7 +237,7 @@ export class MonacoCollabBinding {
                             sel.endColumn
                         ),
                         options: {
-                            className: `collab-selection`,
+                            className: `collab-selection collab-selection-${clientId}`,
                             stickiness: 1,
                         },
                     });
@@ -289,15 +272,37 @@ export class MonacoCollabBinding {
             if (!state.user) return;
 
             const color = state.user.color || '#888888';
-            // const name = state.user.name || `User ${clientId}`;
+            const name = state.user.name || `User ${clientId}`;
+            const safeName = name.replace(/['"\\\\]/g, ''); // prevent CSS injection
 
-            // We can't target individual decorations by client ID with the standard
-            // Monaco decoration API, so we use a single shared class. For multi-user
-            // support with different colors, we use CSS custom properties.
-            // This is a known limitation — we cycle through colors.
             css += `
-                .collab-cursor-line { border-left: 2px solid ${color} !important; }
-                .collab-selection { background-color: ${color}33 !important; }
+                .collab-cursor-${clientId} { border-left: 2px solid ${color} !important; }
+                .collab-cursor-${clientId}::after {
+                    content: "${safeName}";
+                    position: absolute;
+                    top: 100%;
+                    left: 0;
+                    background-color: ${color};
+                    color: white;
+                    font-size: 10px;
+                    padding: 2px 6px;
+                    border-radius: 3px;
+                    border-top-left-radius: 0;
+                    font-family: 'Inter', 'Segoe UI', sans-serif;
+                    font-weight: 600;
+                    white-space: nowrap;
+                    pointer-events: none;
+                    z-index: 50;
+                    line-height: 1.2;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+                    /* Show by default for better collaboration awareness */
+                    opacity: 0.9;
+                }
+                .collab-cursor-${clientId}:hover::after {
+                    opacity: 1;
+                    z-index: 100;
+                }
+                .collab-selection-${clientId} { background-color: ${color}33 !important; }
             `;
         });
 

@@ -31,35 +31,59 @@ const CollabToolbar: React.FC<CollabToolbarProps> = ({ onSessionChange }) => {
     } = useCollaboration();
 
     const [joinModalOpen, setJoinModalOpen] = useAtom(collabJoinModalOpenAtom);
+    const [createModalOpen, setCreateModalOpen] = useState(false);
     const [joinCode, setJoinCode] = useState('');
+    const [userName, setUserName] = useState(() => localStorage.getItem('collab-username') || '');
     const [showCreatedModal, setShowCreatedModal] = useState(false);
     const [createdCode, setCreatedCode] = useState('');
     const [copied, setCopied] = useState(false);
     const joinInputRef = useRef<HTMLInputElement>(null);
+    const nameInputRef = useRef<HTMLInputElement>(null);
+    const createNameInputRef = useRef<HTMLInputElement>(null);
 
     // Focus input when join modal opens
     useEffect(() => {
-        if (joinModalOpen && joinInputRef.current) {
-            setTimeout(() => joinInputRef.current?.focus(), 100);
+        if (joinModalOpen) {
+            setTimeout(() => {
+                if (userName) {
+                    joinInputRef.current?.focus();
+                } else {
+                    nameInputRef.current?.focus();
+                }
+            }, 100);
         }
-    }, [joinModalOpen]);
+    }, [joinModalOpen]); // Removed userName from dependencies to fix focus stealing
+
+    // Focus input when create modal opens
+    useEffect(() => {
+        if (createModalOpen && createNameInputRef.current) {
+            setTimeout(() => createNameInputRef.current?.focus(), 100);
+        }
+    }, [createModalOpen]);
 
     // Notify parent when session changes
     useEffect(() => {
         onSessionChange?.(!!sessionId);
     }, [sessionId, onSessionChange]);
 
-    const handleCreate = () => {
-        const code = createSession();
+    const handleCreateSubmit = () => {
+        if (userName.trim()) {
+            localStorage.setItem('collab-username', userName.trim());
+        }
+        const code = createSession(userName);
         if (code) {
             setCreatedCode(code);
+            setCreateModalOpen(false);
             setShowCreatedModal(true);
         }
     };
 
     const handleJoinSubmit = () => {
         if (joinCode.trim().length >= 4) {
-            joinSession(joinCode.trim());
+            if (userName.trim()) {
+                localStorage.setItem('collab-username', userName.trim());
+            }
+            joinSession(joinCode.trim(), userName);
             setJoinModalOpen(false);
             setJoinCode('');
         }
@@ -68,6 +92,7 @@ const CollabToolbar: React.FC<CollabToolbarProps> = ({ onSessionChange }) => {
     const handleLeave = () => {
         leaveSession();
         onSessionChange?.(false);
+        setShowCreatedModal(false);
     };
 
     const handleCopyCode = async (code: string) => {
@@ -88,14 +113,143 @@ const CollabToolbar: React.FC<CollabToolbarProps> = ({ onSessionChange }) => {
         }
     };
 
-    const handleKeyDown = (e: React.KeyboardEvent) => {
+    const handleKeyDown = (e: React.KeyboardEvent, action: 'join' | 'create') => {
         if (e.key === 'Enter') {
-            handleJoinSubmit();
+            if (action === 'join') handleJoinSubmit();
+            else handleCreateSubmit();
         } else if (e.key === 'Escape') {
-            setJoinModalOpen(false);
-            setJoinCode('');
+            if (action === 'join') {
+                setJoinModalOpen(false);
+                setJoinCode('');
+            } else {
+                setCreateModalOpen(false);
+            }
         }
     };
+
+    // --- Render Modals ---
+    const renderModals = () => (
+        <>
+            {/* Join Modal */}
+            {joinModalOpen && (
+                <div className='collab-modal-overlay' onClick={() => { setJoinModalOpen(false); setJoinCode(''); }}>
+                    <div className='collab-modal' onClick={(e) => e.stopPropagation()}>
+                        <div className='collab-modal-title'>Join Collaboration</div>
+                        <div className='collab-modal-subtitle'>
+                            Enter your name and the session code
+                        </div>
+                        <div className='collab-modal-inputs'>
+                            <input
+                                ref={nameInputRef}
+                                className='collab-modal-input name-input'
+                                type='text'
+                                placeholder='Your Name'
+                                value={userName}
+                                onChange={(e) => setUserName(e.target.value)}
+                                onKeyDown={(e) => handleKeyDown(e, 'join')}
+                                maxLength={20}
+                            />
+                            <input
+                                ref={joinInputRef}
+                                className='collab-modal-input'
+                                type='text'
+                                placeholder='SESSION CODE'
+                                value={joinCode}
+                                onChange={(e) => setJoinCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6))}
+                                onKeyDown={(e) => handleKeyDown(e, 'join')}
+                                maxLength={6}
+                                autoComplete='off'
+                                spellCheck={false}
+                            />
+                        </div>
+                        {error && <div className='collab-modal-error'>{error}</div>}
+                        <div className='collab-modal-actions'>
+                            <button
+                                className='collab-modal-cancel'
+                                onClick={() => { setJoinModalOpen(false); setJoinCode(''); }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className='collab-modal-join'
+                                onClick={handleJoinSubmit}
+                                disabled={joinCode.trim().length < 4 || !userName.trim()}
+                            >
+                                Join Session
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Create Session Modal */}
+            {createModalOpen && (
+                <div className='collab-modal-overlay' onClick={() => setCreateModalOpen(false)}>
+                    <div className='collab-modal' onClick={(e) => e.stopPropagation()}>
+                        <div className='collab-modal-title'>Start Collaboration</div>
+                        <div className='collab-modal-subtitle'>
+                            Enter your name to start a session
+                        </div>
+                        <input
+                            ref={createNameInputRef}
+                            className='collab-modal-input name-input'
+                            type='text'
+                            placeholder='Your Name'
+                            value={userName}
+                            onChange={(e) => setUserName(e.target.value)}
+                            onKeyDown={(e) => handleKeyDown(e, 'create')}
+                            maxLength={20}
+                        />
+                        <div className='collab-modal-actions'>
+                            <button
+                                className='collab-modal-cancel'
+                                onClick={() => setCreateModalOpen(false)}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className='collab-modal-join'
+                                onClick={handleCreateSubmit}
+                                disabled={!userName.trim() || loading}
+                            >
+                                Create Session
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Created Session Modal */}
+            {showCreatedModal && (
+                <div className='collab-modal-overlay' onClick={() => setShowCreatedModal(false)}>
+                    <div className='collab-modal' onClick={(e) => e.stopPropagation()}>
+                        <div className='collab-modal-title'>Session Created!</div>
+                        <div className='collab-modal-subtitle'>
+                            Share this code with your collaborator
+                        </div>
+                        <div
+                            className='collab-created-code'
+                            onClick={() => handleCopyCode(createdCode)}
+                            title='Click to copy'
+                        >
+                            {createdCode}
+                        </div>
+                        <div className='collab-created-hint'>Click the code to copy it</div>
+                        {copied && <div className='collab-copied-toast'>Copied to clipboard!</div>}
+                        <div className='collab-modal-actions'>
+                            <button
+                                className='collab-modal-join'
+                                onClick={() => setShowCreatedModal(false)}
+                                style={{ flex: 1 }}
+                            >
+                                Got it
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
+    );
 
     // --- Active Session View ---
     if (sessionId) {
@@ -138,6 +292,7 @@ const CollabToolbar: React.FC<CollabToolbarProps> = ({ onSessionChange }) => {
                 <button className='collab-btn collab-leave-btn' onClick={handleLeave} title='Leave collaboration session'>
                     Leave
                 </button>
+                {renderModals()}
             </div>
         );
     }
@@ -147,7 +302,7 @@ const CollabToolbar: React.FC<CollabToolbarProps> = ({ onSessionChange }) => {
         <div className='collab-toolbar'>
             <button
                 className='collab-btn collab-start-btn'
-                onClick={handleCreate}
+                onClick={() => setCreateModalOpen(true)}
                 disabled={loading}
                 title='Start a new collaboration session'
             >
@@ -167,78 +322,10 @@ const CollabToolbar: React.FC<CollabToolbarProps> = ({ onSessionChange }) => {
             >
                 Join
             </button>
-
-            {/* Join Modal */}
-            {joinModalOpen && (
-                <div className='collab-modal-overlay' onClick={() => { setJoinModalOpen(false); setJoinCode(''); }}>
-                    <div className='collab-modal' onClick={(e) => e.stopPropagation()}>
-                        <div className='collab-modal-title'>Join Collaboration</div>
-                        <div className='collab-modal-subtitle'>
-                            Enter the session code shared by your collaborator
-                        </div>
-                        <input
-                            ref={joinInputRef}
-                            className='collab-modal-input'
-                            type='text'
-                            placeholder='CODE'
-                            value={joinCode}
-                            onChange={(e) => setJoinCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6))}
-                            onKeyDown={handleKeyDown}
-                            maxLength={6}
-                            autoComplete='off'
-                            spellCheck={false}
-                        />
-                        {error && <div className='collab-modal-error'>{error}</div>}
-                        <div className='collab-modal-actions'>
-                            <button
-                                className='collab-modal-cancel'
-                                onClick={() => { setJoinModalOpen(false); setJoinCode(''); }}
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                className='collab-modal-join'
-                                onClick={handleJoinSubmit}
-                                disabled={joinCode.trim().length < 4}
-                            >
-                                Join Session
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Created Session Modal */}
-            {showCreatedModal && (
-                <div className='collab-modal-overlay' onClick={() => setShowCreatedModal(false)}>
-                    <div className='collab-modal' onClick={(e) => e.stopPropagation()}>
-                        <div className='collab-modal-title'>Session Created!</div>
-                        <div className='collab-modal-subtitle'>
-                            Share this code with your collaborator
-                        </div>
-                        <div
-                            className='collab-created-code'
-                            onClick={() => handleCopyCode(createdCode)}
-                            title='Click to copy'
-                        >
-                            {createdCode}
-                        </div>
-                        <div className='collab-created-hint'>Click the code to copy it</div>
-                        {copied && <div className='collab-copied-toast'>Copied to clipboard!</div>}
-                        <div className='collab-modal-actions'>
-                            <button
-                                className='collab-modal-join'
-                                onClick={() => setShowCreatedModal(false)}
-                                style={{ flex: 1 }}
-                            >
-                                Got it
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {renderModals()}
         </div>
     );
 };
+
 
 export default CollabToolbar;

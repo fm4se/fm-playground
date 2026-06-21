@@ -77,6 +77,8 @@
     border: 1px solid;
     transition: all 0.2s ease;
     white-space: nowrap;
+    height: 28px;
+    box-sizing: border-box;
 }
 
 [data-theme='dark'] .collab-session-badge {
@@ -117,6 +119,8 @@
     transition: all 0.2s ease;
     background: transparent;
     white-space: nowrap;
+    height: 28px;
+    box-sizing: border-box;
 }
 
 .collab-btn:hover {
@@ -124,32 +128,28 @@
 }
 
 .collab-btn.collab-start-btn {
-    border-color: rgba(102, 126, 234, 0.4);
-    color: #667eea;
+    border-color: rgba(128, 128, 128, 0.3);
 }
 
 .collab-btn.collab-start-btn:hover {
-    background: rgba(102, 126, 234, 0.1);
-    border-color: rgba(102, 126, 234, 0.6);
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+    background: rgba(128, 128, 128, 0.1);
+    border-color: rgba(128, 128, 128, 0.5);
 }
 
 .collab-btn.collab-join-btn {
-    border-color: rgba(78, 205, 196, 0.4);
-    color: #4ecdc4;
+    border-color: rgba(128, 128, 128, 0.3);
 }
 
 .collab-btn.collab-join-btn:hover {
-    background: rgba(78, 205, 196, 0.1);
-    border-color: rgba(78, 205, 196, 0.6);
-    box-shadow: 0 2px 8px rgba(78, 205, 196, 0.2);
+    background: rgba(128, 128, 128, 0.1);
+    border-color: rgba(128, 128, 128, 0.5);
 }
 
 .collab-btn.collab-leave-btn {
     border-color: rgba(244, 67, 54, 0.3);
     color: #ef5350;
     font-size: 0.72rem;
-    padding: 2px 8px;
+    padding: 0 8px;
 }
 
 .collab-btn.collab-leave-btn:hover {
@@ -233,6 +233,12 @@
     margin-bottom: 20px;
 }
 
+.collab-modal-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
 .collab-modal-input {
     width: 100%;
     padding: 12px 16px;
@@ -247,6 +253,14 @@
     outline: none;
     transition: border-color 0.2s ease;
     box-sizing: border-box;
+}
+
+.collab-modal-input.name-input {
+    letter-spacing: normal;
+    text-transform: none;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
 }
 
 [data-theme='dark'] .collab-modal-input {
@@ -304,13 +318,12 @@
 }
 
 .collab-modal-actions .collab-modal-join {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: var(--button-bg, #007acc);
     color: white;
 }
 
 .collab-modal-actions .collab-modal-join:hover {
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-    transform: translateY(-1px);
+    background: var(--button-hover-bg, #005999);
 }
 
 .collab-modal-actions .collab-modal-join:disabled {
