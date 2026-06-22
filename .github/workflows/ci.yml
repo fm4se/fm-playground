@@ -32,6 +32,7 @@ jobs:
             smt-diff-api,
             dafny-api,
             dafny-lsp-proxy,
+            collab-server
           ]
         include:
           - folder: alloy-api
@@ -56,6 +57,8 @@ jobs:
             image_name: ghcr.io/${{ github.repository }}-dafny-api
           - folder: dafny-lsp-proxy
             image_name: ghcr.io/${{ github.repository }}-dafny-lsp-proxy
+          - folder: collab-server
+            image_name: ghcr.io/${{ github.repository }}-collab-server
 
     steps:
       - name: Checkout repository
