@@ -124,5 +124,5 @@ jobs:
           build-args: |
             VITE_FMP_API_URL=https://play.formal-methods.net/api
             VITE_FMP_VERSION=${{ env.VITE_FMP_VERSION }}
-            VITE_COLLAB_ENABLED: true
-            VITE_COLLAB_WS_URL: /collab-ws
+            VITE_COLLAB_ENABLED=true
+            VITE_COLLAB_WS_URL=/collab-ws
