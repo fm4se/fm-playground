@@ -1,5 +1,7 @@
 import axios from 'axios';
 import axiosAuth from './axiosAuth';
+import { jotaiStore } from '@/atoms';
+import { collabSessionIdAtom } from '@/collab/collabAtoms';
 
 const API_URL = import.meta.env.VITE_FMP_API_URL;
 const FMP_VERSION = import.meta.env.VITE_FMP_VERSION;
@@ -67,10 +69,21 @@ export async function saveCode(
     metadata: Record<string, any> | null
 ) {
     let url = `${API_URL}/save`;
-    const md = {
+    
+    // Check if user is using the collab feature
+    const collabSessionId = jotaiStore.get(collabSessionIdAtom);
+    const isCollab = !!collabSessionId;
+    
+    const md: Record<string, any> = {
         ...metadata,
         'fmp-version': FMP_VERSION,
+        isCollab,
     };
+    
+    if (isCollab) {
+        md.roomCode = collabSessionId;
+    }
+    
     let meta = JSON.stringify(md);
     const response = await axiosAuth.post(url, { code, check, parent, meta });
     if (response.status === 200) {
