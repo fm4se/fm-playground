@@ -178,8 +178,6 @@ services:
     build:
       context: ./collab-server
     container_name: fmp-collab-server
-    ports:
-      - "4444:4444"
     networks:
       - my_network
     restart: unless-stopped
