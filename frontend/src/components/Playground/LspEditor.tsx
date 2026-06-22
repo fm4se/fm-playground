@@ -224,7 +224,7 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
                     await lcWrapperInstance.dispose();
                     lcWrapperInstance = null;
                 }
-                // We do not dispose editorAppInstance here — it preserves the
+                // We do not dispose editorAppInstance here - it preserves the
                 // global monaco-vscode-api state. It will be properly
                 // disposed on the next startEditor call.
                 isInitializedRef.current = false;

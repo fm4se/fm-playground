@@ -1,13 +1,7 @@
 /**
- * CollabEditorBridge — Bridges the collab system with the active Monaco editor.
- *
  * This component listens for collab session changes and binds/unbinds
  * the Yjs document to whichever Monaco editor is currently active.
  * It is rendered as a sibling to the editor components in InputArea.
- *
- * This approach avoids modifying Editor.tsx and LspEditor.tsx internals —
- * instead it observes the collab session atom and uses a global editor
- * ref registry to find and bind the active editor.
  */
 import { useEffect, useRef } from 'react';
 import type * as monacoEditor from 'monaco-editor';
@@ -15,11 +9,11 @@ import { useCollaboration } from './useCollaboration';
 import { MonacoCollabBinding } from './MonacoCollabBinding';
 
 interface CollabEditorBridgeProps {
-    /** Function to get the current active Monaco editor instance */
+    // Function to get the current active Monaco editor instance
     getEditor: () => monacoEditor.editor.IStandaloneCodeEditor | null;
-    /** Function to get the monaco module */
+    // Function to get the monaco module 
     getMonaco: () => typeof monacoEditor;
-    /** Key to trigger re-bind when the editor instance changes */
+    // Key to trigger re-bind when the editor instance changes
     editorInstanceKey: number;
 }
 
@@ -55,7 +49,7 @@ const CollabEditorBridge: React.FC<CollabEditorBridgeProps> = ({ getEditor, getM
         };
     }, [sessionId, connected, editorInstanceKey]);
 
-    return null; // This component renders nothing — it's pure logic
+    return null; // This component renders nothing
 };
 
 export default CollabEditorBridge;

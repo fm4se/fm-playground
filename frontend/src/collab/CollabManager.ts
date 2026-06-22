@@ -1,18 +1,16 @@
 /**
- * CollabManager — Core Yjs + WebSocket provider + awareness manager.
- *
  * This module manages the Yjs document, WebSocket connection, and
  * awareness protocol for collaborative editing. It is the single
  * source of truth for the collaboration state.
  *
- * It does NOT depend on React or Monaco directly — it exposes
+ * It does NOT depend on React or Monaco directly - it exposes
  * observables and methods that the React hook and Monaco binding consume.
  */
 import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
 import { Awareness } from 'y-protocols/awareness';
 
-/** Random color palette for collaborator cursors */
+// Random color palette for collaborator cursors 
 const COLLAB_COLORS = [
     '#FF6B6B', // coral red
     '#4ECDC4', // teal
@@ -26,7 +24,7 @@ const COLLAB_COLORS = [
     '#85C1E9', // light blue
 ];
 
-/** Generate a random 4-6 character alphanumeric code */
+// Generate a random 4-6 character alphanumeric code 
 export function generateSessionCode(): string {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no I/O/0/1 to avoid confusion
     const length = 4 + Math.floor(Math.random() * 3); // 4, 5, or 6
@@ -37,12 +35,12 @@ export function generateSessionCode(): string {
     return code;
 }
 
-/** Get a deterministic color for a given client ID */
+// Get a deterministic color for a given client ID
 function getColorForClient(clientId: number): string {
     return COLLAB_COLORS[clientId % COLLAB_COLORS.length];
 }
 
-/** Generate a random anonymous name */
+// Generate a random anonymous name
 function generateAnonName(): string {
     const adjectives = ['Swift', 'Bold', 'Calm', 'Keen', 'Wise', 'Warm', 'Cool', 'Fair'];
     const animals = ['Fox', 'Owl', 'Cat', 'Bear', 'Wolf', 'Hawk', 'Deer', 'Lynx'];
@@ -52,11 +50,11 @@ function generateAnonName(): string {
 }
 
 export interface CollabManagerOptions {
-    /** WebSocket server URL (e.g., ws://localhost:4444) */
+    // WebSocket server URL (e.g., ws://localhost:4444)
     wsUrl: string;
-    /** Callback when connection status changes */
+    // Callback when connection status changes 
     onConnectionChange?: (connected: boolean) => void;
-    /** Callback when awareness (remote users) changes */
+    // Callback when awareness (remote users) changes
     onAwarenessChange?: (users: AwarenessUser[]) => void;
 }
 
@@ -93,37 +91,37 @@ export class CollabManager {
         this.localColor = COLLAB_COLORS[Math.floor(Math.random() * COLLAB_COLORS.length)];
     }
 
-    /** Get the Y.Text shared type for the editor content */
+    // Get the Y.Text shared type for the editor content
     getYText(): Y.Text | null {
         return this.ydoc?.getText('monaco') ?? null;
     }
 
-    /** Get the awareness instance */
+    // Get the awareness instance
     getAwareness(): Awareness | null {
         return this.awareness;
     }
 
-    /** Get the Yjs document */
+    // Get the Yjs document
     getYDoc(): Y.Doc | null {
         return this.ydoc;
     }
 
-    /** Get current session code */
+    // Get current session code
     getSessionCode(): string | null {
         return this.sessionCode;
     }
 
-    /** Whether currently connected */
+    // Whether currently connected
     isConnected(): boolean {
         return this.connected;
     }
 
-    /** Get the local user's name */
+    // Get the local user's name
     getLocalName(): string {
         return this.localName;
     }
 
-    /** Get the local user's color */
+    // Get the local user's color
     getLocalColor(): string {
         return this.localColor;
     }
@@ -131,9 +129,6 @@ export class CollabManager {
     /**
      * Create a new collaboration session.
      * Generates a unique code and connects to the WebSocket server.
-     * @param initialContent - The current editor content to seed the room with
-     * @param userName - Optional custom name for the local user
-     * @returns The generated session code
      */
     createSession(initialContent: string, userName?: string): string {
         this.disconnect();
@@ -158,8 +153,6 @@ export class CollabManager {
 
     /**
      * Join an existing collaboration session by code.
-     * @param code - The session code to join
-     * @param userName - Optional custom name for the local user
      */
     joinSession(code: string, userName?: string): void {
         this.disconnect();
@@ -171,11 +164,11 @@ export class CollabManager {
         this.sessionCode = code.toUpperCase().trim();
         this.ydoc = new Y.Doc();
 
-        // Don't pre-fill content — we'll receive it from the room
+        // Don't pre-fill content - we'll receive it from the room
         this.connectToRoom(this.sessionCode);
     }
 
-    /** Connect to a room on the WebSocket server */
+    // Connect to a room on the WebSocket server 
     private connectToRoom(roomName: string): void {
         if (!this.ydoc) return;
 
@@ -206,7 +199,7 @@ export class CollabManager {
         });
     }
 
-    /** Broadcast awareness state to callback */
+    // Broadcast awareness state to callback
     private broadcastAwarenessUpdate(): void {
         if (!this.awareness) return;
 
@@ -230,12 +223,12 @@ export class CollabManager {
         this.onAwarenessChange?.(users);
     }
 
-    /** Update local cursor position in awareness */
+    // Update local cursor position in awareness
     updateCursor(lineNumber: number, column: number): void {
         this.awareness?.setLocalStateField('cursor', { lineNumber, column });
     }
 
-    /** Update local selection in awareness */
+    // Update local selection in awareness
     updateSelection(
         startLineNumber: number,
         startColumn: number,
@@ -255,7 +248,7 @@ export class CollabManager {
         }
     }
 
-    /** Disconnect from the current session and clean up */
+    // Disconnect from the current session and clean up
     disconnect(): void {
         if (this.provider) {
             this.provider.disconnect();
@@ -273,7 +266,7 @@ export class CollabManager {
         this.onAwarenessChange?.([]);
     }
 
-    /** Clean up everything */
+    // Clean up everything
     destroy(): void {
         this.disconnect();
     }

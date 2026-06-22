@@ -1,6 +1,4 @@
 /**
- * useCollaboration — React hook for managing collaborative editing.
- *
  * This hook bridges CollabManager (Yjs/WebSocket) with the React
  * component tree and Jotai state. It provides methods to create/join/leave
  * sessions and automatically binds to the Monaco editor when available.
@@ -56,33 +54,31 @@ function getManager(): CollabManager {
     return globalCollabManager;
 }
 
-/**
- * Hook return type
- */
+//Hook return type
 export interface UseCollaborationReturn {
-    /** Current session code (null if not in a session) */
+    // Current session code (null if not in a session)
     sessionId: string | null;
-    /** Whether connected to the collab server */
+    // Whether connected to the collab server 
     connected: boolean;
-    /** Remote users in the session */
+    // Remote users in the session
     users: CollabUser[];
-    /** Loading state */
+    //Loading state 
     loading: boolean;
-    /** Error message */
+    // Error message 
     error: string | null;
-    /** Create a new session — returns the generated code */
+    // Create a new session - returns the generated code
     createSession: (userName?: string) => string;
-    /** Join an existing session by code */
+    // Join an existing session by code
     joinSession: (code: string, userName?: string) => void;
-    /** Leave the current session */
+    // Leave the current session
     leaveSession: () => void;
-    /** Bind a Monaco editor to the current Yjs session */
+    // Bind a Monaco editor to the current Yjs session
     bindEditor: (
         editor: monacoEditor.editor.IStandaloneCodeEditor,
         model: monacoEditor.editor.ITextModel,
         monacoModule: typeof monacoEditor
     ) => void;
-    /** Unbind the current Monaco editor */
+    // Unbind the current Monaco editor
     unbindEditor: () => void;
 }
 
@@ -103,7 +99,7 @@ export function useCollaboration(): UseCollaborationReturn {
         };
     }, []);
 
-    /** Create a new collaboration session */
+    // Create a new collaboration session
     const createSession = useCallback((userName?: string): string => {
         const manager = getManager();
         setLoading(true);
@@ -123,7 +119,7 @@ export function useCollaboration(): UseCollaborationReturn {
         return code;
     }, [setSessionId, setLoading, setError]);
 
-    /** Join an existing session by code */
+    // Join an existing session by code
     const joinSession = useCallback(
         (code: string, userName?: string): void => {
             const manager = getManager();
@@ -148,7 +144,7 @@ export function useCollaboration(): UseCollaborationReturn {
         [setSessionId, setLoading, setError]
     );
 
-    /** Leave the current session */
+    // Leave the current session
     const leaveSession = useCallback((): void => {
         // Clean up binding first
         if (globalBinding) {
@@ -168,7 +164,7 @@ export function useCollaboration(): UseCollaborationReturn {
         setError(null);
     }, [setSessionId, setLoading, setError]);
 
-    /** Bind a Monaco editor instance to the Yjs document */
+    // Bind a Monaco editor instance to the Yjs document
     const bindEditor = useCallback(
         (
             editor: monacoEditor.editor.IStandaloneCodeEditor,
@@ -197,7 +193,7 @@ export function useCollaboration(): UseCollaborationReturn {
         []
     );
 
-    /** Unbind the current editor */
+    // Unbind the current editor
     const unbindEditor = useCallback((): void => {
         if (globalBinding) {
             globalBinding.destroy();

@@ -26,9 +26,8 @@ import LspEditor from './LspEditor';
 import Editor from './Editor';
 import { additionalInputAreaUiMap, lspSupportMap } from '@/ToolMaps';
 
-// Collaborative editing — lazy-loaded and gated behind env var
-// const COLLAB_ENABLED = import.meta.env.VITE_COLLAB_ENABLED === 'true';
-const COLLAB_ENABLED = 'true';
+// Collaborative editing - lazy-loaded and gated behind env var
+const COLLAB_ENABLED = import.meta.env.VITE_COLLAB_ENABLED === 'true';
 const CollabToolbar = COLLAB_ENABLED
     ? React.lazy(() => import('@/collab/CollabToolbar'))
     : null;

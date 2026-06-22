@@ -1,5 +1,5 @@
 /**
- * CollabToolbar — UI component for collaborative editing controls.
+ * CollabToolbar - UI component for collaborative editing controls.
  *
  * Renders:
  * - When not in a session: "Collaborate" and "Join" buttons

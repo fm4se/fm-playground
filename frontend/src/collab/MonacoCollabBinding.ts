@@ -1,19 +1,11 @@
 /**
- * MonacoCollabBinding — Manual Yjs Y.Text ↔ Monaco ITextModel binding.
- *
- * This replaces the unmaintained y-monaco package by directly observing
- * Y.Text changes and applying them to the Monaco model, and vice versa.
- *
- * It also handles remote cursor/selection decorations via the awareness
- * protocol.
+ * MonacoCollabBinding - Manual Yjs Y.Text <-> Monaco ITextModel binding.
  */
 import * as Y from 'yjs';
 import type * as monacoEditor from 'monaco-editor';
 import type { Awareness } from 'y-protocols/awareness';
 
-/**
- * Convert a Y.Text absolute index to a Monaco {lineNumber, column} position.
- */
+//Convert a Y.Text absolute index to a Monaco {lineNumber, column} position.
 function indexToPosition(model: monacoEditor.editor.ITextModel, index: number): monacoEditor.IPosition {
     // Monaco's getPositionAt is 1-based
     return model.getPositionAt(index);
@@ -188,7 +180,7 @@ export class MonacoCollabBinding {
         }
     }
 
-    /** Render remote cursor and selection decorations */
+    // Render remote cursor and selection decorations 
     private renderRemoteCursors(): void {
         if (!this.awareness || this.destroyed) return;
 
@@ -252,7 +244,7 @@ export class MonacoCollabBinding {
         this.injectCursorStyles();
     }
 
-    /** Inject dynamic CSS styles for remote cursor colors */
+    // Inject dynamic CSS styles for remote cursor colors
     private injectCursorStyles(): void {
         if (!this.awareness) return;
 
@@ -312,7 +304,7 @@ export class MonacoCollabBinding {
         styleEl.textContent = css;
     }
 
-    /** Destroy the binding and clean up all listeners */
+    // Destroy the binding and clean up all listeners
     destroy(): void {
         this.destroyed = true;
 
