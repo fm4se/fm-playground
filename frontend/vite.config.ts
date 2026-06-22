@@ -96,6 +96,13 @@ export default defineConfig({
                 ws: true,
                 rewrite: (path) => path.replace(/^\/lsp-dafny/, ''),
             },
+            '/collab-ws': {
+                target: 'ws://collab-server:4444',
+                changeOrigin: true,
+                secure: false,
+                ws: true,
+                rewrite: (path) => path.replace(/^\/collab-ws/, ''),
+            },
         },
     },
     server: {
@@ -155,6 +162,13 @@ export default defineConfig({
                 secure: false,
                 ws: true,
                 rewrite: (path) => path.replace(/^\/lsp-dafny/, ''),
+            },
+            '/collab-ws': {
+                target: 'ws://localhost:4444',
+                changeOrigin: true,
+                secure: false,
+                ws: true,
+                rewrite: (path) => path.replace(/^\/collab-ws/, ''),
             },
         },
     },

@@ -43,6 +43,9 @@
     "vscode-languageclient": "~9.0.1",
     "vscode-languageserver": "~9.0.1",
     "vscode-uri": "~3.0.8",
+    "y-protocols": "^1.0.7",
+    "y-websocket": "^3.0.0",
+    "yjs": "^13.6.31",
     "z3-solver": "^4.12.2"
   },
   "devDependencies": {

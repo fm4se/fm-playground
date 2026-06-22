@@ -1,0 +1,17 @@
+{
+  "name": "fmp-collab-server",
+  "version": "1.0.0",
+  "description": "Yjs WebSocket collaboration server for FM Playground",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "y-websocket": "^2.1.0",
+    "yjs": "^13.6.0",
+    "ws": "^8.18.0",
+    "dotenv": "^16.4.0"
+  }
+}
