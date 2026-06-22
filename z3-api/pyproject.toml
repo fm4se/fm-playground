@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "z3-api"
-version = "2.13.0"
+version = "2.14.0"
 description = "z3 API for FM Playground"
 authors = ["Soaibuzzaman <soaibuzzaman@uni-weimar.de>"]
 license = "MIT"

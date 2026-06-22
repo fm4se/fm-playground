@@ -1,5 +1,10 @@
 # Change Log
 
+## v2.14.0[2026-06-22]
+
+- ✨ Added collaboration feature with Yjs and WebSocket
+- 🐛 Fixed some issues with the collaboration feature (syncing, error handling)
+
 ## v2.13.0[2026-04-07]
 
 - 📌 Upgraded monaco-languageclient to 10.7.0

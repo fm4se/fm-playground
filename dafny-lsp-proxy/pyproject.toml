@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dafny-lsp-proxy"
-version = "2.13.0"
+version = "2.14.0"
 description = "Dafny LSP Proxy for FM Playground"
 authors = ["Soaibuzzaman <soaibuzzaman@uni-weimar.de>"]
 license = "MIT"
