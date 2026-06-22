@@ -125,19 +125,22 @@
     transform: translateY(-1px);
 }
 
-.collab-btn.collab-start-btn {
-    border-color: rgba(128, 128, 128, 0.3);
-}
-
-.collab-btn.collab-start-btn:hover {
-    background: rgba(128, 128, 128, 0.1);
-    border-color: rgba(128, 128, 128, 0.5);
-}
-
+.collab-btn.collab-start-btn,
 .collab-btn.collab-join-btn {
     border-color: rgba(128, 128, 128, 0.3);
 }
 
+[data-theme='dark'] .collab-btn.collab-start-btn,
+[data-theme='dark'] .collab-btn.collab-join-btn {
+    color: #e4e4e7;
+}
+
+[data-theme='light'] .collab-btn.collab-start-btn,
+[data-theme='light'] .collab-btn.collab-join-btn {
+    color: #333333;
+}
+
+.collab-btn.collab-start-btn:hover,
 .collab-btn.collab-join-btn:hover {
     background: rgba(128, 128, 128, 0.1);
     border-color: rgba(128, 128, 128, 0.5);
