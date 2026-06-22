@@ -18,7 +18,12 @@ import {
 import type { CollabUser } from './collabAtoms';
 import { jotaiStore, editorValueAtom } from '@/atoms';
 
-const COLLAB_WS_URL = import.meta.env.VITE_COLLAB_WS_URL || 'ws://localhost:4444';
+let wsUrl = import.meta.env.VITE_COLLAB_WS_URL || 'ws://localhost:4444';
+if (wsUrl.startsWith('/')) {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    wsUrl = `${protocol}//${window.location.host}${wsUrl}`;
+}
+const COLLAB_WS_URL = wsUrl;
 
 // --- Singletons ---
 // We must share the same manager and binding across all components
