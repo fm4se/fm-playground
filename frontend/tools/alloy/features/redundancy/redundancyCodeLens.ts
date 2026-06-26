@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
-import { jotaiStore, editorValueAtom, lineToHighlightAtom, permalinkAtom, minimalSetRangesAtom, targetAssertionRangeAtom } from '@/atoms';
+import { jotaiStore, editorValueAtom, lineToHighlightAtom, permalinkAtom, minimalSetRangesAtom, targetAssertionRangeAtom, cursorLineAtom, cursorColumnAtom, selectionRangeAtom } from '@/atoms';
 import { alloyRedundancyResultsAtom, alloyExplainResultsAtom, AlloyRedundantConstraint } from './redundancyAtoms';
 import { logToDb } from '@/api/playgroundApi';
+import { executeAlloyExplainRedundancy } from '../../alloyExecutor';
 
 let codeLensProviderDisposableAls: any = null;
 let codeLensProviderDisposableAlloy: any = null;
@@ -12,6 +13,8 @@ let vscodeDisposableAls: any = null;
 let vscodeDisposableAlloy: any = null;
 
 let commandsRegistered = false;
+
+export let isCodeLensEdit = false;
 
 export function triggerAlloyCodeLensUpdate() {
     if (codeLensEmitter) {
@@ -45,7 +48,9 @@ function handleCommentOutConstraint(constraint: AlloyRedundantConstraint) {
     }
 
     const updatedCode = lines.join('\n');
+    isCodeLensEdit = true;
     jotaiStore.set(editorValueAtom, updatedCode);
+    setTimeout(() => { isCodeLensEdit = false; }, 100);
 
     const currentResults = jotaiStore.get(alloyRedundancyResultsAtom);
     if (currentResults && currentResults.redundantConstraints) {
@@ -101,7 +106,9 @@ function handleRemoveConstraint(constraint: AlloyRedundantConstraint) {
     lines.splice(Math.min(s, e) - 1, linesToRemoveCount);
 
     const updatedCode = lines.join('\n');
+    isCodeLensEdit = true;
     jotaiStore.set(editorValueAtom, updatedCode);
+    setTimeout(() => { isCodeLensEdit = false; }, 100);
 
     const currentResults = jotaiStore.get(alloyRedundancyResultsAtom);
     if (currentResults && currentResults.redundantConstraints) {
@@ -156,6 +163,16 @@ function handleRemoveConstraint(constraint: AlloyRedundantConstraint) {
     }
 }
 
+function handleExplainConstraint(constraint: AlloyRedundantConstraint) {
+    if (!constraint?.position?.startLine || !constraint?.position?.startCol) return;
+
+    jotaiStore.set(cursorLineAtom, constraint.position.startLine);
+    jotaiStore.set(cursorColumnAtom, constraint.position.startCol);
+    jotaiStore.set(selectionRangeAtom, null);
+
+    executeAlloyExplainRedundancy();
+}
+
 function getActiveLensesConstraints(): AlloyRedundantConstraint[] {
     const checkResults = jotaiStore.get(alloyRedundancyResultsAtom);
     const explainResults = jotaiStore.get(alloyExplainResultsAtom);
@@ -187,6 +204,9 @@ export function setupAlloyRedundancyCodeLens(monacoModule: any) {
             monacoModule.editor.registerCommand('alloy.redundancy.remove', (_accessor: any, constraint: AlloyRedundantConstraint) => {
                 handleRemoveConstraint(constraint);
             });
+            monacoModule.editor.registerCommand('alloy.redundancy.explain', (_accessor: any, constraint: AlloyRedundantConstraint) => {
+                handleExplainConstraint(constraint);
+            });
         }
 
         // Register in VSCode Command Service (used globally when @codingame/monaco-vscode-api override is active)
@@ -197,6 +217,9 @@ export function setupAlloyRedundancyCodeLens(monacoModule: any) {
                 });
                 vscode.commands.registerCommand('alloy.redundancy.remove', (constraint: AlloyRedundantConstraint) => {
                     handleRemoveConstraint(constraint);
+                });
+                vscode.commands.registerCommand('alloy.redundancy.explain', (constraint: AlloyRedundantConstraint) => {
+                    handleExplainConstraint(constraint);
                 });
             } catch (err) {
                 // Ignore if commands already registered
@@ -228,24 +251,35 @@ export function setupAlloyRedundancyCodeLens(monacoModule: any) {
                             endLineNumber: c.position.startLine,
                             endColumn: 1,
                         };
-                        lenses.push({
-                            range,
-                            id: `comment-${c.constraintIndex}`,
-                            command: {
-                                id: 'alloy.redundancy.commentOut',
-                                title: 'Comment out',
-                                arguments: [c],
-                            },
-                        });
-                        lenses.push({
-                            range,
-                            id: `remove-${c.constraintIndex}`,
-                            command: {
-                                id: 'alloy.redundancy.remove',
-                                title: 'Remove',
-                                arguments: [c],
-                            },
-                        });
+                        if (c.constraintIndex !== -999) {
+                            lenses.push({
+                                range,
+                                id: `comment-${c.constraintIndex}`,
+                                command: {
+                                    id: 'alloy.redundancy.commentOut',
+                                    title: 'Comment out',
+                                    arguments: [c],
+                                },
+                            });
+                            lenses.push({
+                                range,
+                                id: `remove-${c.constraintIndex}`,
+                                command: {
+                                    id: 'alloy.redundancy.remove',
+                                    title: 'Remove',
+                                    arguments: [c],
+                                },
+                            });
+                            lenses.push({
+                                range,
+                                id: `explain-${c.constraintIndex}`,
+                                command: {
+                                    id: 'alloy.redundancy.explain',
+                                    title: 'Explain Redundancy',
+                                    arguments: [c],
+                                },
+                            });
+                        }
                     }
                 }
 
@@ -281,16 +315,23 @@ export function setupAlloyRedundancyCodeLens(monacoModule: any) {
                         // VSCode Range is 0-indexed
                         const lineIdx = Math.max(0, c.position.startLine - 1);
                         const range = new vscode.Range(lineIdx, 0, lineIdx, 0);
-                        lenses.push(new vscode.CodeLens(range, {
-                            command: 'alloy.redundancy.commentOut',
-                            title: 'Comment out',
-                            arguments: [c],
-                        }));
-                        lenses.push(new vscode.CodeLens(range, {
-                            command: 'alloy.redundancy.remove',
-                            title: 'Remove',
-                            arguments: [c],
-                        }));
+                        if (c.constraintIndex !== -999) {
+                            lenses.push(new vscode.CodeLens(range, {
+                                command: 'alloy.redundancy.commentOut',
+                                title: 'Comment out',
+                                arguments: [c],
+                            }));
+                            lenses.push(new vscode.CodeLens(range, {
+                                command: 'alloy.redundancy.remove',
+                                title: 'Remove',
+                                arguments: [c],
+                            }));
+                            lenses.push(new vscode.CodeLens(range, {
+                                command: 'alloy.redundancy.explain',
+                                title: 'Explain Redundancy',
+                                arguments: [c],
+                            }));
+                        }
                     }
                 }
 
