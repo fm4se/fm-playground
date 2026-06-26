@@ -81,7 +81,7 @@ const AlloyEvaluator: React.FC<AlloyEvaluatorProps> = ({
                         textAlign: 'center',
                     }}
                 >
-                    ⚠️ Based on the last loaded instance.
+                    Based on the last loaded instance.
                 </div>
             </div>
         </>

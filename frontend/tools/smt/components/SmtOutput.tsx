@@ -221,7 +221,7 @@ const SmtOutput = () => {
                                             textAlign: 'center',
                                         }}
                                     >
-                                        ⚠️ Based on the last solver state.
+                                        Based on the last solver state.
                                     </div>
                                 )}
                             </div>
