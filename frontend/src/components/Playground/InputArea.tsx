@@ -24,6 +24,7 @@ import FileDownload from '@/components/Utils/FileDownload';
 import CopyToClipboardBtn from '@/components/Utils/CopyToClipboardBtn';
 import LspEditor from './LspEditor';
 import Editor from './Editor';
+import { setupAlloyRedundancyCodeLens } from '@/../tools/alloy/features';
 import { additionalInputAreaUiMap, lspSupportMap } from '@/ToolMaps';
 
 // Collaborative editing - lazy-loaded and gated behind env var
@@ -66,6 +67,7 @@ const InputArea: React.FC<InputAreaProps> = ({ editorTheme, onRunButtonClick, on
         activeEditorRef.current = editor;
         activeMonacoRef.current = monaco;
         setEditorInstanceKey((prev) => prev + 1);
+        setupAlloyRedundancyCodeLens(monaco);
     };
 
     // Check screen size on mount and resize for mobile detection
