@@ -20,23 +20,8 @@ export const RedundancySummary: React.FC = () => {
 
     // --- Render Explain Redundancy Summary ---
     if (explainResults) {
-        if (explainResults.error) {
-            return (
-                <div
-                    style={{
-                        margin: '8px 10px',
-                        padding: '8px 12px',
-                        backgroundColor: isDark ? '#3b1c1c' : '#ffe6e6',
-                        borderLeft: '4px solid #ff4d4d',
-                        borderRadius: '4px',
-                        fontSize: '0.85em',
-                        fontFamily: 'monospace',
-                        color: isDark ? '#ff9999' : '#cc0000',
-                    }}
-                >
-                    // Error explaining redundancy: {explainResults.error}
-                </div>
-            );
+        if (explainResults.error || (explainResults.status && explainResults.status !== 200)) {
+            return null;
         }
 
         if (!explainResults.redundant || !explainResults.selectedConstraint) {
@@ -59,29 +44,9 @@ export const RedundancySummary: React.FC = () => {
         }
 
         const hasEntailing = explainResults.entailingSet && explainResults.entailingSet.length > 0;
-
-        if (!hasEntailing) {
-            return (
-                <div
-                    style={{
-                        margin: '8px 10px',
-                        padding: '8px 12px',
-                        backgroundColor: isDark ? '#2b2a1d' : '#fff9db',
-                        borderLeft: '4px solid #fcc419',
-                        borderRadius: '4px',
-                        fontSize: '0.85em',
-                        fontFamily: 'monospace',
-                    }}
-                >
-                    <div style={{ fontWeight: 'bold', color: isDark ? '#ffd43b' : '#f08c00', marginBottom: '4px' }}>
-                        // Explained Redundancy: Line {explainResults.selectedConstraint.position.startLine} is redundant (highlighted in green).
-                    </div>
-                    <div style={{ color: isDark ? '#d4d4d4' : '#495057', marginLeft: '10px' }}>
-                        // {explainResults.message || 'No explanation based on other facts found. Redundancy originates from structural elements.'}
-                    </div>
-                </div>
-            );
-        }
+        const titleText = hasEntailing
+            ? `// Explained Redundancy: Line ${explainResults.selectedConstraint.position.startLine} is made redundant by ${explainResults.entailingCount ?? explainResults.entailingSet?.length ?? 0} entailing constraint(s) (highlighted in green).`
+            : `// Explained Redundancy: Line ${explainResults.selectedConstraint.position.startLine} is redundant (highlighted in green).`;
 
         return (
             <div
@@ -111,15 +76,19 @@ export const RedundancySummary: React.FC = () => {
                         userSelect: 'none',
                     }}
                 >
-                    <span>
-                        // Explained Redundancy: Line {explainResults.selectedConstraint.position.startLine} is made redundant by {explainResults.entailingCount ?? explainResults.entailingSet?.length ?? 0} entailing constraint(s) (highlighted in green).
-                    </span>
+                    <span>{titleText}</span>
                     <span style={{ fontSize: '0.85em', opacity: 0.75 }}>{isCollapsed ? '▶ Expand' : '▼ Collapse'}</span>
                 </div>
                 {!isCollapsed &&
-                    explainResults.entailingSet?.map((c, i) => (
-                        <div key={i} style={{ color: isDark ? '#d4d4d4' : '#495057', marginLeft: '10px', marginTop: '2px' }}>
-                            // Entailing (Line {c.position?.startLine}{c.position?.endLine > c.position?.startLine ? `-${c.position.endLine}` : ''}): {c.sourceText || c.expression}
+                    (hasEntailing ? (
+                        explainResults.entailingSet?.map((c, i) => (
+                            <div key={i} style={{ color: isDark ? '#d4d4d4' : '#495057', marginLeft: '10px', marginTop: '2px' }}>
+                                // Entailing (Line {c.position?.startLine}{c.position?.endLine > c.position?.startLine ? `-${c.position.endLine}` : ''}): {c.sourceText || c.expression}
+                            </div>
+                        ))
+                    ) : (
+                        <div style={{ color: isDark ? '#d4d4d4' : '#495057', marginLeft: '10px', marginTop: '2px' }}>
+                            // {explainResults.message || 'No explanation based on other facts found. Redundancy originates from structural elements.'}
                         </div>
                     ))}
             </div>
@@ -127,23 +96,8 @@ export const RedundancySummary: React.FC = () => {
     }
 
     // --- Render Check Redundancy Summary ---
-    if (checkResults && checkResults.error) {
-        return (
-            <div
-                style={{
-                    margin: '8px 10px',
-                    padding: '8px 12px',
-                    backgroundColor: isDark ? '#3b1c1c' : '#ffe6e6',
-                    borderLeft: '4px solid #ff4d4d',
-                    borderRadius: '4px',
-                    fontSize: '0.85em',
-                    fontFamily: 'monospace',
-                    color: isDark ? '#ff9999' : '#cc0000',
-                }}
-            >
-                // Error checking redundancy: {checkResults.error}
-            </div>
-        );
+    if (checkResults && (checkResults.error || (checkResults.status && checkResults.status !== 200))) {
+        return null;
     }
 
     if (!checkResults || !checkResults.redundantConstraints || checkResults.redundantConstraints.length === 0) {
