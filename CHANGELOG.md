@@ -1,5 +1,9 @@
 # Change Log
 
+## v2.15.0[2026-06-26]
+
+- ✨ Alloy redundancy checking and explanation
+
 ## v2.14.0[2026-06-22]
 
 - ✨ Added collaboration feature with Yjs and WebSocket
@@ -9,7 +13,6 @@
 
 - 📌 Upgraded monaco-languageclient to 10.7.0
 - 📌 Upgraded Vite 8
- 
 
 ## v2.12.9[2026-03-19]
 
