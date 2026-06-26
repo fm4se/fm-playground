@@ -40,15 +40,15 @@ export const RedundancySummary: React.FC = () => {
                         color: isDark ? '#a3e4d7' : '#196f3d',
                     }}
                 >
-                    // Explain Redundancy: {explainResults.message || 'Selected constraint is not redundant or not found.'}
+                    Explanation: {explainResults.message || 'Selected constraint is not redundant or not found.'}
                 </div>
             );
         }
 
         const hasEntailing = explainResults.entailingSet && explainResults.entailingSet.length > 0;
         const titleText = hasEntailing
-            ? `// Explained Redundancy: Line ${explainResults.selectedConstraint.position.startLine} is made redundant by ${explainResults.entailingCount ?? explainResults.entailingSet?.length ?? 0} entailing constraint(s) (highlighted in green).`
-            : `// Explained Redundancy: Line ${explainResults.selectedConstraint.position.startLine} is redundant (highlighted in green).`;
+            ? `Explanation: Line ${explainResults.selectedConstraint.position.startLine} is made redundant by ${explainResults.entailingCount ?? explainResults.entailingSet?.length ?? 0} entailing constraint(s) (highlighted in green).`
+            : `Explanation: Line ${explainResults.selectedConstraint.position.startLine} is redundant (highlighted in green).`;
 
         return (
             <div
@@ -85,12 +85,12 @@ export const RedundancySummary: React.FC = () => {
                     (hasEntailing ? (
                         explainResults.entailingSet?.map((c, i) => (
                             <div key={i} style={{ color: isDark ? '#d4d4d4' : '#495057', marginLeft: '10px', marginTop: '2px' }}>
-                                // Entailing (Line {c.position?.startLine}{c.position?.endLine > c.position?.startLine ? `-${c.position.endLine}` : ''}): {c.sourceText || c.expression}
+                                Entailing (Line {c.position?.startLine}{c.position?.endLine > c.position?.startLine ? `-${c.position.endLine}` : ''}): {c.sourceText || c.expression}
                             </div>
                         ))
                     ) : (
                         <div style={{ color: isDark ? '#d4d4d4' : '#495057', marginLeft: '10px', marginTop: '2px' }}>
-                            // {explainResults.message || 'No explanation based on other facts found. Redundancy originates from structural elements.'}
+                            {explainResults.message || 'No explanation based on other facts found. Redundancy originates from structural elements.'}
                         </div>
                     ))}
             </div>
@@ -119,7 +119,7 @@ export const RedundancySummary: React.FC = () => {
                     color: isDark ? '#a3e4d7' : '#196f3d',
                 }}
             >
-                // No redundant constraints found (out of {checkResults.totalConstraints ?? 0} total constraints checked).
+                No redundant constraints found (out of {checkResults.totalConstraints ?? 0} total constraints checked).
             </div>
         );
     }
@@ -152,13 +152,13 @@ export const RedundancySummary: React.FC = () => {
                     userSelect: 'none',
                 }}
             >
-                <span>// Found {checkResults.redundantCount} redundant constraint(s) (out of {checkResults.totalConstraints} total constraints).</span>
+                <span>Found {checkResults.redundantCount} redundant constraint(s) (out of {checkResults.totalConstraints} total constraints).</span>
                 <span style={{ fontSize: '0.85em', opacity: 0.75 }}>{isCollapsed ? '▶ Expand' : '▼ Collapse'}</span>
             </div>
             {!isCollapsed &&
                 checkResults.redundantConstraints.map((c) => (
                     <div key={c.constraintIndex} style={{ color: isDark ? '#d4d4d4' : '#495057', marginLeft: '10px', marginTop: '2px' }}>
-                        // Line {c.position?.startLine}: {c.sourceText || c.expression}
+                        Line {c.position?.startLine}: {c.sourceText || c.expression}
                     </div>
                 ))}
         </div>
