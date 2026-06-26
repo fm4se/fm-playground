@@ -59,7 +59,7 @@ async function getAlloyInstance(permalink: Permalink, cmd: number) {
 
 async function performAlloyRedundancyCheck(editorValue: string, cmd: number, permalinkStr?: string, isDefault: boolean = false) {
     const res = await checkAlloyRedundancyApi(editorValue, cmd);
-    jotaiStore.set(alloyRedundancyResultsAtom, res);
+    jotaiStore.set(alloyRedundancyResultsAtom, { ...res, isDefault });
 
     if (permalinkStr) {
         logToDb(permalinkStr, {

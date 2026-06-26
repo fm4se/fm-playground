@@ -19,6 +19,7 @@ export interface AlloyRedundancyResponse {
     cmdId?: number;
     redundantConstraints?: AlloyRedundantConstraint[];
     error?: string;
+    isDefault?: boolean;
 }
 
 export interface AlloyExplainResponse {

@@ -96,11 +96,14 @@ export const RedundancySummary: React.FC = () => {
     }
 
     // --- Render Check Redundancy Summary ---
-    if (checkResults && (checkResults.error || (checkResults.status && checkResults.status !== 200))) {
+    if (!checkResults) return null;
+
+    if (checkResults.error || (checkResults.status && checkResults.status !== 200)) {
         return null;
     }
 
-    if (!checkResults || !checkResults.redundantConstraints || checkResults.redundantConstraints.length === 0) {
+    if (!checkResults.redundantConstraints || checkResults.redundantConstraints.length === 0) {
+        if (checkResults.isDefault) return null;
         return (
             <div
                 style={{
@@ -114,7 +117,7 @@ export const RedundancySummary: React.FC = () => {
                     color: isDark ? '#a3e4d7' : '#196f3d',
                 }}
             >
-                // No redundant constraints found (out of {checkResults?.totalConstraints ?? 0} total constraints checked).
+                // No redundant constraints found (out of {checkResults.totalConstraints ?? 0} total constraints checked).
             </div>
         );
     }
