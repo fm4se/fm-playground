@@ -31,6 +31,9 @@ import {
     triggerAlloyCodeLensUpdate,
 } from './features';
 
+// Fixme: Checking redundancy by default. Disable later.
+export const ENABLE_DEFAULT_REDUNDANCY_CHECK = true;
+
 function computeCharOffset(code: string, line: number, col: number): number {
     const lines = code.split(/\r?\n/);
     let offset = 0;
@@ -49,6 +52,36 @@ async function getAlloyInstance(permalink: Permalink, cmd: number) {
     } catch (error) {
         throw error;
     }
+}
+
+async function performAlloyRedundancyCheck(editorValue: string, cmd: number, permalinkStr?: string, isDefault: boolean = false) {
+    const res = await checkAlloyRedundancyApi(editorValue, cmd);
+    jotaiStore.set(alloyRedundancyResultsAtom, res);
+
+    if (permalinkStr) {
+        logToDb(permalinkStr, {
+            analysis: 'check-redundancy',
+            isDefault,
+            ...res,
+        });
+    }
+
+    if (res.redundantConstraints && res.redundantConstraints.length > 0) {
+        const lineSet = new Set<number>();
+        res.redundantConstraints.forEach((c) => {
+            if (c?.position?.startLine && c?.position?.endLine) {
+                for (let l = c.position.startLine; l <= c.position.endLine; l++) {
+                    lineSet.add(l);
+                }
+            }
+        });
+        jotaiStore.set(lineToHighlightAtom, Array.from(lineSet));
+    } else {
+        jotaiStore.set(lineToHighlightAtom, []);
+    }
+
+    setupAlloyRedundancyCodeLens((window as any).monaco);
+    triggerAlloyCodeLensUpdate();
 }
 
 async function executeAlloyCheckRedundancy() {
@@ -89,32 +122,7 @@ async function executeAlloyCheckRedundancy() {
     }
 
     try {
-        const res = await checkAlloyRedundancyApi(editorValue, alloySelectedCmd);
-        jotaiStore.set(alloyRedundancyResultsAtom, res);
-
-        if (response?.data?.permalink) {
-            logToDb(response.data.permalink, {
-                analysis: 'check-redundancy',
-                ...res,
-            });
-        }
-
-        if (res.redundantConstraints && res.redundantConstraints.length > 0) {
-            const lineSet = new Set<number>();
-            res.redundantConstraints.forEach((c) => {
-                if (c?.position?.startLine && c?.position?.endLine) {
-                    for (let l = c.position.startLine; l <= c.position.endLine; l++) {
-                        lineSet.add(l);
-                    }
-                }
-            });
-            jotaiStore.set(lineToHighlightAtom, Array.from(lineSet));
-        } else {
-            jotaiStore.set(lineToHighlightAtom, []);
-        }
-
-        setupAlloyRedundancyCodeLens((window as any).monaco);
-        triggerAlloyCodeLensUpdate();
+        await performAlloyRedundancyCheck(editorValue, alloySelectedCmd, response?.data?.permalink, false);
 
         // Fetch standard instance output so the UI (viz, table, text, eval tabs) stays identical to execute Alloy!
         const cmdToFetch = alloySelectedCmd < 0 ? 0 : alloySelectedCmd;
@@ -286,6 +294,14 @@ async function executeAlloyNormal() {
         jotaiStore.set(alloyInstanceAtom, []);
         const res = await getAlloyInstance(response?.data, cmdIndex);
         jotaiStore.set(alloyInstanceAtom, res);
+
+        if (ENABLE_DEFAULT_REDUNDANCY_CHECK) {
+            try {
+                await performAlloyRedundancyCheck(editorValue, alloySelectedCmd, response?.data?.permalink, true);
+            } catch (bgErr) {
+                console.error('Default background redundancy check failed:', bgErr);
+            }
+        }
     } catch (err: any) {
         if (err.response?.status === 429) {
             jotaiStore.set(alloyInstanceAtom, []);
