@@ -186,7 +186,7 @@ export const AlloyCmdOptions = () => {
                         color: isDarkTheme ? '#d4d4d4' : '#6c757d',
                     }}
                 >
-                    💡 Place your cursor on any constraint line to explain why it's redundant
+                    Place your cursor on any constraint line to explain why it's redundant
                 </div>
             )}
         </div>
