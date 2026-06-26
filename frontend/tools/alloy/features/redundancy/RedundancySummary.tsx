@@ -9,9 +9,11 @@ export const RedundancySummary: React.FC = () => {
     const isDark = useAtomValue(isDarkThemeAtom);
     const [isCollapsed, setIsCollapsed] = useState(true);
 
-    // Reset to collapsed whenever new results are received
+    // Set default collapsed state: open for explanation, collapsed for check redundancy
     useEffect(() => {
-        if (checkResults || explainResults) {
+        if (explainResults) {
+            setIsCollapsed(false);
+        } else if (checkResults) {
             setIsCollapsed(true);
         }
     }, [checkResults, explainResults]);
@@ -53,8 +55,8 @@ export const RedundancySummary: React.FC = () => {
                 style={{
                     margin: '8px 10px',
                     padding: '8px 12px',
-                    backgroundColor: isDark ? '#2b2a1d' : '#fff9db',
-                    borderLeft: '4px solid #fcc419',
+                    backgroundColor: isDark ? '#182b3c' : '#e7f5ff',
+                    borderLeft: '4px solid #339af0',
                     borderRadius: '4px',
                     fontSize: '0.85em',
                     fontFamily: 'monospace',
@@ -67,7 +69,7 @@ export const RedundancySummary: React.FC = () => {
                     onClick={() => setIsCollapsed(!isCollapsed)}
                     style={{
                         fontWeight: 'bold',
-                        color: isDark ? '#ffd43b' : '#f08c00',
+                        color: isDark ? '#74c0fc' : '#1c7ed6',
                         marginBottom: isCollapsed ? '0px' : '4px',
                         cursor: 'pointer',
                         display: 'flex',
