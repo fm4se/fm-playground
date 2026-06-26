@@ -34,11 +34,14 @@ import {
 // Fixme: Checking redundancy by default. Disable later.
 export const ENABLE_DEFAULT_REDUNDANCY_CHECK = true;
 
-function computeCharOffset(code: string, line: number, col: number): number {
-    const lines = code.split(/\r?\n/);
+export function computeCharOffset(code: string, line: number, col: number): number {
+    let currentLine = 1;
     let offset = 0;
-    for (let i = 0; i < line - 1 && i < lines.length; i++) {
-        offset += lines[i].length + 1; // +1 for newline character
+    while (currentLine < line && offset < code.length) {
+        if (code[offset] === '\n') {
+            currentLine++;
+        }
+        offset++;
     }
     offset += Math.max(0, col - 1);
     return offset + 1; // 1-based character offset
@@ -144,13 +147,12 @@ async function executeAlloyCheckRedundancy() {
     jotaiStore.set(isExecutingAtom, false);
 }
 
-async function executeAlloyExplainRedundancy() {
+export async function executeAlloyExplainRedundancy() {
     const editorValue = jotaiStore.get(editorValueAtom);
     const language = jotaiStore.get(languageAtom);
     const permalink = jotaiStore.get(permalinkAtom);
     const alloySelectedCmd = jotaiStore.get(alloySelectedCmdAtom);
     const enableLsp = jotaiStore.get(enableLspAtom);
-    const alloyCliOption = jotaiStore.get(alloyCliOptionsAtom);
 
     // Clear old check redundancy & explain decorations
     jotaiStore.set(alloyRedundancyResultsAtom, null);
@@ -164,7 +166,7 @@ async function executeAlloyExplainRedundancy() {
     const metadata = {
         ls: enableLsp,
         cmd: cmdIndex + 1,
-        action: alloyCliOption?.value || 'explain-redundancy',
+        action: 'explain-redundancy',
     };
     const response = await saveCodeAndRefreshHistory(
         editorValue,
@@ -245,6 +247,7 @@ async function executeAlloyExplainRedundancy() {
             jotaiStore.set(alloyInstanceAtom, []);
             jotaiStore.set(outputAtom, 'Slow down! You are making too many requests. Please try again later.');
         } else {
+            jotaiStore.set(alloyInstanceAtom, []);
             jotaiStore.set(alloyExplainResultsAtom, { status: 500, error: err.message || 'Unknown error' });
         }
     }
