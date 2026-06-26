@@ -1,79 +1,43 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.4.1'
-	id 'io.spring.dependency-management' version '1.1.7'
-	id 'com.diffplug.spotless' version '6.25.0'
+    id 'java'
+    id 'org.springframework.boot' version '3.4.1'
+    id 'io.spring.dependency-management' version '1.1.7'
 }
 
 group = 'de.buw'
 version = '0.0.1'
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
-	}
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 configurations {
-	// Exclude Spring's Logback to use SLF4J from Alloy JAR
-	all {
-		exclude group: 'ch.qos.logback', module: 'logback-classic'
-		exclude group: 'ch.qos.logback', module: 'logback-core'
-	}
+    // Exclude Spring's Logback to use SLF4J from Alloy JAR
+    all {
+        exclude group: 'ch.qos.logback', module: 'logback-classic'
+        exclude group: 'ch.qos.logback', module: 'logback-core'
+    }
 }
 
 dependencies {
-	implementation('org.springframework.boot:spring-boot-starter-web')
-	implementation('org.springframework.boot:spring-boot-starter-actuator')
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	implementation files('lib/org.alloytools.alloy.dist.jar')
-	// https://mvnrepository.com/artifact/org.json/json
-	implementation 'org.json:json:20240303'
-	// Override old Gson bundled in Alloy JAR (needed for Spring Boot 3.4.x compatibility)
-	implementation 'com.google.code.gson:gson:2.13.0'
-
+    implementation('org.springframework.boot:spring-boot-starter-web')
+    implementation('org.springframework.boot:spring-boot-starter-actuator')
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    implementation files('lib/org.alloytools.alloy.dist.jar')
+    // https://mvnrepository.com/artifact/org.json/json
+    implementation 'org.json:json:20240303'
+    // Override old Gson bundled in Alloy JAR (needed for Spring Boot 3.4.x compatibility)
+    implementation 'com.google.code.gson:gson:2.13.0'
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }
-
-// Spotless configuration for code formatting
-spotless {
-	java {
-		target 'src/**/*.java'
-		googleJavaFormat('1.21.0')
-		removeUnusedImports()
-		trimTrailingWhitespace()
-		endWithNewline()
-	}
-
-	format 'misc', {
-		target '*.gradle', '*.md', '.gitignore'
-		trimTrailingWhitespace()
-		indentWithTabs()
-		endWithNewline()
-	}
-}
-
-// Convenience tasks for development
-task formatCode {
-	description = 'Format all code using Spotless'
-	group = 'formatting'
-	dependsOn 'spotlessApply'
-}
-
-task checkFormat {
-	description = 'Check code formatting using Spotless'
-	group = 'verification'
-	dependsOn 'spotlessCheck'
-}
-
-// Make check task depend on format check
-check.dependsOn checkFormat
