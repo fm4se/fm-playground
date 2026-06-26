@@ -14,6 +14,7 @@ import { getLineToHighlight } from '@/../tools/common/lineHighlightingUtil';
 import { getGraphData, parseAlloyErrorMessage, getTraceLengthAndBackloop } from '@/../tools/alloy/alloyUtils';
 import './AlloyOutput.css';
 import { lineToHighlightAtom, isFullScreenAtom, alloyInstanceAtom } from '@/atoms';
+import { RedundancySummary } from '../features';
 
 async function getAlloyNextInstance(specId: string | null) {
     let url = '/alloy/alloy/nextInstance';
@@ -113,6 +114,9 @@ const AlloyOutput = () => {
                 if (isTemporal) setAlloyTraceLoop(`Trace Length: ${traceLength} | Backloop: ${backloop}`);
                 else setAlloyTraceLoop('');
             }
+        } else if (alloyInstance && 'redundancy' in alloyInstance) {
+            setIsInstance(false);
+            setAlloyErrorMessage((alloyInstance as any).message || '');
         } else if (alloyInstance && 'error' in alloyInstance) {
             // instance not found and error message is present
             setAlloyVizGraph([]);
@@ -296,6 +300,8 @@ const AlloyOutput = () => {
                         </MDBTabsItem>
                     </MDBTabs>
 
+                    <RedundancySummary />
+
                     {activeTab == 'eval' && (
                         <AlloyEvaluator
                             height={isFullScreen ? '80vh' : '52vh'}
@@ -431,16 +437,19 @@ const AlloyOutput = () => {
                     </div>
                 </div>
             ) : (
-                <pre
-                    className='plain-output-box'
-                    contentEditable={false}
-                    style={{
-                        borderRadius: '8px',
-                        height: isFullScreen ? '80vh' : '57vh',
-                        whiteSpace: 'pre-wrap',
-                    }}
-                    dangerouslySetInnerHTML={{ __html: alloyErrorMessage }}
-                />
+                <div>
+                    <RedundancySummary />
+                    <pre
+                        className='plain-output-box'
+                        contentEditable={false}
+                        style={{
+                            borderRadius: '8px',
+                            height: isFullScreen ? '80vh' : '57vh',
+                            whiteSpace: 'pre-wrap',
+                        }}
+                        dangerouslySetInnerHTML={{ __html: alloyErrorMessage }}
+                    />
+                </div>
             )}
         </div>
     );
