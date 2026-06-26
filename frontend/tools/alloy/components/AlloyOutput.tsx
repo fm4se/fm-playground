@@ -275,6 +275,7 @@ const AlloyOutput = () => {
 
     return (
         <div>
+            <RedundancySummary />
             {isInstance ? (
                 <div>
                     <MDBTabs justify>
@@ -299,8 +300,6 @@ const AlloyOutput = () => {
                             </MDBTabsLink>
                         </MDBTabsItem>
                     </MDBTabs>
-
-                    <RedundancySummary />
 
                     {activeTab == 'eval' && (
                         <AlloyEvaluator
@@ -423,17 +422,6 @@ const AlloyOutput = () => {
                                 </IconButton>
                             </div>
                         )}
-                        <div
-                            style={{
-                                marginBottom: '5px',
-                                fontSize: '0.85em',
-                                color: 'var(--secondary-text-color)',
-                                fontStyle: 'italic',
-                                textAlign: 'center',
-                            }}
-                        >
-                            ✨ New: Context Menu. Right-click on viz to explore.
-                        </div>
                     </div>
                 </div>
             ) : (
