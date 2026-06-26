@@ -25,7 +25,8 @@
     margin-bottom: 3rem;
 }
 
-.react-select-container {
+.react-select-container,
+.select__menu-portal {
     .select__control {
         background-color: var(--background-color);
         border-color: var(--border-color);
