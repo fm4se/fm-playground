@@ -22,6 +22,7 @@ import {
     jotaiStore,
 } from '@/atoms';
 import Editor from './Editor'; // Fallback editor
+import { alloyRedundancyResultsAtom, alloyExplainResultsAtom, triggerAlloyCodeLensUpdate, isCodeLensEdit } from '@/../tools/alloy/features';
 
 type LspEditorProps = {
     height: string;
@@ -63,11 +64,16 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
 
     const handleCodeChange = (value: string) => {
         props.setEditorValue(value);
-        props.setLineToHighlight([]);
-        setGreenHighlight([]);
-        // Clear range-based highlights
-        jotaiStore.set(targetAssertionRangeAtom, null);
-        jotaiStore.set(minimalSetRangesAtom, []);
+        if (!isCodeLensEdit) {
+            props.setLineToHighlight([]);
+            setGreenHighlight([]);
+            // Clear range-based highlights
+            jotaiStore.set(targetAssertionRangeAtom, null);
+            jotaiStore.set(minimalSetRangesAtom, []);
+            jotaiStore.set(alloyRedundancyResultsAtom, null);
+            jotaiStore.set(alloyExplainResultsAtom, null);
+            triggerAlloyCodeLensUpdate();
+        }
     };
 
     useEffect(() => {

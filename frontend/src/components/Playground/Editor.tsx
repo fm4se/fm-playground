@@ -16,6 +16,7 @@ import {
     jotaiStore,
 } from '@/atoms';
 import { fmpConfig, languageConfigMap } from '@/ToolMaps';
+import { alloyRedundancyResultsAtom, alloyExplainResultsAtom, triggerAlloyCodeLensUpdate, isCodeLensEdit } from '@/../tools/alloy/features';
 import '@/assets/style/Playground.css';
 
 interface BasicCodeEditorProps {
@@ -228,11 +229,16 @@ const CodeEditor: React.FC<BasicCodeEditorProps> = (props: BasicCodeEditorProps)
     const handleCodeChange = (newCode: string | undefined) => {
         if (newCode !== undefined) {
             setEditorValue(newCode);
-            setLineToHighlight([]);
-            setGreenHighlight([]);
-            // Clear range-based highlights
-            jotaiStore.set(targetAssertionRangeAtom, null);
-            jotaiStore.set(minimalSetRangesAtom, []);
+            if (!isCodeLensEdit) {
+                setLineToHighlight([]);
+                setGreenHighlight([]);
+                // Clear range-based highlights
+                jotaiStore.set(targetAssertionRangeAtom, null);
+                jotaiStore.set(minimalSetRangesAtom, []);
+                jotaiStore.set(alloyRedundancyResultsAtom, null);
+                jotaiStore.set(alloyExplainResultsAtom, null);
+                triggerAlloyCodeLensUpdate();
+            }
         }
     };
 
