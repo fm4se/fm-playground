@@ -24,6 +24,7 @@ import FileDownload from '@/components/Utils/FileDownload';
 import CopyToClipboardBtn from '@/components/Utils/CopyToClipboardBtn';
 import LspEditor from './LspEditor';
 import Editor from './Editor';
+import { setupAlloyRedundancyCodeLens } from '@/../tools/alloy/features';
 import { additionalInputAreaUiMap, lspSupportMap } from '@/ToolMaps';
 
 // Collaborative editing - lazy-loaded and gated behind env var
@@ -66,6 +67,7 @@ const InputArea: React.FC<InputAreaProps> = ({ editorTheme, onRunButtonClick, on
         activeEditorRef.current = editor;
         activeMonacoRef.current = monaco;
         setEditorInstanceKey((prev) => prev + 1);
+        setupAlloyRedundancyCodeLens(monaco);
     };
 
     // Check screen size on mount and resize for mobile detection
@@ -213,20 +215,12 @@ const InputArea: React.FC<InputAreaProps> = ({ editorTheme, onRunButtonClick, on
                                     <CopyToClipboardBtn />
                                 </MDBIcon>
                             )}
-                            <div
-                                style={{
-                                    padding: '3px',
-                                    borderRadius: '6px',
-                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
-                                    boxShadow: '0 0 15px rgba(102, 126, 234, 0.5)',
-                                }}
-                            >
-                                {/* TODO: Temporary highlight for new feature. Remove when no longer needed */}
+                            <div>
                                 <MDBIcon
                                     size='lg'
                                     className='playground-icon'
                                     data-tooltip-id='playground-tooltip'
-                                    data-tooltip-content='Compare Specs (New Feature!)'
+                                    data-tooltip-content='Compare Specs'
                                     onClick={handleEnterDiffView}
                                     style={{
                                         backgroundColor: editorTheme === 'vs-dark' ? '#1e1e1e' : '#ffffff',

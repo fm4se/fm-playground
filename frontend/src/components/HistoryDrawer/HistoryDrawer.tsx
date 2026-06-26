@@ -730,7 +730,7 @@ const HistoryDrawer: React.FC<DrawerComponentProps> = ({
                                 zIndex: 1,
                             }}
                         >
-                            ⚠️ Session-based history will be lost when you close the browser. Login to save your history
+                            Session-based history will be lost when you close the browser. Login to save your history
                             permanently.
                         </div>
                     )}

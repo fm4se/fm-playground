@@ -65,6 +65,7 @@ export const limbooleCliOptionsAtom = atom({ value: '1', label: 'satisfiability'
 export const smtCliOptionsAtom = atom({ value: 'execute-z3', label: 'Execute SMT' });
 export const dafnyCliOptionsAtom = atom({ value: 'verify', label: 'Verify' });
 
+export const alloyCliOptionsAtom = atom({ value: 'execute-alloy', label: 'Execute Alloy' });
 export const alloySelectedCmdAtom = atom(0);
 export const alloyInstanceAtom = atom<any[]>([]);
 export const alloyCmdOptionsAtom = atom<{ value: number; label: string }[]>([]);
@@ -99,3 +100,4 @@ jotaiStore.sub(limbooleCliOptionsAtom, () => {});
 jotaiStore.sub(alloySelectedCmdAtom, () => {});
 jotaiStore.sub(alloyInstanceAtom, () => {});
 jotaiStore.sub(alloyCmdOptionsAtom, () => {});
+jotaiStore.sub(alloyCliOptionsAtom, () => {});

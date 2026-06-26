@@ -30,7 +30,7 @@ const SmtCheckOptions = () => {
                         textAlign: 'center',
                     }}
                 >
-                    💡 Place your cursor on an assertion line or select an assertion to explain why it's redundant
+                    Place your cursor on an assertion line or select an assertion to explain why it's redundant
                 </div>
             )}
             <div style={{ display: 'flex', justifyContent: 'center' }}>
