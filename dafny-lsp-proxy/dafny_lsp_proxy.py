@@ -76,8 +76,12 @@ class UserSession:
                 line_str = line.decode("utf-8").strip()
                 if line_str.startswith("Content-Length:"):
                     content_length = int(line_str.split(":")[1].strip())
-                    await self.dafny_process.stdout.readline()  # Skip empty line
-                    message_bytes = await self.dafny_process.stdout.read(content_length)
+                    # Read until empty header line
+                    while True:
+                        h_line = await self.dafny_process.stdout.readline()
+                        if not h_line or h_line.decode("utf-8").strip() == "":
+                            break
+                    message_bytes = await self.dafny_process.stdout.readexactly(content_length)
                     message = json.loads(message_bytes.decode("utf-8"))
                     # Forward message to the client
                     await self.send_to_client(message)
@@ -119,7 +123,7 @@ class UserSession:
                 await self.websocket.send(json.dumps(message))
             self.last_activity = time.time()
         except Exception as e:
-            raise
+            pass
 
 
 class DafnyLSPProxy:
