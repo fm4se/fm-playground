@@ -35,6 +35,7 @@ type LspEditorProps = {
     editorTheme?: string;
     /** Optional callback fired when the editor instance is ready */
     onEditorReady?: (editor: any, monacoModule: any) => void;
+    onRunShortcut?: () => void;
 };
 
 // Global instances for v10 API
@@ -61,6 +62,20 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
     const [, setSelectionRange] = useAtom(selectionRangeAtom);
     const [targetAssertionRange] = useAtom(targetAssertionRangeAtom);
     const [minimalSetRanges] = useAtom(minimalSetRangesAtom);
+    const onRunShortcutRef = useRef(props.onRunShortcut);
+    const shortcutDisposablesRef = useRef<any[]>([]);
+
+    useEffect(() => {
+        onRunShortcutRef.current = props.onRunShortcut;
+    }, [props.onRunShortcut]);
+
+    useEffect(() => {
+        return () => {
+            shortcutDisposablesRef.current.forEach((d) => {
+                if (d && typeof d.dispose === 'function') d.dispose();
+            });
+        };
+    }, []);
 
     const handleCodeChange = (value: string) => {
         props.setEditorValue(value);
@@ -170,6 +185,24 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
                 editorRef.current = editorAppInstance.getEditor();
                 setLspFailed(false);
 
+                shortcutDisposablesRef.current.forEach((d) => {
+                    if (d && typeof d.dispose === 'function') d.dispose();
+                });
+                shortcutDisposablesRef.current = [];
+
+                const cmdDisposable = editorRef.current!.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+                    onRunShortcutRef.current?.();
+                });
+                const keyDisposable = editorRef.current!.onKeyDown((e: any) => {
+                    if ((e.ctrlKey || e.metaKey) && (e.keyCode === monaco.KeyCode.KeyS || e.browserEvent?.key === 's' || e.browserEvent?.key === 'S')) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onRunShortcutRef.current?.();
+                    }
+                });
+                if (cmdDisposable) shortcutDisposablesRef.current.push(cmdDisposable);
+                if (keyDisposable) shortcutDisposablesRef.current.push(keyDisposable);
+
                 // Dispose old cursor listener if exists
                 if (cursorListenerRef.current) {
                     cursorListenerRef.current.dispose();
@@ -248,6 +281,11 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
                 cursorListenerRef.current.dispose();
                 cursorListenerRef.current = null;
             }
+
+            shortcutDisposablesRef.current.forEach((d) => {
+                if (d && typeof d.dispose === 'function') d.dispose();
+            });
+            shortcutDisposablesRef.current = [];
 
             // Only dispose the language client on unmount/language change.
             const lc = lcWrapperInstance;
@@ -376,7 +414,7 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
                 id='monaco-editor-root'
                 style={{ height: props.height, display: lspFailed ? 'none' : undefined }}
             />
-            {lspFailed && <Editor height={props.height} editorTheme={props.editorTheme || 'vs-dark'} />}
+            {lspFailed && <Editor height={props.height} editorTheme={props.editorTheme || 'vs-dark'} onRunShortcut={props.onRunShortcut} />}
         </div>
     );
 };
