@@ -24,6 +24,7 @@ interface BasicCodeEditorProps {
     editorTheme: string;
     /** Optional callback fired when the editor instance is ready */
     onEditorReady?: (editor: monacoEditor.editor.IStandaloneCodeEditor, monaco: typeof monacoEditor) => void;
+    onRunShortcut?: () => void;
 }
 
 const CodeEditor: React.FC<BasicCodeEditorProps> = (props: BasicCodeEditorProps) => {
@@ -41,6 +42,20 @@ const CodeEditor: React.FC<BasicCodeEditorProps> = (props: BasicCodeEditorProps)
     const [decorationIds, setDecorationIds] = useState<string[]>([]);
     const [greenDecorationIds, setGreenDecorationIds] = useState<string[]>([]);
     const [rangeDecorationIds, setRangeDecorationIds] = useState<string[]>([]);
+    const onRunShortcutRef = useRef(props.onRunShortcut);
+    const shortcutDisposablesRef = useRef<any[]>([]);
+
+    useEffect(() => {
+        onRunShortcutRef.current = props.onRunShortcut;
+    }, [props.onRunShortcut]);
+
+    useEffect(() => {
+        return () => {
+            shortcutDisposablesRef.current.forEach((d) => {
+                if (d && typeof d.dispose === 'function') d.dispose();
+            });
+        };
+    }, []);
 
     /**
      * Sets the editor value when the editorValue prop changes.
@@ -215,6 +230,25 @@ const CodeEditor: React.FC<BasicCodeEditorProps> = (props: BasicCodeEditorProps)
         });
 
         monaco.editor.setTheme('spectraTheme');
+
+        // Clean up previous shortcut bindings if any
+        shortcutDisposablesRef.current.forEach((d) => {
+            if (d && typeof d.dispose === 'function') d.dispose();
+        });
+        shortcutDisposablesRef.current = [];
+
+        const cmdDisposable = editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+            onRunShortcutRef.current?.();
+        });
+        const keyDisposable = editor.onKeyDown((e) => {
+            if ((e.ctrlKey || e.metaKey) && (e.keyCode === monaco.KeyCode.KeyS || e.browserEvent?.key === 's' || e.browserEvent?.key === 'S')) {
+                e.preventDefault();
+                e.stopPropagation();
+                onRunShortcutRef.current?.();
+            }
+        });
+        if (cmdDisposable) shortcutDisposablesRef.current.push(cmdDisposable);
+        if (keyDisposable) shortcutDisposablesRef.current.push(keyDisposable);
 
         // Notify parent that the editor is ready (used for collab binding)
         props.onEditorReady?.(editor, monaco);

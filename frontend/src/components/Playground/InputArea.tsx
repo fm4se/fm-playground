@@ -17,6 +17,7 @@ import {
     lineToHighlightAtom,
     isDiffViewModeAtom,
     originalCodeAtom,
+    jotaiStore,
 } from '@/atoms';
 import ConfirmModal from '@/components/Utils/Modals/ConfirmModal';
 import FileUploadButton from '@/components/Utils/FileUpload';
@@ -69,6 +70,33 @@ const InputArea: React.FC<InputAreaProps> = ({ editorTheme, onRunButtonClick, on
         setEditorInstanceKey((prev) => prev + 1);
         setupAlloyRedundancyCodeLens(monaco);
     };
+
+    const onRunButtonClickRef = useRef(onRunButtonClick);
+    const lastRunTimeRef = useRef<number>(0);
+
+    useEffect(() => {
+        onRunButtonClickRef.current = onRunButtonClick;
+    }, [onRunButtonClick]);
+
+    const handleRunShortcut = () => {
+        const now = Date.now();
+        if (now - lastRunTimeRef.current < 300) return;
+        if (!jotaiStore.get(isExecutingAtom)) {
+            lastRunTimeRef.current = now;
+            onRunButtonClickRef.current();
+        }
+    };
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S')) {
+                e.preventDefault();
+                handleRunShortcut();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
 
     // Check screen size on mount and resize for mobile detection
     useEffect(() => {
@@ -268,6 +296,7 @@ const InputArea: React.FC<InputAreaProps> = ({ editorTheme, onRunButtonClick, on
                         lineToHighlight={lineToHighlight}
                         setLineToHighlight={setLineToHighlight}
                         onEditorReady={handleBasicEditorReady}
+                        onRunShortcut={handleRunShortcut}
                     />
                 </div>
             )}
@@ -276,6 +305,7 @@ const InputArea: React.FC<InputAreaProps> = ({ editorTheme, onRunButtonClick, on
                     height={getEditorHeight()}
                     editorTheme={editorTheme}
                     onEditorReady={handleBasicEditorReady}
+                    onRunShortcut={handleRunShortcut}
                 />
             )}
 
@@ -296,6 +326,8 @@ const InputArea: React.FC<InputAreaProps> = ({ editorTheme, onRunButtonClick, on
                 color='primary'
                 onClick={onRunButtonClick}
                 disabled={isExecuting}
+                data-tooltip-id='playground-tooltip'
+                data-tooltip-content='Run code (Ctrl+S / Cmd+S)'
             >
                 {isExecuting ? 'Running...' : 'RUN'}
             </MDBBtn>
