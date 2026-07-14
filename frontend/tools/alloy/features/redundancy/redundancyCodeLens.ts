@@ -12,7 +12,17 @@ let vscodeEmitterRef: any = null;
 let vscodeDisposableAls: any = null;
 let vscodeDisposableAlloy: any = null;
 
-let commandsRegistered = false;
+let monacoCommandsRegistered = false;
+let vscodeCommandsRegistered = false;
+
+function isVscodeApiReady(): boolean {
+    try {
+        return Boolean(vscode && vscode.commands && typeof vscode.commands.registerCommand === 'function');
+    } catch {
+        return false;
+    }
+}
+
 
 export let isCodeLensEdit = false;
 
@@ -195,23 +205,23 @@ function getActiveLensesConstraints(): AlloyRedundantConstraint[] {
 }
 
 export function setupAlloyRedundancyCodeLens(monacoModule: any) {
-    if (!commandsRegistered) {
-        // Register in standard Monaco Editor command registry
-        if (monacoModule?.editor?.registerCommand) {
-            monacoModule.editor.registerCommand('alloy.redundancy.commentOut', (_accessor: any, constraint: AlloyRedundantConstraint) => {
-                handleCommentOutConstraint(constraint);
-            });
-            monacoModule.editor.registerCommand('alloy.redundancy.remove', (_accessor: any, constraint: AlloyRedundantConstraint) => {
-                handleRemoveConstraint(constraint);
-            });
-            monacoModule.editor.registerCommand('alloy.redundancy.explain', (_accessor: any, constraint: AlloyRedundantConstraint) => {
-                handleExplainConstraint(constraint);
-            });
-        }
+    if (!monacoCommandsRegistered && monacoModule?.editor?.registerCommand) {
+        monacoModule.editor.registerCommand('alloy.redundancy.commentOut', (_accessor: any, constraint: AlloyRedundantConstraint) => {
+            handleCommentOutConstraint(constraint);
+        });
+        monacoModule.editor.registerCommand('alloy.redundancy.remove', (_accessor: any, constraint: AlloyRedundantConstraint) => {
+            handleRemoveConstraint(constraint);
+        });
+        monacoModule.editor.registerCommand('alloy.redundancy.explain', (_accessor: any, constraint: AlloyRedundantConstraint) => {
+            handleExplainConstraint(constraint);
+        });
+        monacoCommandsRegistered = true;
+    }
 
-        // Register in VSCode Command Service (used globally when @codingame/monaco-vscode-api override is active)
-        if (vscode?.commands?.registerCommand) {
-            try {
+    // Register in VSCode Command Service (used globally when @codingame/monaco-vscode-api override is active)
+    if (!vscodeCommandsRegistered && isVscodeApiReady()) {
+        try {
+            if (vscode?.commands?.registerCommand) {
                 vscode.commands.registerCommand('alloy.redundancy.commentOut', (constraint: AlloyRedundantConstraint) => {
                     handleCommentOutConstraint(constraint);
                 });
@@ -221,11 +231,11 @@ export function setupAlloyRedundancyCodeLens(monacoModule: any) {
                 vscode.commands.registerCommand('alloy.redundancy.explain', (constraint: AlloyRedundantConstraint) => {
                     handleExplainConstraint(constraint);
                 });
-            } catch (err) {
-                // Ignore if commands already registered
+                vscodeCommandsRegistered = true;
             }
+        } catch (err) {
+            // Ignore if commands already registered
         }
-        commandsRegistered = true;
     }
 
     // --- Native Monaco CodeLens Provider ---
@@ -296,7 +306,7 @@ export function setupAlloyRedundancyCodeLens(monacoModule: any) {
     }
 
     // --- VSCode CodeLens Provider (LSP & Monaco-VSCode API Wrapper Mode) ---
-    if (vscode?.languages?.registerCodeLensProvider) {
+    if (isVscodeApiReady() && vscode?.languages?.registerCodeLensProvider) {
         if (!vscodeEmitterRef) {
             vscodeEmitterRef = new vscode.EventEmitter<void>();
         }
