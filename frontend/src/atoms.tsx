@@ -78,6 +78,9 @@ export const limbooleDiffOptionsAtom = atom('common-witness');
 export const limbooleDiffWitnessAtom = atom<any>(null);
 export const limbooleDiffFilterAtom = atom('');
 
+export const alloyDiffOptionsAtom = atom('SemDiff');
+export const alloyDiffWitnessAtom = atom<any>(null);
+
 export const smtModelAtom = atom<any>(null);
 
 jotaiStore.sub(editorValueAtom, () => {});
@@ -101,3 +104,5 @@ jotaiStore.sub(alloySelectedCmdAtom, () => {});
 jotaiStore.sub(alloyInstanceAtom, () => {});
 jotaiStore.sub(alloyCmdOptionsAtom, () => {});
 jotaiStore.sub(alloyCliOptionsAtom, () => {});
+jotaiStore.sub(alloyDiffOptionsAtom, () => {});
+jotaiStore.sub(alloyDiffWitnessAtom, () => {});

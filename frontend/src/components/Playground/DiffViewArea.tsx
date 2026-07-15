@@ -16,6 +16,7 @@ import {
     diffComparisonHistoryIdAtom,
     smtDiffWitnessAtom,
     limbooleDiffWitnessAtom,
+    alloyDiffWitnessAtom,
 } from '@/atoms';
 import ConfirmModal from '@/components/Utils/Modals/ConfirmModal';
 import MessageModal from '@/components/Utils/Modals/MessageModal';
@@ -45,6 +46,7 @@ const DiffViewArea: React.FC<DiffViewAreaProps> = ({ editorTheme, onBackToEditin
     const [, setDiffComparisonHistoryId] = useAtom(diffComparisonHistoryIdAtom);
     const [, setSmtDiffWitness] = useAtom(smtDiffWitnessAtom);
     const [, setLimbooleDiffWitness] = useAtom(limbooleDiffWitnessAtom);
+    const [, setAlloyDiffWitness] = useAtom(alloyDiffWitnessAtom);
 
     const [isNewSpecModalOpen, setIsNewSpecModalOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
@@ -175,6 +177,7 @@ const DiffViewArea: React.FC<DiffViewAreaProps> = ({ editorTheme, onBackToEditin
         setOutput('');
         setSmtDiffWitness(null);
         setLimbooleDiffWitness(null);
+        setAlloyDiffWitness(null);
 
         try {
             setIsExecuting(true);
@@ -395,8 +398,8 @@ const DiffViewArea: React.FC<DiffViewAreaProps> = ({ editorTheme, onBackToEditin
                     </div>
                 </div>
             )}
-            {/* Show only if language.short is SAT or SMT */}
-            {(language.short === 'SAT' || language.short === 'SMT') && (
+            {/* Show only if language.short is SAT, SMT, or ALS */}
+            {(language.short === 'SAT' || language.short === 'SMT' || language.short === 'ALS') && (
                 <div className='row'>
                     <div className='col-md-6'>
                         <div style={{ paddingRight: '8px' }}>
