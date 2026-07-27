@@ -382,7 +382,7 @@ const DiffViewArea: React.FC<DiffViewAreaProps> = ({ editorTheme, onBackToEditin
                         height: isMobile ? 'auto' : getEditorHeight(),
                     }}
                 >
-                    <div style={{ flex: 1 }}>
+                    <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
                         <CodeDiffEditor
                             height={getEditorHeight()}
                             editorTheme={editorTheme}
@@ -393,7 +393,7 @@ const DiffViewArea: React.FC<DiffViewAreaProps> = ({ editorTheme, onBackToEditin
                             isAnalyzeMode={isAnalyzeMode}
                         />
                     </div>
-                    <div style={{ flex: 1 }}>
+                    <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
                         <DiffOutput editorTheme={editorTheme} onFullScreenButtonClick={onFullScreenButtonClick} />
                     </div>
                 </div>
