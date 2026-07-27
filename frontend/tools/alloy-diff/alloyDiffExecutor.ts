@@ -41,6 +41,14 @@ export const executeAlloyDiffTool = async () => {
     const alloyDiffOption = jotaiStore.get(alloyDiffOptionsAtom);
     const diffComparisonHistoryId = jotaiStore.get(diffComparisonHistoryIdAtom);
 
+    if (!diffComparisonHistoryId || diffComparisonHistoryId === -1) {
+        jotaiStore.set(alloyDiffWitnessAtom, {
+            error: 'Please select a comparison file from the history panel first.',
+        });
+        jotaiStore.set(isExecutingAtom, false);
+        return;
+    }
+
     const metadata = {
         leftSideCodeId: diffComparisonHistoryId,
         diff_option: alloyDiffOption,
@@ -65,8 +73,35 @@ export const executeAlloyDiffTool = async () => {
     }
 
     try {
-        const res = await getAlloyDiffWitness(response.data, alloyDiffOption);
-        jotaiStore.set(alloyDiffWitnessAtom, res);
+        if (alloyDiffOption === 'semantic-relation') {
+            const resF1NotF2 = await getAlloyDiffWitness(response.data, 'not-previous-but-current').catch(e => ({ error: e.message || 'error' }));
+            const resNotF1ButF2 = await getAlloyDiffWitness(response.data, 'not-current-but-previous').catch(e => ({ error: e.message || 'error' }));
+
+            const isF1NotF2Unsat = !!resF1NotF2.error;
+            const isNotF1ButF2Unsat = !!resNotF1ButF2.error;
+
+            let semanticRelationMessage = '';
+            let finalRes: any = {};
+
+            if (isF1NotF2Unsat && isNotF1ButF2Unsat) {
+                semanticRelationMessage = "Current ≡ Previous\nAll instances that satisfy the current model also satisfy the previous model, and vice versa.";
+                finalRes = { error: semanticRelationMessage };
+            } else if (!isF1NotF2Unsat && isNotF1ButF2Unsat) {
+                semanticRelationMessage = "Previous ⊨ Current\nAll instances that satisfy the previous model also satisfy the current model. Some instances that satisfy the current model do not satisfy the previous model.";
+                finalRes = { ...resF1NotF2, semanticRelationMessage };
+            } else if (isF1NotF2Unsat && !isNotF1ButF2Unsat) {
+                semanticRelationMessage = "Current ⊨ Previous\nAll instances that satisfy the current model also satisfy the previous model. Some instances that satisfy the previous model do not satisfy the current model.";
+                finalRes = { ...resNotF1ButF2, semanticRelationMessage };
+            } else {
+                semanticRelationMessage = "The models are incomparable\nThere exist instances that satisfy the current model but not the previous model, and vice versa.";
+                finalRes = { ...resF1NotF2, semanticRelationMessage };
+            }
+
+            jotaiStore.set(alloyDiffWitnessAtom, finalRes);
+        } else {
+            const res = await getAlloyDiffWitness(response.data, alloyDiffOption);
+            jotaiStore.set(alloyDiffWitnessAtom, res);
+        }
     } catch (err: any) {
         if (err.response?.status === 404) {
             jotaiStore.set(alloyDiffWitnessAtom, {

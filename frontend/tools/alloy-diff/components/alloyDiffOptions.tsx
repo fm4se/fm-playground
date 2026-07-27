@@ -1,15 +1,21 @@
 import Select, { SingleValue } from 'react-select';
-import { useAtom } from 'jotai';
-import { alloyDiffOptionsAtom, isDarkThemeAtom } from '@/atoms';
+import { useAtom, useAtomValue } from 'jotai';
+import { 
+    alloyDiffOptionsAtom, 
+    isDarkThemeAtom
+} from '@/atoms';
+import '@/../tools/alloy/components/AlloyCmdOptions.css';
 
 const AlloyDiffOptions = () => {
-    const [isDarkTheme] = useAtom(isDarkThemeAtom);
+    const isDarkTheme = useAtomValue(isDarkThemeAtom);
+    const [alloyDiffOption, setAlloyDiffOption] = useAtom(alloyDiffOptionsAtom);
+
     const options = [
-        { value: 'SemDiff', label: 'Semantic Difference' },
-        { value: 'CommonInst', label: 'Common Instance' },
-        { value: 'Equivalence', label: 'Equivalence Check' },
+        { value: 'common-witness', label: 'Common Witness' },
+        { value: 'not-current-but-previous', label: 'Not Current But Previous' },
+        { value: 'not-previous-but-current', label: 'Not Previous But Current' },
+        { value: 'semantic-relation', label: 'Semantic Relation' },
     ];
-    const [, setAlloyDiffOption] = useAtom(alloyDiffOptionsAtom);
 
     const handleOptionChange = (selectedOption: SingleValue<{ value: string; label: string }>) => {
         if (selectedOption) {
@@ -18,13 +24,15 @@ const AlloyDiffOptions = () => {
     };
 
     return (
-        <div>
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '5px' }}>
-                <p style={{ marginRight: '10px', marginTop: '5px' }}>Analysis:</p>
-                <div style={{ width: '70%' }}>
-                    <Select
+        <div style={{ marginTop: '15px' }}>
+            <div className='alloy-dropdowns-row'>
+                <div className='alloy-dropdown-item action-dropdown'>
+                    <p className='alloy-dropdown-label'>Analysis:</p>
+                    <div className='alloy-dropdown-select'>
+                        <Select
                         className='basic-single react-select-container'
                         classNamePrefix='select'
+                        value={options.find(o => o.value === alloyDiffOption) || options[0]}
                         defaultValue={options[0] || null}
                         isDisabled={false}
                         isLoading={false}
@@ -87,6 +95,7 @@ const AlloyDiffOptions = () => {
                             }),
                         }}
                     />
+                </div>
                 </div>
             </div>
         </div>

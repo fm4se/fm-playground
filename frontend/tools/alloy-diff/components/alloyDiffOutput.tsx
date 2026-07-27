@@ -52,7 +52,7 @@ const AlloyDiffOutput = () => {
                 const sid = Array.isArray(alloyDiffWitness.specId) ? alloyDiffWitness.specId[0] : alloyDiffWitness.specId;
                 setSpecId(sid);
                 setHasWitness(true);
-                setWitnessMessage('');
+                setWitnessMessage(alloyDiffWitness.semanticRelationMessage || '');
 
                 // Parse XML visualization data
                 if ('alloy' in alloyDiffWitness) {
@@ -140,6 +140,10 @@ const AlloyDiffOutput = () => {
                     return;
                 }
 
+                if (alloyDiffWitness.semanticRelationMessage) {
+                    data.semanticRelationMessage = alloyDiffWitness.semanticRelationMessage;
+                }
+
                 const updatedWitnesses = [...witnesses, data];
                 const newIndex = updatedWitnesses.length - 1;
                 setWitnesses(updatedWitnesses);
@@ -211,6 +215,22 @@ const AlloyDiffOutput = () => {
 
     return (
         <div>
+            {witnessMessage && (
+                <pre
+                    className='plain-alloy-message-box'
+                    contentEditable={false}
+                    style={{
+                        borderRadius: '8px',
+                        whiteSpace: 'pre-wrap',
+                        padding: '15px',
+                        marginBottom: '15px',
+                        maxHeight: '150px',
+                        overflowY: 'auto',
+                        width: '100%'
+                    }}
+                    dangerouslySetInnerHTML={{ __html: witnessMessage }}
+                />
+            )}
             {hasWitness ? (
                 <div>
                     <MDBTabs justify>
@@ -333,20 +353,11 @@ const AlloyDiffOutput = () => {
                             </div>
                         )}
                     </div>
-                    {witnessMessage && <div style={{ textAlign: 'center', color: '#ff0000ff', marginTop: '8px' }}>{witnessMessage}</div>}
                 </div>
             ) : (
-                <div
-                    className='plain-output-box'
-                    style={{
-                        borderRadius: '8px',
-                        height: isFullScreen ? '80vh' : '45vh',
-                        whiteSpace: 'pre-wrap',
-                        padding: '15px',
-                        overflowY: 'auto',
-                    }}
-                    dangerouslySetInnerHTML={{ __html: witnessMessage }}
-                />
+                <div style={{ height: isFullScreen ? '80vh' : '45vh' }}>
+                    {/* The message is already displayed above. We just need to fill the empty space if needed, or we can just leave it empty. */}
+                </div>
             )}
         </div>
     );

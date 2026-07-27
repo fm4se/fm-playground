@@ -78,7 +78,7 @@ export const limbooleDiffOptionsAtom = atom('common-witness');
 export const limbooleDiffWitnessAtom = atom<any>(null);
 export const limbooleDiffFilterAtom = atom('');
 
-export const alloyDiffOptionsAtom = atom('SemDiff');
+export const alloyDiffOptionsAtom = atom('common-witness');
 export const alloyDiffWitnessAtom = atom<any>(null);
 
 export const smtModelAtom = atom<any>(null);

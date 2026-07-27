@@ -1,6 +1,9 @@
 package de.buw.fmp.alloy.api;
 
+import edu.mit.csail.sdg.alloy4.A4Reporter;
 import edu.mit.csail.sdg.alloy4.XMLNode;
+import edu.mit.csail.sdg.parser.CompModule;
+import edu.mit.csail.sdg.parser.CompUtil;
 import edu.mit.csail.sdg.translator.A4Options;
 import edu.mit.csail.sdg.translator.A4Solution;
 import edu.mit.csail.sdg.translator.A4SolutionReader;
@@ -39,7 +42,6 @@ public class DiffController {
   @Value("${API_URL:http://127.0.0.1:8000/}")
   private String apiUrl;
 
-  private static final Map<String, StoredDiffSolution> diffInstances = new LinkedHashMap<>();
   private static int running = 0;
 
   /**
@@ -116,8 +118,8 @@ public class DiffController {
         || request.getLeftCode().isBlank() || request.getRightCode().isBlank()) {
       return errorJson("Both left and right Alloy models must be provided and non-empty.");
     }
-    return executeDiff(request.getLeftCode(), request.getRightCode(), request.getAnalysis(),
-        request.getScope(), request.isWithPred());
+    String analysis = request.getAnalysis() != null ? request.getAnalysis() : "SemDiff";
+    return executeDiff(request.getLeftCode(), request.getRightCode(), analysis, request.getScope(), request.isWithPred());
   }
 
   /**
@@ -148,19 +150,30 @@ public class DiffController {
     File leftFile = null;
     File rightFile = null;
     try {
-      Analysis analysisEnum;
-      try {
-        if (analysisStr != null && !analysisStr.isEmpty()) {
-          analysisEnum = Analysis.valueOf(analysisStr);
-        } else {
-          analysisEnum = Analysis.SemDiff;
-        }
-      } catch (Exception e) {
+      Analysis analysisEnum = Analysis.SemDiff;
+      boolean swap = false;
+      if ("common-witness".equals(analysisStr) || "CommonInst".equals(analysisStr)) {
+        analysisEnum = Analysis.CommonInst;
+      } else if ("not-current-but-previous".equals(analysisStr)) {
         analysisEnum = Analysis.SemDiff;
+        swap = false;
+      } else if ("not-previous-but-current".equals(analysisStr)) {
+        analysisEnum = Analysis.SemDiff;
+        swap = true;
+      } else if ("semantic-relation".equals(analysisStr) || "Equivalence".equals(analysisStr)) {
+        analysisEnum = Analysis.Equivalence;
       }
 
       leftFile = writeToTempFile(leftCode, "alloy_diff_left_");
       rightFile = writeToTempFile(rightCode, "alloy_diff_right_");
+
+      CompModule rightModule = null;
+      try {
+        rightModule = CompUtil.parseEverything_fromFile(A4Reporter.NOP, null, rightFile.getAbsolutePath());
+      } catch (Exception e) {
+        // Ignored, we just won't have a module for eval if it fails to parse
+      }
+      final CompModule finalModule = rightModule;
 
       synchronized (ModuleDiff.class) {
         A4Options opt = AlloyInstanceController.getOptions();
@@ -170,8 +183,8 @@ public class DiffController {
       final Analysis finalAnalysis = analysisEnum;
       final int finalScope = scope;
       final boolean finalWithPred = withPred;
-      final String leftPath = leftFile.getAbsolutePath();
-      final String rightPath = rightFile.getAbsolutePath();
+      final String leftPath = swap ? rightFile.getAbsolutePath() : leftFile.getAbsolutePath();
+      final String rightPath = swap ? leftFile.getAbsolutePath() : rightFile.getAbsolutePath();
 
       A4Solution ans = runTimed(new DiffRunner() {
         @Override
@@ -185,9 +198,9 @@ public class DiffController {
       String specId;
       do {
         specId = Long.toHexString(Double.doubleToLongBits(Math.random()));
-      } while (diffInstances.containsKey(specId));
+      } while (AlloyInstanceController.instances.containsKey(specId));
 
-      diffInstances.put(specId, new StoredDiffSolution(ans));
+      AlloyInstanceController.instances.put(specId, new StoredSolution(finalModule, ans));
 
       return solutionToJson(specId, ans, finalAnalysis);
 
@@ -200,7 +213,7 @@ public class DiffController {
   }
 
   private String getNextWitnessInternal(String specId) {
-    StoredDiffSolution stored = diffInstances.get(specId);
+    StoredSolution stored = AlloyInstanceController.instances.get(specId);
     if (stored == null) {
       return errorJson("No diff solution found, possibly cleaned up in the meantime.");
     }
@@ -228,13 +241,13 @@ public class DiffController {
       if (analysis != null) {
         switch (analysis) {
           case SemDiff:
-            msg = "No semantic differences found between the two specifications.";
+            msg = "No semantic differences found between the two models.";
             break;
           case CommonInst:
-            msg = "No common instances found between the two specifications.";
+            msg = "No common instances found between the two models.";
             break;
           case Equivalence:
-            msg = "No counterexample found: the two specifications are semantically equivalent.";
+            msg = "No counterexample found: the two models are semantically equivalent.";
             break;
         }
       }
@@ -273,12 +286,6 @@ public class DiffController {
       sb.append("\n");
     }
     return sb.toString();
-  }
-
-  @Scheduled(fixedRate = 30000)
-  public void removeOldInstances() {
-    long currentTime = System.currentTimeMillis();
-    diffInstances.entrySet().removeIf(entry -> currentTime - entry.getValue().getLastAccessed() > 3600000);
   }
 
   public A4Solution runTimed(DiffRunner r, int seconds) throws Throwable {
@@ -349,29 +356,6 @@ public class DiffController {
       }
     }
     return new JSONObject(text);
-  }
-
-  private static class StoredDiffSolution {
-    private A4Solution solution;
-    private long lastAccessed;
-
-    public StoredDiffSolution(A4Solution solution) {
-      this.solution = solution;
-      this.lastAccessed = System.currentTimeMillis();
-    }
-
-    public A4Solution getSolution() {
-      return solution;
-    }
-
-    public void setSolution(A4Solution solution) {
-      this.solution = solution;
-      this.lastAccessed = System.currentTimeMillis();
-    }
-
-    public long getLastAccessed() {
-      return lastAccessed;
-    }
   }
 
   private abstract static class DiffRunner implements Runnable {
