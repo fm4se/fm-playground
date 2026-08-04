@@ -4,9 +4,10 @@ import {
     DefaultScopeComputation,
     LangiumCoreServices,
     LangiumDocument,
-    PrecomputedScopes,
-} from 'langium';
-import { isReferrable, isTypeDef, isVar, isVarDecl, TypeDef, Var, VarDecl } from './generated/ast.js';
+    MultiMap,
+    type AstNodeDescription
+} from "langium";
+import { isReferrable, isTypeDef, isVar, isVarDecl, TypeDef, Var, VarDecl } from "./generated/ast.js";
 
 export class SpectraScopeComputation extends DefaultScopeComputation {
     services: any;
@@ -14,22 +15,24 @@ export class SpectraScopeComputation extends DefaultScopeComputation {
         super(services);
     }
 
-    protected override async processNode(
-        node: AstNode,
-        document: LangiumDocument,
-        scopes: PrecomputedScopes
-    ): Promise<void> {
+    protected override addLocalSymbol(node: AstNode, document: LangiumDocument, symbols: MultiMap<AstNode, AstNodeDescription>): void {
         const container = node.$container;
+        
+        // This is replicating what DefaultScopeComputation does if we want default behavior,
+        // but we only add if it matches our specific conditions below or we fallback.
+        // Actually, looking at default, it adds to container if name exists.
+        // The original code only added for isReferrable, isTypeDef, etc.
+        // But to be safe and replicate the old `processNode`, we just implement our rules here.
+
         if (container && isReferrable(node)) {
             const name = this.nameProvider.getName(node);
             if (name) {
                 const description = this.descriptions.createDescription(node, name, document);
-
-                scopes.add(container, description);
+                symbols.add(container, description);
 
                 if (container.$container && node.$containerProperty) {
                     const value = (container as GenericAstNode)[node.$containerProperty as string];
-                    if (Array.isArray(value)) scopes.add(container.$container, description);
+                    if (Array.isArray(value)) symbols.add(container.$container, description);
                 }
             }
         }
@@ -41,7 +44,7 @@ export class SpectraScopeComputation extends DefaultScopeComputation {
                 const constantName = this.nameProvider.getName(constant);
                 if (constantName) {
                     const constantDescription = this.descriptions.createDescription(constant, constantName, document);
-                    scopes.add(container, constantDescription);
+                    symbols.add(container, constantDescription);
                 }
             }
         }
@@ -53,7 +56,7 @@ export class SpectraScopeComputation extends DefaultScopeComputation {
                 const constantName = this.nameProvider.getName(constant);
                 if (constantName) {
                     const constantDescription = this.descriptions.createDescription(constant, constantName, document);
-                    scopes.add(container, constantDescription);
+                    symbols.add(container, constantDescription);
                 }
             }
         }
@@ -65,7 +68,7 @@ export class SpectraScopeComputation extends DefaultScopeComputation {
                 const constantName = this.nameProvider.getName(constant);
                 if (constantName) {
                     const constantDescription = this.descriptions.createDescription(constant, constantName, document);
-                    scopes.add(container, constantDescription);
+                    symbols.add(container, constantDescription);
                 }
             }
         }

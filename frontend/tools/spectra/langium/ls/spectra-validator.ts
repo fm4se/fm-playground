@@ -1,6 +1,15 @@
-import { AstUtils, type ValidationAcceptor, type ValidationChecks } from 'langium';
+import {
+    AstUtils,
+    type ValidationAcceptor,
+    type ValidationChecks
+} from 'langium';
 import type { SpectraServices } from './spectra-module.js';
-import { SpectraAstType, Model, isTemporalPrimaryExpr, TemporalPrimaryExpr } from './generated/ast.js';
+import {
+    SpectraAstType,
+    Model,
+    isTemporalPrimaryExpr,
+    TemporalPrimaryExpr
+} from './generated/ast.js';
 
 /**
  * Register custom validation checks.
@@ -116,13 +125,14 @@ const dwyerPatternNames = new Set([
     'pattern51',
     'pattern52',
     'pattern53',
-    'pattern54',
+    'pattern54'
 ]);
 
 /**
  * Implementation of custom validations.
  */
 export class SpectraValidator {
+
     checkDwyerPatternsImport(model: Model, accept: ValidationAcceptor): void {
         let firstOffendingCall: TemporalPrimaryExpr | undefined = undefined;
         let usesDwyerPatterns = false;
@@ -139,18 +149,22 @@ export class SpectraValidator {
         }
 
         if (usesDwyerPatterns) {
-            const hasDwyerImport = model.imports.some((imp) => {
+            const hasDwyerImport = model.imports.some(imp => {
                 const importString = (imp as any).strValue || imp.$cstNode?.text;
                 return importString.includes('DwyerPatterns.spectra') || importString.includes('DwyerPatterns');
             });
 
             if (!hasDwyerImport && firstOffendingCall) {
-                accept('warning', 'Dwyer patterns are used but "DwyerPatterns.spectra" is not imported.', {
-                    node: firstOffendingCall,
-                    property: 'predPatt',
-                    code: 'ImportError',
-                });
+                accept('warning',
+                    'Dwyer patterns are used but "DwyerPatterns.spectra" is not imported.',
+                    {
+                        node: firstOffendingCall,
+                        property: 'predPatt',
+                        code: 'ImportError'
+                    }
+                );
             }
         }
     }
 }
+

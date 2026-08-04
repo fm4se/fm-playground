@@ -13,7 +13,7 @@ export class SpectraScopeProvider extends DefaultScopeProvider {
 
     override getScope(context: ReferenceInfo): Scope {
         const defaultScope = super.getScope(context);
-        const referenceNode = context.container;
+        const referenceNode = context.container
         const model = AstUtils.getContainerOfType(referenceNode, isModel);
 
         if (!model) {
@@ -28,15 +28,16 @@ export class SpectraScopeProvider extends DefaultScopeProvider {
             return defaultScope;
         }
 
-        const importDwyerPatterns = model.imports.some((imp) => {
+        const importDwyerPatterns = model.imports.some(imp => {
             const importString = (imp as any).strValue || imp.$cstNode?.text;
             if (!importString) return false;
 
             return importString.includes('DwyerPatterns.spectra') || importString.includes('DwyerPatterns');
-        });
+        })
         if (importDwyerPatterns) {
             return defaultScope;
-        } else {
+        }
+        else {
             const filteredScope = this.createFilteredScope(defaultScope, DWYER_PATTERNS_URI);
             return filteredScope;
         }
@@ -45,7 +46,7 @@ export class SpectraScopeProvider extends DefaultScopeProvider {
     protected createFilteredScope(baseScope: Scope, uriToFilter: URI): Scope {
         const uriStringToFilter = uriToFilter.toString();
         // Filter out all descriptions originating from the specified URI
-        const filteredStream = baseScope.getAllElements().filter((desc) => {
+        const filteredStream = baseScope.getAllElements().filter(desc => {
             // Ensure desc.documentUri exists before accessing toString()
             return desc.documentUri?.toString() !== uriStringToFilter;
         });

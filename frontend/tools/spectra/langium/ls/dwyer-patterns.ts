@@ -1,12 +1,12 @@
 export const buildinDwyerPatterns = `
 module DwyerPatterns
 
-// This file is a merge between the legacy DwyerPatterns file that
-// contained inconsistent names of patterns and parameters and the
+// This file is a merge between the legacy DwyerPatterns file that 
+// contained inconsistent names of patterns and parameters and the 
 // current DwyerPatterns as used in many newer examples.
 
-// We merged this file for backwards compatibility with older
-// specifications. Do not use it anywhere else.
+// We merged this file for backwards compatibility with older 
+// specifications. Do not use it anywhere else. 
 // The old names must disappear!
 
 /////////////////////
@@ -20,7 +20,7 @@ module DwyerPatterns
  * <b>Scope:</b> Globally<br>
  * <b>LTL:</b> G !p
  * </p>
- *
+ * 
  * a better way is to use a normal guarantee/assumption
  */
 pattern P_is_false_globally(p) {
@@ -337,7 +337,7 @@ pattern P_occures_at_most_twice_before_R(p, r) {
  * <p>
  * <b>Kind:</b> Bounded Existence: p-states occur at most 2 times<br>
  * <b>Scope:</b> After q<br>
- * <b>LTL:</b>
+ * <b>LTL:</b> 
 (!q U (q && ((((G !p V (p || G !p)) V (!p || (G !p V (p || G !p)))) V (p || ((G !p V (p || G !p)) V (!p || (G !p V (p || G !p)))))) V (!p || (((G !p V (p || G !p))
 V (!p || (G !p V (p || G !p)))) V (p || ((G !p V (p || G !p)) V (!p || (G !p V ( p || G !p)))))))))) || !F q
  * </p>
@@ -649,17 +649,17 @@ pattern S_precedes_to_P_after_Q_until_R(s, p, q, r) {
  */
 pattern S_responds_to_P_globally(s, p) {
   var { S0, S1} state;
-
+  
   // initial assignments: initial state
   ini state=S0;
-
+  
   // safety this and next state
   alw ((state=S0 & ((!p) | (p & s)) & next(state=S0)) |
   (state=S0 & (p & !s) & next(state=S1)) |
   (state=S1 & (s) & next(state=S0)) |
   (state=S1 & (!s) & next(state=S1)));
 
-
+  
   // equivalence of satisfaction
   alwEv (state=S0);
 }
@@ -1592,7 +1592,7 @@ pattern S_and_T_without_Z_responds_to_P_between_Q_and_R(s, t, z, p, q, r) {
  * <b>Scope:</b> Globally<br>
  * <b>LTL:</b> G !p
  * </p>
- *
+ * 
  * a better way is to use a normal guarantee/assumption
  */
 pattern notP_globally(p) {
@@ -2077,7 +2077,7 @@ pattern pattern25(q, p, r, s) {
 
 
 /**
- *<p>
+ *<p> 
  * <b>Kind:</b> Response: s responds to p<br>
  * <b>Scope:</b> Globally<br>
  * <b>LTL:</b> G (p -> F s)

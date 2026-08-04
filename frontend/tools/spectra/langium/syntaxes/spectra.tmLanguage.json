@@ -1,81 +1,71 @@
 {
-    "name": "spectra",
-    "scopeName": "source.spectra",
-    "fileTypes": [".spectra"],
-    "patterns": [
+  "name": "spectra",
+  "scopeName": "source.spectra",
+  "fileTypes": [
+    "spectra"
+  ],
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "name": "keyword.control.spectra",
+      "match": "\\b(FALSE|G|GE|GEF|GF|H|HISTORICALLY|Int|O|ONCE|PREV|S|SINCE|T|TRIGGERED|TRUE|Y|alw|alwEv|always|alwaysEventually|and|asm|assumption|aux|auxvar|boolean|counter|define|env|envvar|exists|false|forall|gar|guarantee|iff|implies|import|in|ini|initially|input|keep|mod|module|modulo|monitor|next|not|or|out|output|pattern|predicate|regexp|regtest|spec|sys|sysvar|trans|trig|true|type|var|weight|xor)\\b|\\B(\\.all|\\.any|\\.max|\\.min|\\.prod|\\.sum)\\b|\\b(dec:|inc:|overflow:|reset:|underflow:)\\B"
+    },
+    {
+      "name": "string.quoted.double.spectra",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
         {
-            "include": "#comments"
-        },
-        {
-            "name": "keyword.system.spectra",
-            "match": "\\b(sysvar|sys|output|guarantee|gar)\\b"
-        },
-        {
-            "name": "keyword.environment.spectra",
-            "match": "\\b(envvar|env|input|in|assumption|asm)\\b"
-        },
-        {
-            "name": "keyword.regex.spectra",
-            "match": "\\b(regexp|regtest)\\b"
-        },
-        {
-            "name": "keyword.control.spectra",
-            "match": "\\b(FALSE|G|GE|GEF|GF|H|HISTORICALLY|Int|O|ONCE|PREV|S|SINCE|T|TRIGGERED|TRUE|Y|alw|alwEv|always|alwaysEventually|and|aux|auxvar|boolean|counter|define|exists|false|forall|iff|implies|import|ini|initially|keep|mod|module|modulo|monitor|next|not|or|out|pattern|predicate|spec|trans|trig|true|type|var|weight|xor)\\b|\\B(\\.all|\\.any|\\.max|\\.min|\\.prod|\\.sum)\\b|\\b(dec:|inc:|overflow:|reset:|underflow:)\\B"
-        },
-        {
-            "name": "string.quoted.double.spectra",
-            "begin": "\"",
-            "end": "\"",
-            "patterns": [
-                {
-                    "include": "#string-character-escape"
-                }
-            ]
+          "include": "#string-character-escape"
         }
-    ],
-    "repository": {
-        "comments": {
-            "patterns": [
-                {
-                    "name": "comment.block.spectra",
-                    "begin": "/\\*",
-                    "beginCaptures": {
-                        "0": {
-                            "name": "punctuation.definition.comment.spectra"
-                        }
-                    },
-                    "end": "\\*/",
-                    "endCaptures": {
-                        "0": {
-                            "name": "punctuation.definition.comment.spectra"
-                        }
-                    }
-                },
-                {
-                    "begin": "//",
-                    "beginCaptures": {
-                        "1": {
-                            "name": "punctuation.whitespace.comment.leading.spectra"
-                        }
-                    },
-                    "end": "(?=$)",
-                    "name": "comment.line.spectra"
-                },
-                {
-                    "begin": "--",
-                    "beginCaptures": {
-                        "1": {
-                            "name": "punctuation.whitespace.comment.leading.spectra"
-                        }
-                    },
-                    "end": "(?=$)",
-                    "name": "comment.line.spectra"
-                }
-            ]
-        },
-        "string-character-escape": {
-            "name": "constant.character.escape.spectra",
-            "match": "\\\\(x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}|u\\{[0-9A-Fa-f]+\\}|[0-2][0-7]{0,2}|3[0-6][0-7]?|37[0-7]?|[4-7][0-7]?|.|$)"
-        }
+      ]
     }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.block.spectra",
+          "begin": "/\\*",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.spectra"
+            }
+          },
+          "end": "\\*/",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.spectra"
+            }
+          }
+        },
+        {
+          "begin": "//",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.whitespace.comment.leading.spectra"
+            }
+          },
+          "end": "(?=$)",
+          "name": "comment.line.spectra"
+        },
+        {
+          "begin": "--",
+          "beginCaptures": {
+            "1": {
+              "name": "punctuation.whitespace.comment.leading.spectra"
+            }
+          },
+          "end": "(?=$)",
+          "name": "comment.line.spectra"
+        }
+      ]
+    },
+    "string-character-escape": {
+      "name": "constant.character.escape.spectra",
+      "match": "\\\\(x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}|u\\{[0-9A-Fa-f]+\\}|[0-2][0-7]{0,2}|3[0-6][0-7]?|37[0-7]?|[4-7][0-7]?|.|$)"
+    }
+  }
 }

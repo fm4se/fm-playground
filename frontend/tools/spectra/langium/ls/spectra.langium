@@ -37,8 +37,8 @@ VarDecl infers VarDecl:
 ;
 
 Referrable infers Referrable:
-    Var | TypeConstant | DefineDecl | TypedParam
-    | PatternParam | Monitor | Counter
+    Var | TypeConstant | DefineDecl | TypedParam 
+    | PatternParam | Monitor | Counter 
     | DefineRegExpDecl | DomainVarDecl
     | TypedParamList | VarDecl
 ;

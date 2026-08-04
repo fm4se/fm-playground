@@ -7,7 +7,8 @@ import { LangiumDocument, MaybePromise } from 'langium';
 import { Range } from 'vscode-languageserver-types';
 
 export class SpectraCodeActionProvider implements CodeActionProvider {
-    constructor(services: SpectraServices) {}
+
+    constructor(services: SpectraServices) { }
 
     getCodeActions(document: LangiumDocument, params: CodeActionParams): MaybePromise<Array<Command | CodeAction>> {
         const result: CodeAction[] = [];
@@ -18,12 +19,8 @@ export class SpectraCodeActionProvider implements CodeActionProvider {
         return result;
     }
 
-    createCodeActions(
-        diagnostic: Diagnostic,
-        document: LangiumDocument,
-        acceptor: (codeAction: CodeAction | undefined) => void
-    ): void {
-        switch (diagnostic.code as string) {
+    createCodeActions(diagnostic: Diagnostic, document: LangiumDocument, acceptor: (codeAction: CodeAction | undefined) => void): void {
+        switch ((diagnostic.code as string)) {
             // Add case for the DwyerPatternsImportError
             case 'ImportError':
                 acceptor(this.createImportDwyerPatternsAction(diagnostic, document));
@@ -34,27 +31,24 @@ export class SpectraCodeActionProvider implements CodeActionProvider {
 
     private createImportDwyerPatternsAction(diagnostic: Diagnostic, document: LangiumDocument): CodeAction | undefined {
         const importStatement = 'import "DwyerPatterns.spectra"\n';
-        const insertRange: Range = {
-            // insert at the beginning of the document
+        const insertRange: Range = { // insert at the beginning of the document
             start: { line: 0, character: 0 },
-            end: { line: 0, character: 0 },
+            end: { line: 0, character: 0 }
         };
 
         return {
-            title: 'import DwyerPatterns.spectra',
+            title: "import DwyerPatterns.spectra",
             kind: 'quickfix',
             diagnostics: [diagnostic],
             isPreferred: true,
             edit: {
                 changes: {
-                    [document.textDocument.uri]: [
-                        {
-                            range: insertRange,
-                            newText: importStatement,
-                        },
-                    ],
-                },
-            },
+                    [document.textDocument.uri]: [{
+                        range: insertRange,
+                        newText: importStatement
+                    }]
+                }
+            }
         };
     }
 }

@@ -1,11 +1,11 @@
 import { DeepPartial, type Module, inject } from 'langium';
-import {
-    createDefaultModule,
-    createDefaultSharedModule,
-    type DefaultSharedModuleContext,
-    type LangiumServices,
-    type LangiumSharedServices,
-    type PartialLangiumServices,
+import { 
+    createDefaultModule, 
+    createDefaultSharedModule, 
+    type DefaultSharedModuleContext, 
+    type LangiumServices, 
+    type LangiumSharedServices, 
+    type PartialLangiumServices 
 } from 'langium/lsp';
 import { SpectraGeneratedModule, SpectraGeneratedSharedModule } from './generated/module.js';
 import { SpectraValidator, registerValidationChecks } from './spectra-validator.js';
@@ -14,20 +14,21 @@ import { SpectraScopeProvider } from './spectra-scope-provider.js';
 import { SpectraWorkspaceManager } from './spectra-workspace-manager.js';
 import { SpectraCodeActionProvider } from './spectra-code-actions.js';
 
+
 /**
  * Declaration of custom services - add your own service classes here.
  */
 export type SpectraAddedServices = {
     validation: {
-        SpectraValidator: SpectraValidator;
-    };
-};
+        SpectraValidator: SpectraValidator
+    }
+}
 
 /**
  * Union of Langium default services and your custom services - use this as constructor parameter
  * of custom service classes.
  */
-export type SpectraServices = LangiumServices & SpectraAddedServices;
+export type SpectraServices = LangiumServices & SpectraAddedServices
 
 /**
  * Dependency injection module that overrides Langium default services and contributes the
@@ -36,14 +37,14 @@ export type SpectraServices = LangiumServices & SpectraAddedServices;
  */
 export const SpectraModule: Module<SpectraServices, PartialLangiumServices & SpectraAddedServices> = {
     validation: {
-        SpectraValidator: () => new SpectraValidator(),
+        SpectraValidator: () => new SpectraValidator()
     },
     references: {
         ScopeComputation: (services) => new SpectraScopeComputation(services),
-        ScopeProvider: (services) => new SpectraScopeProvider(services),
+        ScopeProvider: (services) => new SpectraScopeProvider(services)
     },
     lsp: {
-        CodeActionProvider: (services) => new SpectraCodeActionProvider(services),
+        CodeActionProvider: (services) => new SpectraCodeActionProvider(services)
     },
 };
 
@@ -63,11 +64,19 @@ export const SpectraModule: Module<SpectraServices, PartialLangiumServices & Spe
  * @returns An object wrapping the shared services and the language-specific services
  */
 export function createSpectraServices(context: DefaultSharedModuleContext): {
-    shared: LangiumSharedServices;
-    Spectra: SpectraServices;
+    shared: LangiumSharedServices,
+    Spectra: SpectraServices
 } {
-    const shared = inject(createDefaultSharedModule(context), SpectraGeneratedSharedModule, SpectraSharedModule);
-    const Spectra = inject(createDefaultModule({ shared }), SpectraGeneratedModule, SpectraModule);
+    const shared = inject(
+        createDefaultSharedModule(context),
+        SpectraGeneratedSharedModule,
+        SpectraSharedModule
+    );
+    const Spectra = inject(
+        createDefaultModule({ shared }),
+        SpectraGeneratedModule,
+        SpectraModule
+    );
     shared.ServiceRegistry.register(Spectra);
     registerValidationChecks(Spectra);
     if (!context.connection) {
@@ -80,8 +89,8 @@ export function createSpectraServices(context: DefaultSharedModuleContext): {
 
 export type SpectraSharedServices = LangiumSharedServices;
 
-export const SpectraSharedModule: Module<SpectraSharedServices, DeepPartial<SpectraSharedServices>> = {
+export const SpectraSharedModule:  Module<SpectraSharedServices, DeepPartial<SpectraSharedServices>> = {
     workspace: {
-        WorkspaceManager: (services) => new SpectraWorkspaceManager(services),
-    },
-};
+        WorkspaceManager: (services) => new SpectraWorkspaceManager(services)
+    }
+}

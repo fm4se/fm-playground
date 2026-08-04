@@ -1,10 +1,16 @@
-import { AstNode, DefaultWorkspaceManager, LangiumDocument, LangiumDocumentFactory } from 'langium';
-import { LangiumSharedServices } from 'langium/lsp';
-import { WorkspaceFolder } from 'vscode-languageserver';
-import { URI } from 'vscode-uri';
-import { buildinDwyerPatterns } from './dwyer-patterns.js';
+import {
+    AstNode,
+    DefaultWorkspaceManager,
+    LangiumDocument,
+    LangiumDocumentFactory,
+} from "langium";
+import { LangiumSharedServices } from "langium/lsp";
+import { WorkspaceFolder } from "vscode-languageserver";
+import { URI } from "vscode-uri";
+import { buildinDwyerPatterns } from "./dwyer-patterns.js";
 
-export const DWYER_PATTERNS_URI = URI.parse('file:///DweyerPatterns.spectra');
+export const DWYER_PATTERNS_URI = URI.parse("file:///DweyerPatterns.spectra");
+
 
 export class SpectraWorkspaceManager extends DefaultWorkspaceManager {
     private documentFactory: LangiumDocumentFactory;
@@ -14,7 +20,7 @@ export class SpectraWorkspaceManager extends DefaultWorkspaceManager {
     }
 
     protected override async loadAdditionalDocuments(
-        folders: WorkspaceFolder[],
+        folders: WorkspaceFolder[], 
         collector: (document: LangiumDocument<AstNode>) => void
     ): Promise<void> {
         await super.loadAdditionalDocuments(folders, collector);
