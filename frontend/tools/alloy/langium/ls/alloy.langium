@@ -6,7 +6,7 @@ entry AlloyModule:
     ModuleDecl? import+=Import* paragraph+=Paragraph*;
 
 ModuleDecl:
-    'module' qualName=ModulePath ('[' params+=ModuleParam (',' params+=ModuleParam)* ']')?;
+    'module' qualName=ModulePath ('[' params+=ModuleParam (',' params+=ModuleParam)* ']')?; 
 
 ModuleParam:
     exactly?='exactly'? name=ID;
@@ -21,12 +21,12 @@ MacroDecl:
     'let' name=ID ('[' params+=ID (',' params+=ID)* ']')? '='? expr=Expr;
 
 SigDecl:
-    'private'? 'var'? 'abstract'? mult=MULT? 'sig' name=ID (',' additionalSigs+=AdditionalSig)* sigExt=SigExt?
+    'private'? 'var'? 'abstract'? mult=MULT? 'sig' name=ID (',' additionalSigs+=AdditionalSig)* sigExt=SigExt? 
     '{' (fields+=FieldDecl (',' fields+=FieldDecl)* ','?)? '}' block=Block?;
 
 AdditionalSig:
     name=ID;
-
+    
 SigExt:
     keyword=('extends' | 'in') parent=QualName ('+' additionalParents+=QualName)*;
 
@@ -43,7 +43,7 @@ PredDecl:
     'pred' (qualifier=QualName '.')? name=ID paraDecls=ParaDecls? block=Block;
 
 FunDecl:
-    'fun' (qualifier=QualName '.')? name=ID paraDecls=ParaDecls? ':'
+    'fun' (qualifier=QualName '.')? name=ID paraDecls=ParaDecls? ':' 
     (mult=MULT | multSet='set')? retType=ReturnTypeExpr '{' body=Expr '}';
 
 ParaDecls:
@@ -56,11 +56,11 @@ EnumDecl:
     'private'? 'enum' name=ID '{' values+=ID (',' values+=ID)* '}';
 
 CmdDecl:
-    (name=ID ':')? (kind='run' | kind='check') (predicate=QualName | block=Block) scope=Scope?
+    (name=ID ':')? (kind='run' | kind='check') (predicate=QualName | block=Block) scope=Scope? 
     ('expect' expectNum=INT)? ('=>' chainedCmd=CmdDecl)?;
 
 Scope:
-    'for' number=INT ('but' typeScopes+=TypeScope (',' typeScopes+=TypeScope)*)?
+    'for' number=INT ('but' typeScopes+=TypeScope (',' typeScopes+=TypeScope)*)? 
     | 'for' typeScopes+=TypeScope (',' typeScopes+=TypeScope)*;
 
 TypeScope:
@@ -146,18 +146,18 @@ UnaryExpr infers Expr:
     | PrimaryExpr;
 
 PrimaryExpr infers Expr:
-    Const
-    | QualName
+    Const 
+    | QualName 
     | ({infer AtExpr} '@' ref=[NamedElement:ID])
     | ({infer ThisExpr} 'this')
     | ({infer ParenExpr} '(' expr=Expr ')')
     | Block
     | ({infer SetExpr} '{' decls+=Decl (',' decls+=Decl)* blockOrBar=BlockOrBar '}')
-    | ({infer SumExpr} 'sum' decls+=Decl (',' decls+=Decl)* '|' expr=Expr)
-    | ({infer LetExpr} 'let' decls+=LetDecl (',' decls+=LetDecl)* blockOrBar=BlockOrBar)
-    | ({infer MetaExpr} qualName=QualName '$')
-    | STRING
-;
+    | ({infer SumExpr} 'sum' decls+=Decl (',' decls+=Decl)* '|' expr=Expr)  
+    | ({infer LetExpr} 'let' decls+=LetDecl (',' decls+=LetDecl)* blockOrBar=BlockOrBar)  
+    | ({infer MetaExpr} qualName=QualName '$')  
+    | STRING  
+    ;
 
 
 QualName:
@@ -190,11 +190,9 @@ BlockOrBar:
 CompareOp returns string:
     'in' | '=' | '<' | '>' | '=<' | '>=';
 
-QUANT returns string:
-    'all' | 'no' | 'sum' | 'some' | 'lone' | 'one';
+QUANT returns string: 'all' | 'no' | 'sum' | 'some' | 'lone' | 'one';
 
-MULT returns string:
-    'lone' | 'some' | 'one';
+MULT returns string: 'lone' | 'some' | 'one';
 
 terminal PRIME: "'";
 hidden terminal WS: /\s+/;
@@ -207,3 +205,4 @@ terminal STRING: /"([^"\\]|\\.)*"/;
 hidden terminal ML_COMMENT: /\/\*[\s\S]*?\*\//;
 hidden terminal SL_COMMENT_SLASH: /\/\/[^\n\r]*/;
 hidden terminal SL_COMMENT_DASH: /--[^\n\r]*/;
+

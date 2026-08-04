@@ -1,37 +1,6 @@
-import {
-    AstNodeDescription,
-    DefaultScopeProvider,
-    EMPTY_SCOPE,
-    ReferenceInfo,
-    Scope,
-    AstUtils,
-    AstNode,
-    LangiumDocuments,
-} from 'langium';
+import { AstNodeDescription, DefaultScopeProvider, EMPTY_SCOPE, ReferenceInfo, Scope, AstUtils, AstNode, LangiumDocuments } from 'langium';
 import type { LangiumServices } from 'langium/lsp';
-import {
-    AlloyModule,
-    SigDecl,
-    PredDecl,
-    FunDecl,
-    AssertDecl,
-    QuantExpr,
-    SetExpr,
-    LetExpr,
-    EnumDecl,
-    Import,
-    ModulePath,
-    NamedElement,
-    isAlloyModule,
-    isQuantExpr,
-    isSetExpr,
-    isLetExpr,
-    isDecl,
-    isFunDecl,
-    isPredDecl,
-    isModuleDecl,
-    isQualName,
-} from './generated/ast.js';
+import { AlloyModule, SigDecl, PredDecl, FunDecl, AssertDecl, QuantExpr, SetExpr, LetExpr, EnumDecl, Import, ModulePath, NamedElement, isAlloyModule, isQuantExpr, isSetExpr, isLetExpr, isDecl, isFunDecl, isPredDecl, isModuleDecl, isQualName } from './generated/ast.js';
 
 const IMPORTABLE_TYPES = new Set<string>([
     'AdditionalSig',
@@ -39,24 +8,26 @@ const IMPORTABLE_TYPES = new Set<string>([
     'EnumDecl',
     'FactDecl',
     'FieldDecl',
+    'Decl',
     'FunDecl',
     'MacroDecl',
     'PredDecl',
-    'SigDecl',
+    'SigDecl'
 ]);
 
 /**
  * Custom scope provider for the Alloy language that handles name resolution.
- *
+ * 
  * Scope resolution in Alloy follows this priority order:
  * 1. Local variables (quantifier variables, let bindings, function/predicate parameters)
- * 2. Module parameters
+ * 2. Module parameters 
  * 3. Imported names from open statements (util/ordering functions like 'first', 'last')
  * 4. Signature names and field names
  * 5. Enum declarations and enum values
  * 6. Predicate, function, and assertion names
  */
 export class AlloyScopeProvider extends DefaultScopeProvider {
+
     private readonly documents: LangiumDocuments;
 
     constructor(services: LangiumServices) {
@@ -66,7 +37,7 @@ export class AlloyScopeProvider extends DefaultScopeProvider {
 
     /**
      * Main entry point for scope resolution. Called by Langium when resolving references.
-     *
+     * 
      * @param context - Contains the AST node context and reference information
      * @returns Scope containing all available names for the given context
      */
@@ -86,7 +57,7 @@ export class AlloyScopeProvider extends DefaultScopeProvider {
     /**
      * Creates a comprehensive scope for NamedElement references.
      * This method aggregates all available names from different sources in priority order.
-     *
+     * 
      * @param context - Reference context to determine the container module
      * @returns Scope containing all available named elements
      */
@@ -103,17 +74,17 @@ export class AlloyScopeProvider extends DefaultScopeProvider {
         // Priority 2: Module parameters (e.g., module myModule[Elem])
         elements.push(...this.collectModuleParameters(model));
 
-        // Priority 3: Imported names from open statements (e.g., util/ordering)
-        elements.push(...this.collectImportedNames(model, context));
+    // Priority 3: Imported names from open statements (e.g., util/ordering)
+    elements.push(...this.collectImportedNames(model, context));
 
         // Priority 4-6: Global declarations within the module
-        elements.push(...this.collectSigNames(model)); // Signature names
-        elements.push(...this.collectFieldNames(model)); // Field names
+        elements.push(...this.collectSigNames(model));        // Signature names
+        elements.push(...this.collectFieldNames(model));      // Field names  
         elements.push(...this.collectEnumDeclarations(model)); // Enum type names
-        elements.push(...this.collectEnumValues(model)); // Enum value names
-        elements.push(...this.collectPredicates(model)); // Predicate names
-        elements.push(...this.collectFunctions(model)); // Function names
-        elements.push(...this.collectAssertions(model)); // Assertion names
+        elements.push(...this.collectEnumValues(model));      // Enum value names
+        elements.push(...this.collectPredicates(model));      // Predicate names
+        elements.push(...this.collectFunctions(model));       // Function names
+        elements.push(...this.collectAssertions(model));      // Assertion names
 
         return this.createScope(elements);
     }
@@ -128,24 +99,24 @@ export class AlloyScopeProvider extends DefaultScopeProvider {
         }
 
         const qualifierSegments = this.getQualifierSegments(context);
-        const relevantImports = model.import.filter((imp) => this.matchesImportQualifier(imp, qualifierSegments));
+        const relevantImports = model.import.filter(imp => this.matchesImportQualifier(imp, qualifierSegments));
 
         if (relevantImports.length === 0) {
             return [];
         }
 
-        const targetModulePaths = new Set<string>(relevantImports.map((imp) => this.modulePathToString(imp.qualName)));
+        const targetModulePaths = new Set<string>(relevantImports.map(imp => this.modulePathToString(imp.qualName)));
         const modulePathCache = new Map<string, string | null>();
         const result: AstNodeDescription[] = [];
 
-        for (const description of this.indexManager.allElements(NamedElement)) {
+        for (const description of this.indexManager.allElements(NamedElement.$type)) {
             if (!description.documentUri || !description.name) {
                 continue;
             }
 
             const containerType = (description as AstNodeDescription & { containerType?: string }).containerType;
-            const isFieldDecl =
-                description.type === 'FieldDecl' || (description.type === 'Decl' && containerType === 'FieldDecl');
+            const isFieldDecl = description.type === 'FieldDecl'
+                || (description.type === 'Decl' && containerType === 'FieldDecl');
             if (!isFieldDecl && (!description.type || !IMPORTABLE_TYPES.has(description.type))) {
                 continue;
             }
@@ -222,10 +193,10 @@ export class AlloyScopeProvider extends DefaultScopeProvider {
      * - Set comprehension variables: {x: Sig | x.field = value}
      * - Function/predicate parameters: pred myPred[x: Sig] { ... }
      * - Let expression bindings: let x = expr | ...
-     *
+     * 
      * Uses AST traversal upward from the reference point to find variable declarations.
      * Variables declared in inner scopes shadow those in outer scopes.
-     *
+     * 
      * @param context - Reference context used to walk up the AST tree
      * @returns Array of local variable descriptions
      */
@@ -259,7 +230,7 @@ export class AlloyScopeProvider extends DefaultScopeProvider {
                     }
                 }
             }
-            // Branch 2: Set comprehension expressions
+            // Branch 2: Set comprehension expressions 
             // Example: "{x: Person | x.age > 18}" - 'x' is a comprehension variable
             else if (isSetExpr(current)) {
                 const setExpr = current as SetExpr;
@@ -305,7 +276,7 @@ export class AlloyScopeProvider extends DefaultScopeProvider {
                     }
                 }
             }
-            // Branch 4: Predicate declarations with parameters
+            // Branch 4: Predicate declarations with parameters  
             // Example: "pred isAdult[x: Person] {...}" - 'x' is a parameter
             else if (isPredDecl(current)) {
                 const predDecl = current as PredDecl;
@@ -340,7 +311,7 @@ export class AlloyScopeProvider extends DefaultScopeProvider {
                     }
                 }
             }
-
+            
             // Move up one level in the AST tree to find variables in outer scopes
             current = current.$container;
         }
@@ -352,7 +323,7 @@ export class AlloyScopeProvider extends DefaultScopeProvider {
      * Collects module parameters that are available throughout the module.
      * Module parameters are formal parameters declared at the module level.
      * Example: "module myModule[Person, Time]" - 'Person' and 'Time' are module parameters
-     *
+     * 
      * @param model - The Alloy module to collect parameters from
      * @returns Array of module parameter descriptions
      */
@@ -377,8 +348,8 @@ export class AlloyScopeProvider extends DefaultScopeProvider {
      * Signatures are the main type declarations in Alloy.
      * Example: "sig Person { age: Int }" - 'Person' is a signature name
      * Also handles additional signatures: "sig A, B, C extends Parent"
-     *
-     * @param model - The Alloy module to collect signatures from
+     * 
+     * @param model - The Alloy module to collect signatures from  
      * @returns Array of signature name descriptions
      */
     private collectSigNames(model: AlloyModule): AstNodeDescription[] {
@@ -399,13 +370,7 @@ export class AlloyScopeProvider extends DefaultScopeProvider {
                 // Example: "sig A, B, C extends Parent" - adds 'B' and 'C'
                 if (sigDecl.additionalSigs) {
                     for (const additionalSig of sigDecl.additionalSigs) {
-                        elements.push(
-                            this.descriptions.createDescription(
-                                additionalSig,
-                                additionalSig.name,
-                                additionalSig.$document
-                            )
-                        );
+                        elements.push(this.descriptions.createDescription(additionalSig, additionalSig.name, additionalSig.$document));
                     }
                 }
             }
@@ -418,9 +383,9 @@ export class AlloyScopeProvider extends DefaultScopeProvider {
      * Collects all field names declared within signatures.
      * Field names can be referenced in expressions (e.g., person.age).
      * Example: "sig Person { name: String, age: Int }" - 'name' and 'age' are field names
-     *
+     * 
      * @param model - The Alloy module to collect fields from
-     * @returns Array of field name descriptions
+     * @returns Array of field name descriptions  
      */
     private collectFieldNames(model: AlloyModule): AstNodeDescription[] {
         const elements: AstNodeDescription[] = [];
@@ -434,18 +399,14 @@ export class AlloyScopeProvider extends DefaultScopeProvider {
                         if (fieldDecl.decl) {
                             // Add primary field name (e.g., 'name' in "name: String")
                             if (fieldDecl.decl.name && fieldDecl.decl.name.name) {
-                                elements.push(
-                                    this.descriptions.createDescription(fieldDecl.decl, fieldDecl.decl.name.name)
-                                );
+                                elements.push(this.descriptions.createDescription(fieldDecl.decl, fieldDecl.decl.name.name));
                             }
                             // Add additional field names from comma-separated declarations
                             // Example: "name, nickname: String" - adds 'nickname'
                             if (fieldDecl.decl.additionalNames) {
                                 for (const additionalName of fieldDecl.decl.additionalNames) {
                                     if (additionalName.name) {
-                                        elements.push(
-                                            this.descriptions.createDescription(fieldDecl.decl, additionalName.name)
-                                        );
+                                        elements.push(this.descriptions.createDescription(fieldDecl.decl, additionalName.name));
                                     }
                                 }
                             }
@@ -462,7 +423,7 @@ export class AlloyScopeProvider extends DefaultScopeProvider {
      * Collects enum type names (not the values, just the enum type itself).
      * Example: "enum Color {RED, GREEN, BLUE}" - 'Color' is the enum declaration
      * These can be used as types in field declarations and expressions.
-     *
+     * 
      * @param model - The Alloy module to collect enum types from
      * @returns Array of enum type name descriptions
      */
@@ -472,7 +433,7 @@ export class AlloyScopeProvider extends DefaultScopeProvider {
         for (const paragraph of model.paragraph) {
             if (paragraph.$type === 'EnumDecl') {
                 const enumDecl = paragraph as EnumDecl;
-
+                
                 // Add enum type name (e.g., 'Color' from "enum Color {RED, GREEN}")
                 if (enumDecl.name) {
                     elements.push(this.descriptions.createDescription(enumDecl, enumDecl.name, enumDecl.$document));
@@ -487,7 +448,7 @@ export class AlloyScopeProvider extends DefaultScopeProvider {
      * Collects enum value names that can be referenced in expressions.
      * Example: "enum Color {RED, GREEN, BLUE}" - 'RED', 'GREEN', 'BLUE' are enum values
      * These values can be used directly in expressions without qualification.
-     *
+     * 
      * @param model - The Alloy module to collect enum values from
      * @returns Array of enum value descriptions
      */
@@ -497,7 +458,7 @@ export class AlloyScopeProvider extends DefaultScopeProvider {
         for (const paragraph of model.paragraph) {
             if (paragraph.$type === 'EnumDecl') {
                 const enumDecl = paragraph as EnumDecl;
-
+                
                 // Add individual enum values (e.g., 'RED', 'GREEN' from "enum Color {RED, GREEN}")
                 if (enumDecl.values) {
                     for (const value of enumDecl.values) {
@@ -514,7 +475,7 @@ export class AlloyScopeProvider extends DefaultScopeProvider {
      * Collects predicate names that can be called or referenced.
      * Example: "pred isAdult[p: Person] { p.age >= 18 }" - 'isAdult' is a predicate name
      * Predicates can be invoked in expressions and facts.
-     *
+     * 
      * @param model - The Alloy module to collect predicates from
      * @returns Array of predicate name descriptions
      */
@@ -537,7 +498,7 @@ export class AlloyScopeProvider extends DefaultScopeProvider {
      * Collects function names that can be called in expressions.
      * Example: "fun parent[p: Person]: set Person { p.parents }" - 'parent' is a function name
      * Functions return values and can be used in expressions.
-     *
+     * 
      * @param model - The Alloy module to collect functions from
      * @returns Array of function name descriptions
      */
@@ -560,7 +521,7 @@ export class AlloyScopeProvider extends DefaultScopeProvider {
      * Collects assertion names that can be referenced in check commands.
      * Example: "assert noOrphans { all p: Person | some p.parents }" - 'noOrphans' is an assertion
      * Assertions are used to state properties that should hold and can be checked.
-     *
+     * 
      * @param model - The Alloy module to collect assertions from
      * @returns Array of assertion name descriptions
      */

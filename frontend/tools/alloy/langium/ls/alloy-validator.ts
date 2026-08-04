@@ -7,16 +7,23 @@ import type { AlloyServices } from './alloy-module.js';
  */
 export function registerValidationChecks(services: AlloyServices) {
     const registry = services.validation.ValidationRegistry;
-    const validator = services.validation.AlloyValidator;
-    const checks: ValidationChecks<AlloyAstType> = {
-        // Add your custom validation checks here
-    };
-    registry.register(checks, validator);
-}
+    
+    // Get modular validators from DI
+    const usageValidator = services.validation.AlloyUsageValidator;
+    const nameValidator = services.validation.AlloyNameValidator;
 
-/**
- * Implementation of custom validations.
- */
-export class AlloyValidator {
-    // Add custom validation methods here
+    // Register usage checks
+    const usageChecks: ValidationChecks<AlloyAstType> = {
+        SigDecl: usageValidator.checkUnusedSignature,
+        AdditionalSig: usageValidator.checkUnusedAdditionalSignature
+    };
+    registry.register(usageChecks, usageValidator);
+
+    // Register naming checks
+    const nameChecks: ValidationChecks<AlloyAstType> = {
+        AlloyModule: nameValidator.checkDuplicateNames,
+        SigDecl: nameValidator.checkDuplicateFields,
+        ParaDecls: nameValidator.checkDuplicateParameters
+    };
+    registry.register(nameChecks, nameValidator);
 }
