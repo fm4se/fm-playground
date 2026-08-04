@@ -25,7 +25,7 @@
     "cytoscape-cise": "^2.0.1",
     "cytoscape-dagre": "^2.5.0",
     "jotai": "^2.12.5",
-    "langium": "~3.2.0",
+    "langium": "~4.1.0",
     "lodash": "^4.17.21",
     "mdb-react-ui-kit": "^7.0.0",
     "monaco-languageclient": "^10.7.0",
