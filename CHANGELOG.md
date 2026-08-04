@@ -1,5 +1,11 @@
 # Change Log
 
+## v2.16.0[2026-08-04]
+
+- Upgraded Langium grammar to 4
+- Fixed Alloy parsing issues
+- Added shortcut to run
+
 ## v2.15.0[2026-06-26]
 
 - ✨ Alloy redundancy checking and explanation
