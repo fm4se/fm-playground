@@ -1,10 +1,10 @@
-import { LimbooleServices } from './limboole-module.js';
+import { LimbooleServices } from "./limboole-module.js";
 
-/**
- * Test an expressions against all expressions in the document.
+/** 
+ * Test an expressions against all expressions in the document. 
  * @param exprStr Current expression to be tested
- * @returns Proposal of an expression name in the document, that could be the intended spelling.
- */
+ * @returns Proposal of an expression name in the document, that could be the intended spelling. 
+*/
 export function checkTypo(exprStr: string, services: LimbooleServices): string | undefined {
     const expressionMap = services.utils.LimbooleExpressionCollector.getCollection();
 
@@ -46,9 +46,9 @@ function levenshteinDistance(str1: string, str2: string, threshold: number): num
         for (let j = 1; j <= len2; j++) {
             const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
             const newValue = Math.min(
-                currentRow[j - 1] + 1, // Insertion
-                previousValue + cost, // Substitution
-                currentRow[j] + 1 // Deletion
+                currentRow[j - 1] + 1,        // Insertion
+                previousValue + cost,         // Substitution
+                currentRow[j] + 1             // Deletion
             );
             previousValue = currentRow[j];
             currentRow[j] = newValue;
@@ -60,3 +60,5 @@ function levenshteinDistance(str1: string, str2: string, threshold: number): num
 
     return currentRow[len2];
 }
+
+

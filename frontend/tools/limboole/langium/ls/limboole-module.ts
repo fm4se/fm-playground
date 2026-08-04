@@ -1,12 +1,5 @@
 import { type Module, inject } from 'langium';
-import {
-    createDefaultModule,
-    createDefaultSharedModule,
-    type DefaultSharedModuleContext,
-    type LangiumServices,
-    type LangiumSharedServices,
-    type PartialLangiumServices,
-} from 'langium/lsp';
+import { createDefaultModule, createDefaultSharedModule, type DefaultSharedModuleContext, type LangiumServices, type LangiumSharedServices, type PartialLangiumServices } from 'langium/lsp';
 import { LimbooleGeneratedModule, LimbooleGeneratedSharedModule } from './generated/module.js';
 import { LimbooleValidator, registerValidationChecks } from './limboole-validator.js';
 import { LimbooleCodeActionProvider } from './limboole-code-action.js';
@@ -17,18 +10,18 @@ import { ExpressionCollection, registerExpressionCollector } from './limboole-ex
  */
 export type LimbooleAddedServices = {
     validation: {
-        LimbooleValidator: LimbooleValidator;
-    };
+        LimbooleValidator: LimbooleValidator
+    },
     utils: {
-        LimbooleExpressionCollector: ExpressionCollection;
-    };
-};
+        LimbooleExpressionCollector: ExpressionCollection
+    }
+}
 
 /**
  * Union of Langium default services and your custom services - use this as constructor parameter
  * of custom service classes.
  */
-export type LimbooleServices = LangiumServices & LimbooleAddedServices;
+export type LimbooleServices = LangiumServices & LimbooleAddedServices
 
 /**
  * Dependency injection module that overrides Langium default services and contributes the
@@ -40,7 +33,7 @@ export const LimbooleModule: Module<LimbooleServices, PartialLangiumServices & L
         LimbooleValidator: (services) => new LimbooleValidator(services),
     },
     utils: {
-        LimbooleExpressionCollector: () => new ExpressionCollection(),
+        LimbooleExpressionCollector: () => new ExpressionCollection()
     },
     lsp: {
         CodeActionProvider: (services) => new LimbooleCodeActionProvider(services),
@@ -63,12 +56,20 @@ export const LimbooleModule: Module<LimbooleServices, PartialLangiumServices & L
  * @returns An object wrapping the shared services and the language-specific services
  */
 export function createLimbooleServices(context: DefaultSharedModuleContext): {
-    shared: LangiumSharedServices;
-    Limboole: LimbooleServices;
+    shared: LangiumSharedServices,
+    Limboole: LimbooleServices
 } {
-    const shared = inject(createDefaultSharedModule(context), LimbooleGeneratedSharedModule);
-    const Limboole = inject(createDefaultModule({ shared }), LimbooleGeneratedModule, LimbooleModule);
+    const shared = inject(
+        createDefaultSharedModule(context),
+        LimbooleGeneratedSharedModule
+    );
+    const Limboole = inject(
+        createDefaultModule({ shared }),
+        LimbooleGeneratedModule,
+        LimbooleModule
+    );
     shared.ServiceRegistry.register(Limboole);
+
 
     registerValidationChecks(Limboole);
     registerExpressionCollector(Limboole);

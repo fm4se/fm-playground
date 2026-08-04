@@ -1,16 +1,17 @@
-import { Expr } from './generated/ast.js';
-import { LimbooleServices } from './limboole-module.js';
-import { DocumentState } from 'langium';
+import { Expr } from "./generated/ast.js";
+import { LimbooleServices } from "./limboole-module.js";
+import { DocumentState } from "langium";
 
 export function registerExpressionCollector(services: LimbooleServices) {
-    services.shared.workspace.DocumentBuilder.onBuildPhase(DocumentState.Parsed, (documents) => {
+    services.shared.workspace.DocumentBuilder.onBuildPhase(DocumentState.Parsed, documents => {
         for (const document of documents) {
             services.utils.LimbooleExpressionCollector.findAllBasicExpressions(document.parseResult.value);
         }
-    });
+    })
 }
 
 export class ExpressionCollection {
+
     expressionMap: { [key: string]: Expr[] };
 
     constructor() {
@@ -24,6 +25,7 @@ export class ExpressionCollection {
     }
 
     addToCollection(expression: string, node: Expr): void {
+
         // We first need to create a new entry in the map if it doesn't exist
         if (this.expressionMap[expression]) {
             this.expressionMap[expression].push(node);
@@ -41,7 +43,9 @@ export class ExpressionCollection {
     }
 
     printCollection(): void {
+        console.log("Printing all expressions in the collection:");
         for (const expression in this.expressionMap) {
+            console.log(expression);
         }
     }
 

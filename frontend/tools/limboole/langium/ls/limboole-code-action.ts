@@ -6,7 +6,9 @@ import type { LimbooleServices } from './limboole-module.js';
 import { LangiumDocument, MaybePromise } from 'langium';
 
 export class LimbooleCodeActionProvider implements CodeActionProvider {
-    constructor(services: LimbooleServices) {}
+
+    constructor(services: LimbooleServices) { }
+
 
     getCodeActions(document: LangiumDocument, params: CodeActionParams): MaybePromise<Array<Command | CodeAction>> {
         const result: CodeAction[] = [];
@@ -17,12 +19,8 @@ export class LimbooleCodeActionProvider implements CodeActionProvider {
         return result;
     }
 
-    createCodeActions(
-        diagnostic: Diagnostic,
-        document: LangiumDocument,
-        acceptor: (codeAction: CodeAction | undefined) => void
-    ): void {
-        switch (diagnostic.code as string) {
+    createCodeActions(diagnostic: Diagnostic, document: LangiumDocument, acceptor: (codeAction: CodeAction | undefined) => void): void {
+        switch ((diagnostic.code as string)) {
             case 'typo':
                 acceptor(this.createTypoCodeAction(diagnostic, document));
                 break;
@@ -30,21 +28,19 @@ export class LimbooleCodeActionProvider implements CodeActionProvider {
     }
 
     private createTypoCodeAction(diagnostic: Diagnostic, document: LangiumDocument): CodeAction | undefined {
-        const data = diagnostic.data?.typo;
+        const data = diagnostic.data?.typo
         if (data) {
             return {
                 title: 'Replace with ' + data,
                 kind: 'quickfix', // Showing the quick fix in the lightbulb menu
                 edit: {
                     changes: {
-                        [document.textDocument.uri]: [
-                            {
-                                range: diagnostic.range,
-                                newText: data,
-                            },
-                        ],
-                    },
-                },
+                        [document.textDocument.uri]: [{
+                            range: diagnostic.range,
+                            newText: data
+                        }]
+                    }
+                }
             };
         }
 
