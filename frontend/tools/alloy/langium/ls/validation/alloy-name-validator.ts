@@ -6,45 +6,71 @@ export class AlloyNameValidator {
     constructor(services: AlloyServices) {}
 
     checkDuplicateNames(module: AlloyModule, accept: ValidationAcceptor): void {
-        const nameToNodes = new Map<string, { node: AstNode, property: string }[]>();
+        const typeNames = new Map<string, { node: AstNode, property: string }[]>();
+        const callableNames = new Map<string, { node: AstNode, property: string }[]>();
 
-        const addName = (name: string | undefined, node: AstNode, property: string) => {
+        const addTypeName = (name: string | undefined, node: AstNode, property: string) => {
             if (name) {
-                if (!nameToNodes.has(name)) {
-                    nameToNodes.set(name, []);
-                }
-                nameToNodes.get(name)!.push({ node, property });
+                if (!typeNames.has(name)) typeNames.set(name, []);
+                typeNames.get(name)!.push({ node, property });
             }
+        };
+
+        const addCallableName = (name: string | undefined, arity: number, node: AstNode, property: string) => {
+            if (name) {
+                const key = `${name}#${arity}`;
+                if (!callableNames.has(key)) callableNames.set(key, []);
+                callableNames.get(key)!.push({ node, property });
+            }
+        };
+
+        const getArity = (paraDecls: ParaDecls | undefined): number => {
+            let arity = 0;
+            if (paraDecls?.decls) {
+                for (const decl of paraDecls.decls) {
+                    arity += 1; // Primary name
+                    arity += (decl as any).additionalNames?.length || 0;
+                }
+            }
+            return arity;
         };
 
         for (const p of module.paragraph || []) {
             switch (p.$type) {
                 case 'SigDecl':
-                    addName(p.name, p, 'name');
-                    for (const addSig of p.additionalSigs || []) {
-                        addName(addSig.name, addSig, 'name');
+                    addTypeName(p.name, p, 'name');
+                    for (const addSig of (p as SigDecl).additionalSigs || []) {
+                        addTypeName(addSig.name, addSig, 'name');
                     }
+                    break;
+                case 'EnumDecl':
+                    addTypeName(p.name, p, 'name');
                     break;
                 case 'MacroDecl':
                 case 'PredDecl':
                 case 'FunDecl':
-                case 'EnumDecl':
-                    addName(p.name, p, 'name');
+                    addCallableName(p.name, getArity((p as any).paraDecls), p, 'name');
                     break;
-                case 'FactDecl':
-                case 'AssertDecl':
-                case 'CmdDecl':
-                    if (p.name) {
-                        addName(p.name, p, 'name');
-                    }
-                    break;
+                // Facts, asserts, and commands are just labels and can overlap with other names.
             }
         }
 
-        for (const [name, nodes] of nameToNodes.entries()) {
+        for (const [name, nodes] of typeNames.entries()) {
             if (nodes.length > 1) {
                 for (const { node, property } of nodes) {
-                    accept('error', `Duplicate naming: '${name}' is already defined.`, {
+                    accept('error', `Duplicate type naming: '${name}' is already defined.`, {
+                        node,
+                        property
+                    });
+                }
+            }
+        }
+
+        for (const [key, nodes] of callableNames.entries()) {
+            if (nodes.length > 1) {
+                const [name, arity] = key.split('#');
+                for (const { node, property } of nodes) {
+                    accept('error', `Duplicate callable naming: '${name}' with arity ${arity} is already defined.`, {
                         node,
                         property
                     });

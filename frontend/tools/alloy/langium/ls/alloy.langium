@@ -56,7 +56,9 @@ EnumDecl:
     'private'? 'enum' name=ID '{' values+=ID (',' values+=ID)* '}';
 
 CmdDecl:
-    (name=ID ':')? (kind='run' | kind='check') (predicate=QualName | block=Block) scope=Scope? 
+    (name=ID ':')? (kind='run' | kind='check') 
+    (name=ID block=Block | block=Block | predicate=QualName)? 
+    scope=Scope? 
     ('expect' expectNum=INT)? ('=>' chainedCmd=CmdDecl)?;
 
 Scope:
@@ -85,11 +87,7 @@ BiImplicationExpr infers Expr:
     ImplicationExpr ({infer BiImplicationExpr.left=current} ('<=>' | 'iff') right=ImplicationExpr)*;
 
 ImplicationExpr infers Expr:
-    QuantExpr ({infer ImplicationExpr.left=current} ('=>' | 'implies') right=QuantExpr ('else' elseExpr=QuantExpr)?)?;
-
-QuantExpr infers Expr:
-    ({infer QuantExpr} QUANT decls+=Decl (',' decls+=Decl)* blockOrBar=BlockOrBar)
-    | BinaryTemporalExpr;
+    BinaryTemporalExpr ({infer ImplicationExpr.left=current} ('=>' | 'implies') right=BinaryTemporalExpr ('else' elseExpr=ImplicationExpr)?)?;
 
 BinaryTemporalExpr infers Expr:
     ConjunctionExpr ({infer BinaryTemporalExpr.left=current} ('until' | 'releases' | 'since' | 'triggered') right=ConjunctionExpr)*;
@@ -106,13 +104,13 @@ UnaryMultExpr infers Expr:
     | ComparisonExpr;
 
 ComparisonExpr infers Expr:
-    UnionDiffExpr ({infer ComparisonExpr.left=current} (negated=('!' | 'not'))? op=CompareOp right=UnionDiffExpr)?;
+    UnionDiffExpr ({infer ComparisonExpr.left=current} op=CompareOp right=UnionDiffExpr)?;
 
 UnionDiffExpr infers Expr:
     CardinalityExpr ({infer UnionDiffExpr.left=current} ('+' | '-') right=CardinalityExpr)*;
 
 CardinalityExpr infers Expr:
-    ({infer CardinalityExpr} '#' expr=CardinalityExpr)
+    ({infer CardinalityExpr} ('#' | 'int') expr=CardinalityExpr)
     | OverrideExpr;
 
 OverrideExpr infers Expr:
@@ -153,8 +151,8 @@ PrimaryExpr infers Expr:
     | ({infer ParenExpr} '(' expr=Expr ')')
     | Block
     | ({infer SetExpr} '{' decls+=Decl (',' decls+=Decl)* blockOrBar=BlockOrBar '}')
-    | ({infer SumExpr} 'sum' decls+=Decl (',' decls+=Decl)* '|' expr=Expr)  
-    | ({infer LetExpr} 'let' decls+=LetDecl (',' decls+=LetDecl)* blockOrBar=BlockOrBar)  
+    | ({infer LetExpr} 'let' decls+=LetDecl (',' decls+=LetDecl)* blockOrBar=BlockOrBar)
+    | ({infer QuantExpr} QUANT decls+=Decl (',' decls+=Decl)* blockOrBar=BlockOrBar)
     | ({infer MetaExpr} qualName=QualName '$')  
     | STRING  
     ;
@@ -173,7 +171,11 @@ Const:
     '-'? number=(INT | HEX_INT | BIN_INT) | 'none' | 'univ' | 'iden' | 'Int' | 'String' | 'int';
 
 ArrowOp:
-    (leftMult=('lone' | 'one') | leftSet='set')? '->' (rightMult=MULT | rightSet='set')?;
+    leftMult=LONE_ARROW (rightMult=MULT | rightSet='set')?
+  | leftMult=SOME_ARROW (rightMult=MULT | rightSet='set')?
+  | leftMult=ONE_ARROW (rightMult=MULT | rightSet='set')?
+  | leftSet=SET_ARROW (rightMult=MULT | rightSet='set')?
+  | '->' (rightMult=MULT | rightSet='set')?;
 
 LetDecl:
     name=ID '=' expr=Expr;
@@ -188,7 +190,7 @@ BlockOrBar:
     block=Block | '|' expr=Expr;
 
 CompareOp returns string:
-    'in' | '=' | '<' | '>' | '=<' | '>=';
+    'in' | '=' | '<' | '>' | '=<' | '>=' | NOT_IN | NOT_EQ | 'not' 'in';
 
 QUANT returns string: 'all' | 'no' | 'sum' | 'some' | 'lone' | 'one';
 
@@ -196,6 +198,12 @@ MULT returns string: 'lone' | 'some' | 'one';
 
 terminal PRIME: "'";
 hidden terminal WS: /\s+/;
+terminal NOT_EQ: /!=/;
+terminal NOT_IN: /!in\b/;
+terminal LONE_ARROW: /lone\s*->/;
+terminal SOME_ARROW: /some\s*->/;
+terminal ONE_ARROW: /one\s*->/;
+terminal SET_ARROW: /set\s*->/;
 terminal ID: /[_a-zA-Z][\w_\"]*/;
 terminal INT: /\d+/;
 terminal HEX_INT: /0x[0-9A-Fa-f]+/;

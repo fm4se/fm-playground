@@ -67,6 +67,19 @@ export class AlloyScopeProvider extends DefaultScopeProvider {
 
         const elements: AstNodeDescription[] = [];
 
+        // Add built-in Alloy 6 keywords that act as types/names
+        const document = AstUtils.getDocument(context.container);
+        if (document) {
+            elements.push({
+                name: 'steps',
+                nameSegment: undefined,
+                selectionSegment: undefined,
+                type: 'NamedElement',
+                documentUri: document.uri,
+                path: ''
+            } as AstNodeDescription);
+        }
+
         // Priority 1: Local variables have highest priority and can shadow global names
         // These include quantifier variables (all x: Sig | ...), let bindings, and parameters
         elements.push(...this.collectLocalVariables(context));
