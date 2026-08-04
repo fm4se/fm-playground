@@ -30,9 +30,13 @@ Command:
    | PAR_OPEN 'declare-sort' name=SmtSymbol arity=NUMERAL PAR_CLOSE
    | PAR_OPEN 'get-unsat-assumptions' PAR_CLOSE
     // Z3 Commands
-   | PAR_OPEN 'eval' term+=Term+ PAR_CLOSE
+   | PAR_OPEN 'eval' term+=Term+ PAR_CLOSE 
    | PAR_OPEN ('maximize' | 'minimize') term=Term PAR_CLOSE
+   | UnknownCommand
 ;
+
+UnknownCommand:
+    PAR_OPEN name=SmtSymbol elements+=SExpr* PAR_CLOSE;
 
 CmdCheckSat:
     PAR_OPEN 'check-sat' PAR_CLOSE
@@ -77,9 +81,9 @@ CmdDecDataType:
 // sortDec is not exposed to other commands
 // We only have access to it, if we stay inside the command, like an inner function
 CmdDecDataTypes:
-    PAR_OPEN commandType='declare-datatypes'
-    PAR_OPEN  sortDec+=SortDec* PAR_CLOSE
-    PAR_OPEN dataTypeDecs+=CommonDataTypeDec+ PAR_CLOSE
+    PAR_OPEN commandType='declare-datatypes' 
+    PAR_OPEN  sortDec+=SortDec* PAR_CLOSE 
+    PAR_OPEN dataTypeDecs+=CommonDataTypeDec+ PAR_CLOSE 
     PAR_CLOSE;
 
 CommonDataTypeDec:
@@ -101,12 +105,12 @@ ConstructorDec:
     PAR_OPEN name=SmtSymbol selectorDec+=SelectorDec* PAR_CLOSE;
 
 SelectorDec:
-    PAR_OPEN name=SmtSymbol sort=Sort PAR_CLOSE
+    PAR_OPEN name=SmtSymbol sort=Sort PAR_CLOSE 
     | PAR_OPEN listKey=('tail'|'head') sort=Sort PAR_CLOSE
 ;
 
 SortDec:
-    PAR_OPEN name=SmtSymbol num=NUMERAL PAR_CLOSE
+    PAR_OPEN name=SmtSymbol num=NUMERAL PAR_CLOSE 
     | name=SmtSymbol;
 
 FunctionDef:
@@ -122,7 +126,7 @@ SortedVar:
     PAR_OPEN name=SmtSymbol sort=Sort PAR_CLOSE;
 
 Sort:
-    identifier=SortIdentifier
+    identifier=SortIdentifier 
     | PAR_OPEN identifier=SortIdentifier sorts+=Sort+ PAR_CLOSE
 ;
 
@@ -130,7 +134,7 @@ Index:
     num=NUMERAL | symbol=SmtSymbol;
 
 SortIdentifier:
-    ID=[NamedSort:SmtSymbol]
+    ID=[NamedSort:SmtSymbol] 
     | (PAR_OPEN '_' ID=[NamedSort:SmtSymbol] indices+=Index+ PAR_CLOSE)
     | sort=PreDefinedSort
     | 'Array'
@@ -146,7 +150,7 @@ Term:
     SpecConstant
     | QualIdentifier
     | BValue
-    | PAR_OPEN Operator terms+=Term+ PAR_CLOSE
+    | PAR_OPEN Operator terms+=Term+ PAR_CLOSE 
     | PAR_OPEN 'if' condition+=Term+ statement+=ConditionalTerm*  PAR_CLOSE
     | PAR_OPEN qualId=QualIdentifier args+=Term+  boolean=BValue? PAR_CLOSE
     | PAR_OPEN 'let' PAR_OPEN varBinding+=VarBinding+ PAR_CLOSE body+=Term PAR_CLOSE
@@ -193,7 +197,7 @@ Operator returns string:
 
 // Bit-vector theory operations
 BvOperation returns string:
-    'concat' | 'bvnot' | 'bvand' | 'bvor' | 'bvneg' | 'bvadd' | 'bvmul' | 'bvudiv' | 'bvurem'
+    'concat' | 'bvnot' | 'bvand' | 'bvor' | 'bvneg' | 'bvadd' | 'bvmul' | 'bvudiv' | 'bvurem' 
     | 'bvshl' | 'bvlshr' | 'bvult' | 'bvnand' | 'bvnor' | 'bvxor' | 'bvxnor' | 'bvcomp'
     | 'bvsub' | 'bvsdiv' | 'bvsrem' | 'bvsmod' | 'bvashr' | 'bvule' | 'bvugt' | 'bvuge'
     | 'bvslt' | 'bvsle' | 'bvsgt' | 'bvsge'
@@ -233,7 +237,7 @@ NamedAttribute:
 
 AttributeValue:
     BValue |
-    const=SpecConstant
+    const=SpecConstant 
     | symbol=SmtSymbol string+=STRING*
     | {infer AttributeValue} PAR_OPEN exprs+=SExpr* PAR_CLOSE;
 
@@ -257,7 +261,7 @@ OptionKeyword:
     | option=':random-seed' value=NUMERAL?
     | option=':regular-output-channel' value=STRING?
     | option=':reproducible-resource-limit' value=NUMERAL
-    // Z3
+    // Z3 
     | option=':smt-auto-config' value=BValue?
     | option=':smt.mbqi' value=BValue?
     | option=':smt.macro-finder' value=BValue?
@@ -301,11 +305,11 @@ terminal SEPERATOR: ',';
 hidden terminal WS: /\s+/;
 
 // - + * / div mod abs <= < >= > to_real to_int is_int
-terminal ARITHMETIC_OPERATOR: 'div' | 'mod' | 'abs' | '<=' | '<' | '>=' | '>' | 'to_real' | 'to_int' | 'is_int';
+terminal ARITHMETIC_OPERATOR: 'div' | 'mod' | 'abs' | '<=' | '<' | '>=' | '>' | 'to_real' | 'to_int' | 'is_int'; 
 // not => and or xor = // distinct ite
 terminal BOOLEAN_OPERATOR: 'not' | '=>' | 'and' | 'or' | 'xor' | 'ite' | 'distinct';
 
-terminal SIMPLE_SYMBOL:
+terminal SIMPLE_SYMBOL: 
     (LETTER | '+' | '-' | '/' | '*' | ',' | '=' | '%' | '?' | '!' | '.' | '$' | '_' | '~' | '&' | '^' | '<' | '>' | '@')
     (LETTER | DIGIT | '+' | '-' | '/' | '*' | '=' | '%' | '?' | '!' | '.' | '$' | '_' | '~' | '&' | '^' | '<' | '>' | '@')*;
 hidden terminal SL_COMMENT: /;[^\n\r]*/;

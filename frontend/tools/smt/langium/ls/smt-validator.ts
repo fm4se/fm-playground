@@ -1,5 +1,5 @@
 import type { ValidationAcceptor, ValidationChecks } from 'langium';
-import type { SmtAstType, Model } from './generated/ast.js';
+import type { SmtAstType, UnknownCommand } from './generated/ast.js';
 import type { SmtServices } from './smt-module.js';
 
 /**
@@ -9,7 +9,7 @@ export function registerValidationChecks(services: SmtServices) {
     const registry = services.validation.ValidationRegistry;
     const validator = services.validation.SmtValidator;
     const checks: ValidationChecks<SmtAstType> = {
-        Model: validator.checkPersonStartsWithCapital,
+        UnknownCommand: validator.checkUnknownCommand
     };
     registry.register(checks, validator);
 }
@@ -18,12 +18,9 @@ export function registerValidationChecks(services: SmtServices) {
  * Implementation of custom validations.
  */
 export class SmtValidator {
-    checkPersonStartsWithCapital(model: Model, accept: ValidationAcceptor): void {
-        // if (Model[Symbol] !== model[Symbol]) {
-        //     const firstChar = model.elements.substring(0, 1);
-        //     if (firstChar.toUpperCase() !== firstChar) {
-        //         accept('warning', 'Person name should start with a capital.', { node: person, property: 'name' });
-        //     }
-        // }
+
+    checkUnknownCommand(cmd: UnknownCommand, accept: ValidationAcceptor): void {
+        accept('error', `Unknown command '${cmd.name}'.`, { node: cmd, property: 'name' });
     }
+
 }
