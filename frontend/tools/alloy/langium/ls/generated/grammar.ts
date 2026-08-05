@@ -63,7 +63,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
           {
             "$type": "SimpleType",
             "typeRef": {
-              "$ref": "#/rules@48"
+              "$ref": "#/rules@50"
             }
           },
           {
@@ -240,7 +240,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@63"
+                "$ref": "#/rules@65"
               },
               "arguments": []
             }
@@ -257,6 +257,11 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
       "definition": {
         "$type": "Group",
         "elements": [
+          {
+            "$type": "Keyword",
+            "value": "private",
+            "cardinality": "?"
+          },
           {
             "$type": "Keyword",
             "value": "open"
@@ -335,7 +340,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@63"
+                    "$ref": "#/rules@65"
                   },
                   "arguments": []
                 }
@@ -434,7 +439,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@63"
+                "$ref": "#/rules@65"
               },
               "arguments": []
             }
@@ -453,7 +458,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@63"
+                    "$ref": "#/rules@65"
                   },
                   "arguments": []
                 }
@@ -472,7 +477,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@63"
+                        "$ref": "#/rules@65"
                       },
                       "arguments": []
                     }
@@ -538,7 +543,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@54"
+                "$ref": "#/rules@56"
               },
               "arguments": []
             },
@@ -555,7 +560,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@63"
+                "$ref": "#/rules@65"
               },
               "arguments": []
             }
@@ -655,7 +660,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@49"
+                "$ref": "#/rules@51"
               },
               "arguments": []
             },
@@ -677,7 +682,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
         "terminal": {
           "$type": "RuleCall",
           "rule": {
-            "$ref": "#/rules@63"
+            "$ref": "#/rules@65"
           },
           "arguments": []
         }
@@ -868,7 +873,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@63"
+                "$ref": "#/rules@65"
               },
               "arguments": []
             },
@@ -881,7 +886,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@49"
+                "$ref": "#/rules@51"
               },
               "arguments": []
             }
@@ -931,7 +936,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@63"
+                "$ref": "#/rules@65"
               },
               "arguments": []
             }
@@ -956,7 +961,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@49"
+                "$ref": "#/rules@51"
               },
               "arguments": []
             }
@@ -973,6 +978,11 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
       "definition": {
         "$type": "Group",
         "elements": [
+          {
+            "$type": "Keyword",
+            "value": "private",
+            "cardinality": "?"
+          },
           {
             "$type": "Keyword",
             "value": "fun"
@@ -1006,7 +1016,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@63"
+                "$ref": "#/rules@65"
               },
               "arguments": []
             }
@@ -1038,7 +1048,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@54"
+                    "$ref": "#/rules@56"
                   },
                   "arguments": []
                 }
@@ -1228,7 +1238,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@63"
+                "$ref": "#/rules@65"
               },
               "arguments": []
             },
@@ -1241,7 +1251,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@49"
+                "$ref": "#/rules@51"
               },
               "arguments": []
             }
@@ -1274,7 +1284,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@63"
+                "$ref": "#/rules@65"
               },
               "arguments": []
             }
@@ -1290,7 +1300,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@63"
+                "$ref": "#/rules@65"
               },
               "arguments": []
             }
@@ -1309,7 +1319,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@63"
+                    "$ref": "#/rules@65"
                   },
                   "arguments": []
                 }
@@ -1343,7 +1353,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@63"
+                    "$ref": "#/rules@65"
                   },
                   "arguments": []
                 }
@@ -1391,7 +1401,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@63"
+                        "$ref": "#/rules@65"
                       },
                       "arguments": []
                     }
@@ -1403,7 +1413,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@49"
+                        "$ref": "#/rules@51"
                       },
                       "arguments": []
                     }
@@ -1417,7 +1427,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@49"
+                    "$ref": "#/rules@51"
                   },
                   "arguments": []
                 }
@@ -1464,7 +1474,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@64"
+                    "$ref": "#/rules@66"
                   },
                   "arguments": []
                 }
@@ -1520,7 +1530,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@64"
+                    "$ref": "#/rules@66"
                   },
                   "arguments": []
                 }
@@ -1638,7 +1648,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@64"
+                "$ref": "#/rules@66"
               },
               "arguments": []
             }
@@ -1660,7 +1670,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@64"
+                        "$ref": "#/rules@66"
                       },
                       "arguments": []
                     }
@@ -1679,7 +1689,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
                         "terminal": {
                           "$type": "RuleCall",
                           "rule": {
-                            "$ref": "#/rules@64"
+                            "$ref": "#/rules@66"
                           },
                           "arguments": []
                         }
@@ -1694,39 +1704,16 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
             "cardinality": "?"
           },
           {
-            "$type": "Alternatives",
-            "elements": [
-              {
-                "$type": "Assignment",
-                "feature": "type",
-                "operator": "=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@43"
-                  },
-                  "arguments": []
-                }
+            "$type": "Assignment",
+            "feature": "type",
+            "operator": "=",
+            "terminal": {
+              "$type": "RuleCall",
+              "rule": {
+                "$ref": "#/rules@43"
               },
-              {
-                "$type": "Assignment",
-                "feature": "builtin",
-                "operator": "=",
-                "terminal": {
-                  "$type": "Alternatives",
-                  "elements": [
-                    {
-                      "$type": "Keyword",
-                      "value": "int"
-                    },
-                    {
-                      "$type": "Keyword",
-                      "value": "Int"
-                    }
-                  ]
-                }
-              }
-            ]
+              "arguments": []
+            }
           }
         ]
       },
@@ -2357,7 +2344,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@52"
+                    "$ref": "#/rules@54"
                   },
                   "arguments": []
                 }
@@ -2401,41 +2388,92 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
             "arguments": []
           },
           {
-            "$type": "Group",
+            "$type": "Alternatives",
             "elements": [
               {
-                "$type": "Action",
-                "inferredType": {
-                  "$type": "InferredType",
-                  "name": "UnionDiffExpr"
-                },
-                "feature": "left",
-                "operator": "="
-              },
-              {
-                "$type": "Alternatives",
+                "$type": "Group",
                 "elements": [
                   {
-                    "$type": "Keyword",
-                    "value": "+"
+                    "$type": "Action",
+                    "inferredType": {
+                      "$type": "InferredType",
+                      "name": "UnionDiffExpr"
+                    },
+                    "feature": "left",
+                    "operator": "="
                   },
                   {
-                    "$type": "Keyword",
-                    "value": "-"
+                    "$type": "Alternatives",
+                    "elements": [
+                      {
+                        "$type": "Keyword",
+                        "value": "+"
+                      },
+                      {
+                        "$type": "Keyword",
+                        "value": "-"
+                      }
+                    ]
+                  },
+                  {
+                    "$type": "Assignment",
+                    "feature": "right",
+                    "operator": "=",
+                    "terminal": {
+                      "$type": "RuleCall",
+                      "rule": {
+                        "$ref": "#/rules@32"
+                      },
+                      "arguments": []
+                    }
                   }
                 ]
               },
               {
-                "$type": "Assignment",
-                "feature": "right",
-                "operator": "=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@32"
+                "$type": "Group",
+                "elements": [
+                  {
+                    "$type": "Action",
+                    "inferredType": {
+                      "$type": "InferredType",
+                      "name": "BuiltinMathExpr"
+                    },
+                    "feature": "left",
+                    "operator": "="
                   },
-                  "arguments": []
-                }
+                  {
+                    "$type": "Keyword",
+                    "value": "fun"
+                  },
+                  {
+                    "$type": "Keyword",
+                    "value": "/"
+                  },
+                  {
+                    "$type": "Assignment",
+                    "feature": "op",
+                    "operator": "=",
+                    "terminal": {
+                      "$type": "RuleCall",
+                      "rule": {
+                        "$ref": "#/rules@65"
+                      },
+                      "arguments": []
+                    }
+                  },
+                  {
+                    "$type": "Assignment",
+                    "feature": "right",
+                    "operator": "=",
+                    "terminal": {
+                      "$type": "RuleCall",
+                      "rule": {
+                        "$ref": "#/rules@32"
+                      },
+                      "arguments": []
+                    }
+                  }
+                ]
               }
             ],
             "cardinality": "*"
@@ -2650,7 +2688,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@47"
+                    "$ref": "#/rules@49"
                   },
                   "arguments": []
                 }
@@ -2940,7 +2978,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@55"
+                  "$ref": "#/rules@57"
                 },
                 "arguments": []
               }
@@ -3030,7 +3068,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@46"
+              "$ref": "#/rules@48"
             },
             "arguments": []
           },
@@ -3067,7 +3105,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
                   "terminal": {
                     "$type": "RuleCall",
                     "rule": {
-                      "$ref": "#/rules@63"
+                      "$ref": "#/rules@65"
                     },
                     "arguments": []
                   },
@@ -3128,7 +3166,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@49"
+              "$ref": "#/rules@51"
             },
             "arguments": []
           },
@@ -3187,7 +3225,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@51"
+                    "$ref": "#/rules@53"
                   },
                   "arguments": []
                 }
@@ -3219,7 +3257,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@48"
+                    "$ref": "#/rules@50"
                   },
                   "arguments": []
                 }
@@ -3238,7 +3276,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@48"
+                        "$ref": "#/rules@50"
                       },
                       "arguments": []
                     }
@@ -3253,7 +3291,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@51"
+                    "$ref": "#/rules@53"
                   },
                   "arguments": []
                 }
@@ -3273,7 +3311,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
               {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@53"
+                  "$ref": "#/rules@55"
                 },
                 "arguments": []
               },
@@ -3318,7 +3356,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@51"
+                    "$ref": "#/rules@53"
                   },
                   "arguments": []
                 }
@@ -3356,7 +3394,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@67"
+              "$ref": "#/rules@69"
             },
             "arguments": []
           }
@@ -3387,7 +3425,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@63"
+                    "$ref": "#/rules@46"
                   },
                   "arguments": []
                 }
@@ -3401,7 +3439,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
           },
           {
             "$type": "Assignment",
-            "feature": "ID",
+            "feature": "ref",
             "operator": "=",
             "terminal": {
               "$type": "CrossReference",
@@ -3411,7 +3449,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
               "terminal": {
                 "$type": "RuleCall",
                 "rule": {
-                  "$ref": "#/rules@63"
+                  "$ref": "#/rules@47"
                 },
                 "arguments": []
               },
@@ -3446,7 +3484,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@63"
+                    "$ref": "#/rules@46"
                   },
                   "arguments": []
                 }
@@ -3465,7 +3503,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@63"
+                "$ref": "#/rules@65"
               },
               "arguments": []
             }
@@ -3497,7 +3535,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@63"
+                    "$ref": "#/rules@46"
                   },
                   "arguments": []
                 }
@@ -3516,7 +3554,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@63"
+                "$ref": "#/rules@65"
               },
               "arguments": []
             }
@@ -3529,50 +3567,73 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
     },
     {
       "$type": "ParserRule",
-      "name": "Const",
+      "name": "NameOrKeyword",
+      "dataType": "string",
       "definition": {
         "$type": "Alternatives",
         "elements": [
           {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Keyword",
-                "value": "-",
-                "cardinality": "?"
-              },
-              {
-                "$type": "Assignment",
-                "feature": "number",
-                "operator": "=",
-                "terminal": {
-                  "$type": "Alternatives",
-                  "elements": [
-                    {
-                      "$type": "RuleCall",
-                      "rule": {
-                        "$ref": "#/rules@64"
-                      },
-                      "arguments": []
-                    },
-                    {
-                      "$type": "RuleCall",
-                      "rule": {
-                        "$ref": "#/rules@65"
-                      },
-                      "arguments": []
-                    },
-                    {
-                      "$type": "RuleCall",
-                      "rule": {
-                        "$ref": "#/rules@66"
-                      },
-                      "arguments": []
-                    }
-                  ]
-                }
-              }
-            ]
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@65"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "Keyword",
+            "value": "fun"
+          },
+          {
+            "$type": "Keyword",
+            "value": "pred"
+          },
+          {
+            "$type": "Keyword",
+            "value": "Int"
+          },
+          {
+            "$type": "Keyword",
+            "value": "int"
+          },
+          {
+            "$type": "Keyword",
+            "value": "none"
+          },
+          {
+            "$type": "Keyword",
+            "value": "univ"
+          },
+          {
+            "$type": "Keyword",
+            "value": "iden"
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "IDOrBuiltin",
+      "dataType": "string",
+      "definition": {
+        "$type": "Alternatives",
+        "elements": [
+          {
+            "$type": "RuleCall",
+            "rule": {
+              "$ref": "#/rules@65"
+            },
+            "arguments": []
+          },
+          {
+            "$type": "Keyword",
+            "value": "Int"
+          },
+          {
+            "$type": "Keyword",
+            "value": "int"
           },
           {
             "$type": "Keyword",
@@ -3588,15 +3649,55 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
           },
           {
             "$type": "Keyword",
-            "value": "Int"
-          },
-          {
-            "$type": "Keyword",
             "value": "String"
-          },
+          }
+        ]
+      },
+      "entry": false,
+      "fragment": false,
+      "parameters": []
+    },
+    {
+      "$type": "ParserRule",
+      "name": "Const",
+      "definition": {
+        "$type": "Group",
+        "elements": [
           {
             "$type": "Keyword",
-            "value": "int"
+            "value": "-",
+            "cardinality": "?"
+          },
+          {
+            "$type": "Assignment",
+            "feature": "number",
+            "operator": "=",
+            "terminal": {
+              "$type": "Alternatives",
+              "elements": [
+                {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@66"
+                  },
+                  "arguments": []
+                },
+                {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@67"
+                  },
+                  "arguments": []
+                },
+                {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@68"
+                  },
+                  "arguments": []
+                }
+              ]
+            }
           }
         ]
       },
@@ -3610,94 +3711,6 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
       "definition": {
         "$type": "Alternatives",
         "elements": [
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Assignment",
-                "feature": "leftMult",
-                "operator": "=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@59"
-                  },
-                  "arguments": []
-                }
-              },
-              {
-                "$type": "Alternatives",
-                "elements": [
-                  {
-                    "$type": "Assignment",
-                    "feature": "rightMult",
-                    "operator": "=",
-                    "terminal": {
-                      "$type": "RuleCall",
-                      "rule": {
-                        "$ref": "#/rules@54"
-                      },
-                      "arguments": []
-                    }
-                  },
-                  {
-                    "$type": "Assignment",
-                    "feature": "rightSet",
-                    "operator": "=",
-                    "terminal": {
-                      "$type": "Keyword",
-                      "value": "set"
-                    }
-                  }
-                ],
-                "cardinality": "?"
-              }
-            ]
-          },
-          {
-            "$type": "Group",
-            "elements": [
-              {
-                "$type": "Assignment",
-                "feature": "leftMult",
-                "operator": "=",
-                "terminal": {
-                  "$type": "RuleCall",
-                  "rule": {
-                    "$ref": "#/rules@60"
-                  },
-                  "arguments": []
-                }
-              },
-              {
-                "$type": "Alternatives",
-                "elements": [
-                  {
-                    "$type": "Assignment",
-                    "feature": "rightMult",
-                    "operator": "=",
-                    "terminal": {
-                      "$type": "RuleCall",
-                      "rule": {
-                        "$ref": "#/rules@54"
-                      },
-                      "arguments": []
-                    }
-                  },
-                  {
-                    "$type": "Assignment",
-                    "feature": "rightSet",
-                    "operator": "=",
-                    "terminal": {
-                      "$type": "Keyword",
-                      "value": "set"
-                    }
-                  }
-                ],
-                "cardinality": "?"
-              }
-            ]
-          },
           {
             "$type": "Group",
             "elements": [
@@ -3723,7 +3736,95 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@54"
+                        "$ref": "#/rules@56"
+                      },
+                      "arguments": []
+                    }
+                  },
+                  {
+                    "$type": "Assignment",
+                    "feature": "rightSet",
+                    "operator": "=",
+                    "terminal": {
+                      "$type": "Keyword",
+                      "value": "set"
+                    }
+                  }
+                ],
+                "cardinality": "?"
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Assignment",
+                "feature": "leftMult",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@62"
+                  },
+                  "arguments": []
+                }
+              },
+              {
+                "$type": "Alternatives",
+                "elements": [
+                  {
+                    "$type": "Assignment",
+                    "feature": "rightMult",
+                    "operator": "=",
+                    "terminal": {
+                      "$type": "RuleCall",
+                      "rule": {
+                        "$ref": "#/rules@56"
+                      },
+                      "arguments": []
+                    }
+                  },
+                  {
+                    "$type": "Assignment",
+                    "feature": "rightSet",
+                    "operator": "=",
+                    "terminal": {
+                      "$type": "Keyword",
+                      "value": "set"
+                    }
+                  }
+                ],
+                "cardinality": "?"
+              }
+            ]
+          },
+          {
+            "$type": "Group",
+            "elements": [
+              {
+                "$type": "Assignment",
+                "feature": "leftMult",
+                "operator": "=",
+                "terminal": {
+                  "$type": "RuleCall",
+                  "rule": {
+                    "$ref": "#/rules@63"
+                  },
+                  "arguments": []
+                }
+              },
+              {
+                "$type": "Alternatives",
+                "elements": [
+                  {
+                    "$type": "Assignment",
+                    "feature": "rightMult",
+                    "operator": "=",
+                    "terminal": {
+                      "$type": "RuleCall",
+                      "rule": {
+                        "$ref": "#/rules@56"
                       },
                       "arguments": []
                     }
@@ -3752,7 +3853,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
                 "terminal": {
                   "$type": "RuleCall",
                   "rule": {
-                    "$ref": "#/rules@62"
+                    "$ref": "#/rules@64"
                   },
                   "arguments": []
                 }
@@ -3767,7 +3868,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@54"
+                        "$ref": "#/rules@56"
                       },
                       "arguments": []
                     }
@@ -3803,7 +3904,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
                     "terminal": {
                       "$type": "RuleCall",
                       "rule": {
-                        "$ref": "#/rules@54"
+                        "$ref": "#/rules@56"
                       },
                       "arguments": []
                     }
@@ -3841,7 +3942,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@63"
+                "$ref": "#/rules@65"
               },
               "arguments": []
             }
@@ -3885,7 +3986,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@50"
+                "$ref": "#/rules@52"
               },
               "arguments": []
             },
@@ -3943,7 +4044,7 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
             "terminal": {
               "$type": "RuleCall",
               "rule": {
-                "$ref": "#/rules@49"
+                "$ref": "#/rules@51"
               },
               "arguments": []
             }
@@ -4007,16 +4108,20 @@ export const AlloyGrammar = (): Grammar => loadedAlloyGrammar ?? (loadedAlloyGra
             "value": ">="
           },
           {
+            "$type": "Keyword",
+            "value": "<="
+          },
+          {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@58"
+              "$ref": "#/rules@60"
             },
             "arguments": []
           },
           {
             "$type": "RuleCall",
             "rule": {
-              "$ref": "#/rules@57"
+              "$ref": "#/rules@59"
             },
             "arguments": []
           },

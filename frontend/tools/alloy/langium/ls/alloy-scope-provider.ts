@@ -67,17 +67,20 @@ export class AlloyScopeProvider extends DefaultScopeProvider {
 
         const elements: AstNodeDescription[] = [];
 
-        // Add built-in Alloy 6 keywords that act as types/names
+        // Add built-in Alloy 6 keywords and standard library functions that act as types/names
         const document = AstUtils.getDocument(context.container);
         if (document) {
-            elements.push({
-                name: 'steps',
-                nameSegment: undefined,
-                selectionSegment: undefined,
-                type: 'NamedElement',
-                documentUri: document.uri,
-                path: ''
-            } as AstNodeDescription);
+            const builtins = ['steps', 'Int', 'int', 'String', 'totalOrder', 'seq', 'none', 'univ', 'iden', 'abs', 'plus', 'minus', 'mul', 'div', 'rem', 'add', 'sub', 'sum', 'max', 'min'];
+            for (const builtin of builtins) {
+                elements.push({
+                    name: builtin,
+                    nameSegment: undefined,
+                    selectionSegment: undefined,
+                    type: 'NamedElement',
+                    documentUri: document.uri,
+                    path: ''
+                } as AstNodeDescription);
+            }
         }
 
         // Priority 1: Local variables have highest priority and can shadow global names
@@ -98,6 +101,7 @@ export class AlloyScopeProvider extends DefaultScopeProvider {
         elements.push(...this.collectPredicates(model));      // Predicate names
         elements.push(...this.collectFunctions(model));       // Function names
         elements.push(...this.collectAssertions(model));      // Assertion names
+        elements.push(...this.collectMacros(model));          // Macro names
 
         return this.createScope(elements);
     }
@@ -163,7 +167,7 @@ export class AlloyScopeProvider extends DefaultScopeProvider {
     }
 
     private getQualifierSegments(context: ReferenceInfo): string[] | undefined {
-        if (isQualName(context.container) && context.reference === context.container.ID) {
+        if (isQualName(context.container) && context.reference === context.container.ref) {
             return context.container.names;
         }
         return undefined;
@@ -320,6 +324,20 @@ export class AlloyScopeProvider extends DefaultScopeProvider {
                     for (const letDecl of letExpr.decls) {
                         if (letDecl.name) {
                             elements.push(this.descriptions.createDescription(letDecl, letDecl.name));
+                        }
+                    }
+                }
+            }
+            // Branch 6: Macro declarations
+            // Example: "let dynamic[x] = x -> Time" - 'x' is a macro parameter
+            else if (current.$type === 'MacroDecl') {
+                const macroDecl = current as any; // Type it roughly or cast
+                if (macroDecl.params) {
+                    for (const param of macroDecl.params) {
+                        if (param) {
+                            // Macro params are strings in the AST since they're just IDs, but createDescription needs an AstNode.
+                            // We can use the macroDecl itself as the node, and param as the name.
+                            elements.push(this.descriptions.createDescription(macroDecl, param));
                         }
                     }
                 }
@@ -545,7 +563,22 @@ export class AlloyScopeProvider extends DefaultScopeProvider {
             if (paragraph.$type === 'AssertDecl') {
                 const assertDecl = paragraph as AssertDecl;
                 if (assertDecl.name) {
-                    elements.push(this.descriptions.createDescription(assertDecl, assertDecl.name));
+                    elements.push(this.descriptions.createDescription(assertDecl, assertDecl.name, assertDecl.$document));
+                }
+            }
+        }
+
+        return elements;
+    }
+
+    private collectMacros(model: AlloyModule): AstNodeDescription[] {
+        const elements: AstNodeDescription[] = [];
+
+        for (const paragraph of model.paragraph) {
+            if (paragraph.$type === 'MacroDecl') {
+                const macroDecl = paragraph as any;
+                if (macroDecl.name) {
+                    elements.push(this.descriptions.createDescription(macroDecl, macroDecl.name, macroDecl.$document));
                 }
             }
         }

@@ -52,6 +52,7 @@ export type AlloyKeywordNames =
     | ";"
     | "<"
     | "<:"
+    | "<="
     | "<=>"
     | "="
     | "=<"
@@ -155,7 +156,7 @@ export function isAlloyModule(item: unknown): item is AlloyModule {
 }
 
 export interface ArrowExpr extends langium.AstNode {
-    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
+    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | BuiltinMathExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
     readonly $type: 'ArrowExpr';
     arrows: Array<ArrowOp>;
     left: Expr;
@@ -212,7 +213,7 @@ export function isAssertDecl(item: unknown): item is AssertDecl {
 }
 
 export interface AtExpr extends langium.AstNode {
-    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
+    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | BuiltinMathExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
     readonly $type: 'AtExpr';
     ref: langium.Reference<NamedElement>;
 }
@@ -227,7 +228,7 @@ export function isAtExpr(item: unknown): item is AtExpr {
 }
 
 export interface BiImplicationExpr extends langium.AstNode {
-    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
+    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | BuiltinMathExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
     readonly $type: 'BiImplicationExpr';
     left: Expr;
     right: Expr;
@@ -244,7 +245,7 @@ export function isBiImplicationExpr(item: unknown): item is BiImplicationExpr {
 }
 
 export interface BinaryTemporalExpr extends langium.AstNode {
-    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
+    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | BuiltinMathExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
     readonly $type: 'BinaryTemporalExpr';
     left: Expr;
     right: Expr;
@@ -261,7 +262,7 @@ export function isBinaryTemporalExpr(item: unknown): item is BinaryTemporalExpr 
 }
 
 export interface Block extends langium.AstNode {
-    readonly $container: ArrowExpr | AssertDecl | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | CardinalityExpr | CmdDecl | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FactDecl | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PredDecl | PrimeExpr | RestrictionExpr | SequenceExpr | SigDecl | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
+    readonly $container: ArrowExpr | AssertDecl | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | BuiltinMathExpr | CardinalityExpr | CmdDecl | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FactDecl | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PredDecl | PrimeExpr | RestrictionExpr | SequenceExpr | SigDecl | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
     readonly $type: 'Block';
     statements: Array<BlockStatement>;
 }
@@ -308,7 +309,7 @@ export function isBlockStatement(item: unknown): item is BlockStatement {
 }
 
 export interface BoxJoinExpr extends langium.AstNode {
-    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
+    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | BuiltinMathExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
     readonly $type: 'BoxJoinExpr';
     indices: Array<Expr>;
     left: Expr;
@@ -324,8 +325,27 @@ export function isBoxJoinExpr(item: unknown): item is BoxJoinExpr {
     return reflection.isInstance(item, BoxJoinExpr.$type);
 }
 
+export interface BuiltinMathExpr extends langium.AstNode {
+    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | BuiltinMathExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
+    readonly $type: 'BuiltinMathExpr';
+    left: Expr;
+    op: string;
+    right: Expr;
+}
+
+export const BuiltinMathExpr = {
+    $type: 'BuiltinMathExpr',
+    left: 'left',
+    op: 'op',
+    right: 'right'
+} as const;
+
+export function isBuiltinMathExpr(item: unknown): item is BuiltinMathExpr {
+    return reflection.isInstance(item, BuiltinMathExpr.$type);
+}
+
 export interface CardinalityExpr extends langium.AstNode {
-    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
+    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | BuiltinMathExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
     readonly $type: 'CardinalityExpr';
     expr: Expr;
 }
@@ -373,7 +393,7 @@ export function isCompareOp(item: unknown): item is CompareOp {
 }
 
 export interface ComparisonExpr extends langium.AstNode {
-    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
+    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | BuiltinMathExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
     readonly $type: 'ComparisonExpr';
     left: Expr;
     op: CompareOp;
@@ -392,7 +412,7 @@ export function isComparisonExpr(item: unknown): item is ComparisonExpr {
 }
 
 export interface ConjunctionExpr extends langium.AstNode {
-    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
+    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | BuiltinMathExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
     readonly $type: 'ConjunctionExpr';
     left: Expr;
     right: Expr;
@@ -409,9 +429,9 @@ export function isConjunctionExpr(item: unknown): item is ConjunctionExpr {
 }
 
 export interface Const extends langium.AstNode {
-    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
+    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | BuiltinMathExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
     readonly $type: 'Const';
-    number?: string;
+    number: string;
 }
 
 export const Const = {
@@ -443,7 +463,7 @@ export function isDecl(item: unknown): item is Decl {
 }
 
 export interface DisjunctionExpr extends langium.AstNode {
-    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
+    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | BuiltinMathExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
     readonly $type: 'DisjunctionExpr';
     left: Expr;
     right: Expr;
@@ -460,7 +480,7 @@ export function isDisjunctionExpr(item: unknown): item is DisjunctionExpr {
 }
 
 export interface DotJoinExpr extends langium.AstNode {
-    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
+    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | BuiltinMathExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
     readonly $type: 'DotJoinExpr';
     left: Expr;
     right: Expr;
@@ -493,7 +513,7 @@ export function isEnumDecl(item: unknown): item is EnumDecl {
     return reflection.isInstance(item, EnumDecl.$type);
 }
 
-export type Expr = ArrowExpr | AtExpr | BiImplicationExpr | BinaryTemporalExpr | Block | BoxJoinExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Const | DisjunctionExpr | DotJoinExpr | ImplicationExpr | IntersectionExpr | LetExpr | MetaExpr | OverrideExpr | ParenExpr | PrimeExpr | QualName | QuantExpr | RestrictionExpr | SequenceExpr | SetExpr | ThisExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
+export type Expr = ArrowExpr | AtExpr | BiImplicationExpr | BinaryTemporalExpr | Block | BoxJoinExpr | BuiltinMathExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Const | DisjunctionExpr | DotJoinExpr | ImplicationExpr | IntersectionExpr | LetExpr | MetaExpr | OverrideExpr | ParenExpr | PrimeExpr | QualName | QuantExpr | RestrictionExpr | SequenceExpr | SetExpr | ThisExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
 
 export const Expr = {
     $type: 'Expr'
@@ -562,8 +582,14 @@ export function isFunDecl(item: unknown): item is FunDecl {
     return reflection.isInstance(item, FunDecl.$type);
 }
 
+export type IDOrBuiltin = 'Int' | 'String' | 'iden' | 'int' | 'none' | 'univ' | string;
+
+export function isIDOrBuiltin(item: unknown): item is IDOrBuiltin {
+    return item === 'Int' || item === 'int' || item === 'none' || item === 'univ' || item === 'iden' || item === 'String' || (typeof item === 'string' && (/[_a-zA-Z][\w_\"]*/.test(item)));
+}
+
 export interface ImplicationExpr extends langium.AstNode {
-    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
+    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | BuiltinMathExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
     readonly $type: 'ImplicationExpr';
     elseExpr?: Expr;
     left: Expr;
@@ -601,7 +627,7 @@ export function isImport(item: unknown): item is Import {
 }
 
 export interface IntersectionExpr extends langium.AstNode {
-    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
+    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | BuiltinMathExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
     readonly $type: 'IntersectionExpr';
     left: Expr;
     right: Expr;
@@ -635,7 +661,7 @@ export function isLetDecl(item: unknown): item is LetDecl {
 }
 
 export interface LetExpr extends langium.AstNode {
-    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
+    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | BuiltinMathExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
     readonly $type: 'LetExpr';
     blockOrBar: BlockOrBar;
     decls: Array<LetDecl>;
@@ -671,7 +697,7 @@ export function isMacroDecl(item: unknown): item is MacroDecl {
 }
 
 export interface MetaExpr extends langium.AstNode {
-    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
+    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | BuiltinMathExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
     readonly $type: 'MetaExpr';
     qualName: QualName;
 }
@@ -724,7 +750,7 @@ export interface ModulePath extends langium.AstNode {
     readonly $container: Import | ModuleDecl;
     readonly $type: 'ModulePath';
     name: string;
-    names: Array<string>;
+    names: Array<NameOrKeyword>;
 }
 
 export const ModulePath = {
@@ -753,8 +779,14 @@ export function isNamedElement(item: unknown): item is NamedElement {
     return reflection.isInstance(item, NamedElement.$type);
 }
 
+export type NameOrKeyword = 'Int' | 'fun' | 'iden' | 'int' | 'none' | 'pred' | 'univ' | string;
+
+export function isNameOrKeyword(item: unknown): item is NameOrKeyword {
+    return item === 'fun' || item === 'pred' || item === 'Int' || item === 'int' || item === 'none' || item === 'univ' || item === 'iden' || (typeof item === 'string' && (/[_a-zA-Z][\w_\"]*/.test(item)));
+}
+
 export interface OverrideExpr extends langium.AstNode {
-    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
+    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | BuiltinMathExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
     readonly $type: 'OverrideExpr';
     left: Expr;
     right: Expr;
@@ -796,7 +828,7 @@ export function isParagraph(item: unknown): item is Paragraph {
 }
 
 export interface ParenExpr extends langium.AstNode {
-    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
+    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | BuiltinMathExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
     readonly $type: 'ParenExpr';
     expr: Expr;
 }
@@ -832,7 +864,7 @@ export function isPredDecl(item: unknown): item is PredDecl {
 }
 
 export interface PrimeExpr extends langium.AstNode {
-    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
+    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | BuiltinMathExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
     readonly $type: 'PrimeExpr';
     left: Expr;
 }
@@ -850,7 +882,7 @@ export interface QualDeclName extends langium.AstNode {
     readonly $container: Decl;
     readonly $type: 'QualDeclName';
     name: string;
-    names: Array<string>;
+    names: Array<NameOrKeyword>;
 }
 
 export const QualDeclName = {
@@ -864,16 +896,16 @@ export function isQualDeclName(item: unknown): item is QualDeclName {
 }
 
 export interface QualName extends langium.AstNode {
-    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | CardinalityExpr | CmdDecl | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | MetaExpr | OverrideExpr | ParenExpr | PredDecl | PrimeExpr | RestrictionExpr | SequenceExpr | SigExt | TypeScope | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
+    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | BuiltinMathExpr | CardinalityExpr | CmdDecl | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | MetaExpr | OverrideExpr | ParenExpr | PredDecl | PrimeExpr | RestrictionExpr | SequenceExpr | SigExt | TypeScope | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
     readonly $type: 'QualName';
-    ID: langium.Reference<NamedElement>;
-    names: Array<string>;
+    names: Array<NameOrKeyword>;
+    ref: langium.Reference<NamedElement>;
 }
 
 export const QualName = {
     $type: 'QualName',
-    ID: 'ID',
-    names: 'names'
+    names: 'names',
+    ref: 'ref'
 } as const;
 
 export function isQualName(item: unknown): item is QualName {
@@ -887,7 +919,7 @@ export function isQUANT(item: unknown): item is QUANT {
 }
 
 export interface QuantExpr extends langium.AstNode {
-    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
+    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | BuiltinMathExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
     readonly $type: 'QUANT' | 'QuantExpr';
     blockOrBar: BlockOrBar;
     decls: Array<Decl>;
@@ -904,7 +936,7 @@ export function isQuantExpr(item: unknown): item is QuantExpr {
 }
 
 export interface RestrictionExpr extends langium.AstNode {
-    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
+    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | BuiltinMathExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
     readonly $type: 'RestrictionExpr';
     left: Expr;
     right: Expr;
@@ -938,7 +970,7 @@ export function isScope(item: unknown): item is Scope {
 }
 
 export interface SequenceExpr extends langium.AstNode {
-    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
+    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | BuiltinMathExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
     readonly $type: 'SequenceExpr';
     left: Expr;
     right: Expr;
@@ -955,7 +987,7 @@ export function isSequenceExpr(item: unknown): item is SequenceExpr {
 }
 
 export interface SetExpr extends langium.AstNode {
-    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
+    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | BuiltinMathExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
     readonly $type: 'SetExpr';
     blockOrBar: BlockOrBar;
     decls: Array<Decl>;
@@ -1016,7 +1048,7 @@ export function isSigExt(item: unknown): item is SigExt {
 }
 
 export interface ThisExpr extends langium.AstNode {
-    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
+    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | BuiltinMathExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
     readonly $type: 'ThisExpr';
 }
 
@@ -1031,16 +1063,14 @@ export function isThisExpr(item: unknown): item is ThisExpr {
 export interface TypeScope extends langium.AstNode {
     readonly $container: Scope;
     readonly $type: 'TypeScope';
-    builtin?: 'Int' | 'int';
     endNumber?: string;
     number: string;
     stepNumber?: string;
-    type?: QualName;
+    type: QualName;
 }
 
 export const TypeScope = {
     $type: 'TypeScope',
-    builtin: 'builtin',
     endNumber: 'endNumber',
     number: 'number',
     stepNumber: 'stepNumber',
@@ -1052,7 +1082,7 @@ export function isTypeScope(item: unknown): item is TypeScope {
 }
 
 export interface UnaryExpr extends langium.AstNode {
-    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
+    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | BuiltinMathExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
     readonly $type: 'UnaryExpr';
     expr: Expr;
 }
@@ -1067,7 +1097,7 @@ export function isUnaryExpr(item: unknown): item is UnaryExpr {
 }
 
 export interface UnaryLogicalExpr extends langium.AstNode {
-    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
+    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | BuiltinMathExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
     readonly $type: 'UnaryLogicalExpr';
     expr: Expr;
 }
@@ -1082,7 +1112,7 @@ export function isUnaryLogicalExpr(item: unknown): item is UnaryLogicalExpr {
 }
 
 export interface UnaryMultExpr extends langium.AstNode {
-    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
+    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | BuiltinMathExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
     readonly $type: 'UnaryMultExpr';
     expr: Expr;
 }
@@ -1097,7 +1127,7 @@ export function isUnaryMultExpr(item: unknown): item is UnaryMultExpr {
 }
 
 export interface UnionDiffExpr extends langium.AstNode {
-    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
+    readonly $container: ArrowExpr | BiImplicationExpr | BinaryTemporalExpr | BlockOrBar | BlockStatement | BoxJoinExpr | BuiltinMathExpr | CardinalityExpr | ComparisonExpr | ConjunctionExpr | Decl | DisjunctionExpr | DotJoinExpr | FunDecl | ImplicationExpr | IntersectionExpr | LetDecl | MacroDecl | OverrideExpr | ParenExpr | PrimeExpr | RestrictionExpr | SequenceExpr | UnaryExpr | UnaryLogicalExpr | UnaryMultExpr | UnionDiffExpr;
     readonly $type: 'UnionDiffExpr';
     left: Expr;
     right: Expr;
@@ -1126,6 +1156,7 @@ export type AlloyAstType = {
     BlockOrBar: BlockOrBar
     BlockStatement: BlockStatement
     BoxJoinExpr: BoxJoinExpr
+    BuiltinMathExpr: BuiltinMathExpr
     CardinalityExpr: CardinalityExpr
     CmdDecl: CmdDecl
     ComparisonExpr: ComparisonExpr
@@ -1318,6 +1349,21 @@ export class AlloyAstReflection extends langium.AbstractAstReflection {
                 },
                 left: {
                     name: BoxJoinExpr.left
+                }
+            },
+            superTypes: [Expr.$type]
+        },
+        BuiltinMathExpr: {
+            name: BuiltinMathExpr.$type,
+            properties: {
+                left: {
+                    name: BuiltinMathExpr.left
+                },
+                op: {
+                    name: BuiltinMathExpr.op
+                },
+                right: {
+                    name: BuiltinMathExpr.right
                 }
             },
             superTypes: [Expr.$type]
@@ -1727,13 +1773,13 @@ export class AlloyAstReflection extends langium.AbstractAstReflection {
         QualName: {
             name: QualName.$type,
             properties: {
-                ID: {
-                    name: QualName.ID,
-                    referenceType: NamedElement.$type
-                },
                 names: {
                     name: QualName.names,
                     defaultValue: []
+                },
+                ref: {
+                    name: QualName.ref,
+                    referenceType: NamedElement.$type
                 }
             },
             superTypes: [Expr.$type]
@@ -1852,9 +1898,6 @@ export class AlloyAstReflection extends langium.AbstractAstReflection {
         TypeScope: {
             name: TypeScope.$type,
             properties: {
-                builtin: {
-                    name: TypeScope.builtin
-                },
                 endNumber: {
                     name: TypeScope.endNumber
                 },

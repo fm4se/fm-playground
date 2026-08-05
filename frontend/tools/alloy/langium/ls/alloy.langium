@@ -12,7 +12,7 @@ ModuleParam:
     exactly?='exactly'? name=ID;
 
 Import:
-    'open' qualName=ModulePath ('[' aliases+=ModulePath (',' aliases+=ModulePath)*']')? ('as' alias=ID)?;
+    'private'? 'open' qualName=ModulePath ('[' aliases+=ModulePath (',' aliases+=ModulePath)*']')? ('as' alias=ID)?;
 
 Paragraph:
     SigDecl | FactDecl | PredDecl | FunDecl | AssertDecl | CmdDecl | EnumDecl | MacroDecl;
@@ -43,7 +43,7 @@ PredDecl:
     'pred' (qualifier=QualName '.')? name=ID paraDecls=ParaDecls? block=Block;
 
 FunDecl:
-    'fun' (qualifier=QualName '.')? name=ID paraDecls=ParaDecls? ':' 
+    'private'? 'fun' (qualifier=QualName '.')? name=ID paraDecls=ParaDecls? ':' 
     (mult=MULT | multSet='set')? retType=ReturnTypeExpr '{' body=Expr '}';
 
 ParaDecls:
@@ -66,7 +66,7 @@ Scope:
     | 'for' typeScopes+=TypeScope (',' typeScopes+=TypeScope)*;
 
 TypeScope:
-    'exactly'? number=INT ('..' (endNumber=INT (':' stepNumber=INT)?)?)? (type=QualName | builtin=('int' | 'Int'));
+    'exactly'? number=INT ('..' (endNumber=INT (':' stepNumber=INT)?)?)? type=QualName;
 
 
 Expr:
@@ -107,7 +107,10 @@ ComparisonExpr infers Expr:
     UnionDiffExpr ({infer ComparisonExpr.left=current} op=CompareOp right=UnionDiffExpr)?;
 
 UnionDiffExpr infers Expr:
-    CardinalityExpr ({infer UnionDiffExpr.left=current} ('+' | '-') right=CardinalityExpr)*;
+    CardinalityExpr (
+        {infer UnionDiffExpr.left=current} ('+' | '-') right=CardinalityExpr
+        | {infer BuiltinMathExpr.left=current} 'fun' '/' op=ID right=CardinalityExpr
+    )*;
 
 CardinalityExpr infers Expr:
     ({infer CardinalityExpr} ('#' | 'int') expr=CardinalityExpr)
@@ -159,16 +162,24 @@ PrimaryExpr infers Expr:
 
 
 QualName:
-    ('this/')? (names+=ID'/')* ID=[NamedElement:ID];
+    ('this/')? (names+=NameOrKeyword'/')* ref=[NamedElement:IDOrBuiltin];
 
 QualDeclName:
-    ('this/')? (names+=ID'/')* name=ID;
+    ('this/')? (names+=NameOrKeyword'/')* name=ID;
 
 ModulePath:
-    ('this/')? (names+=ID'/')* name=ID;
+    ('this/')? (names+=NameOrKeyword'/')* name=ID;
+
+// Allows keywords to appear as namespace prefixes in qualified names (e.g., fun/add, pred/totalOrder, seq/Int)
+NameOrKeyword returns string:
+    ID | 'fun' | 'pred' | 'Int' | 'int' | 'none' | 'univ' | 'iden';
+
+// The final segment of a QualName can be an ID or a built-in type, but NOT a declaration keyword like 'pred' or 'fun'.
+IDOrBuiltin returns string:
+    ID | 'Int' | 'int' | 'none' | 'univ' | 'iden' | 'String';
 
 Const:
-    '-'? number=(INT | HEX_INT | BIN_INT) | 'none' | 'univ' | 'iden' | 'Int' | 'String' | 'int';
+    '-'? number=(INT | HEX_INT | BIN_INT);
 
 ArrowOp:
     leftMult=LONE_ARROW (rightMult=MULT | rightSet='set')?
@@ -190,7 +201,7 @@ BlockOrBar:
     block=Block | '|' expr=Expr;
 
 CompareOp returns string:
-    'in' | '=' | '<' | '>' | '=<' | '>=' | NOT_IN | NOT_EQ | 'not' 'in';
+    'in' | '=' | '<' | '>' | '=<' | '>=' | '<=' | NOT_IN | NOT_EQ | 'not' 'in';
 
 QUANT returns string: 'all' | 'no' | 'sum' | 'some' | 'lone' | 'one';
 
