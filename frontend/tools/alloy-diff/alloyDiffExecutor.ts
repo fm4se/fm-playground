@@ -84,16 +84,16 @@ export const executeAlloyDiffTool = async () => {
             let finalRes: any = {};
 
             if (isF1NotF2Unsat && isNotF1ButF2Unsat) {
-                semanticRelationMessage = "Current ≡ Previous\nAll instances that satisfy the current model also satisfy the previous model, and vice versa.";
+                semanticRelationMessage = "<details><summary>Current ≡ Previous</summary>All instances that satisfy the current model also satisfy the previous model, and vice versa.</details>";
                 finalRes = { error: semanticRelationMessage };
             } else if (!isF1NotF2Unsat && isNotF1ButF2Unsat) {
-                semanticRelationMessage = "Previous ⊨ Current\nAll instances that satisfy the previous model also satisfy the current model. Some instances that satisfy the current model do not satisfy the previous model.";
+                semanticRelationMessage = "<details><summary>Previous ⊨ Current</summary>All instances that satisfy the previous model also satisfy the current model. Some instances that satisfy the current model do not satisfy the previous model.</details>";
                 finalRes = { ...resF1NotF2, semanticRelationMessage };
             } else if (isF1NotF2Unsat && !isNotF1ButF2Unsat) {
-                semanticRelationMessage = "Current ⊨ Previous\nAll instances that satisfy the current model also satisfy the previous model. Some instances that satisfy the previous model do not satisfy the current model.";
+                semanticRelationMessage = "<details><summary>Current ⊨ Previous</summary>All instances that satisfy the current model also satisfy the previous model. Some instances that satisfy the previous model do not satisfy the current model.</details>";
                 finalRes = { ...resNotF1ButF2, semanticRelationMessage };
             } else {
-                semanticRelationMessage = "The models are incomparable\nThere exist instances that satisfy the current model but not the previous model, and vice versa.";
+                semanticRelationMessage = "<details><summary>The models are incomparable</summary>There exist instances that satisfy the current model but not the previous model, and vice versa.</details>";
                 finalRes = { ...resF1NotF2, semanticRelationMessage };
             }
 

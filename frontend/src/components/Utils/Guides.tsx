@@ -33,7 +33,11 @@ const Guides: React.FC<GuidesProps> = ({ id, editorTheme }: GuidesProps) => {
 
     return (
         <div>
-            <h2>Guides</h2>
+            <h2
+            style={{
+                marginTop: '10px',
+            }}
+            >Guides</h2>
             <div className='row'>
                 {guideData.map((item, index) => (
                     <div key={index} className='col-md-4' style={{ marginBottom: '12px' }}>

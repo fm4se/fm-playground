@@ -8,7 +8,8 @@ import { LiaClipboardListSolid } from 'react-icons/lia';
 import { MDBBtn, MDBTabs, MDBTabsItem, MDBTabsLink, MDBTabsContent, MDBTabsPane } from 'mdb-react-ui-kit';
 import { isFullScreenAtom, alloyDiffWitnessAtom, alloyDiffOptionsAtom } from '@/atoms';
 import { getNextAlloyDiffWitness } from '../alloyDiffExecutor';
-import { jotaiStore, permalinkAtom } from '@/atoms';
+import { jotaiStore, permalinkAtom, isDarkThemeAtom } from '@/atoms';
+import { useAtomValue } from 'jotai';
 import { logToDb } from '@/api/playgroundApi';
 import AlloyCytoscapeGraph from '@/../tools/alloy/components/AlloyCytoscapeGraph';
 import AlloyEvaluator from '@/../tools/alloy/components/AlloyEvaluator';
@@ -27,6 +28,7 @@ const AlloyDiffOutput = () => {
     const [isLastWitness, setIsLastWitness] = useState(false);
     const [witnessMessage, setWitnessMessage] = useState('');
     const [hasWitness, setHasWitness] = useState(false);
+    const isDark = useAtomValue(isDarkThemeAtom);
 
     // Visualization and Tab States
     const [activeTab, setActiveTab] = useState('graph');
@@ -213,21 +215,47 @@ const AlloyDiffOutput = () => {
 
     const showNavigation = specId !== 'Equivalence' && alloyDiffOption !== 'Equivalence';
 
+    const getMessageStyle = (message: string, isDark: boolean) => {
+        if (!message) return {};
+        if (message.includes('≡')) {
+            return {
+                backgroundColor: isDark ? '#1c3b2b' : '#e6ffe6',
+                borderLeft: '4px solid #2ecc71',
+                color: isDark ? '#a3e4d7' : '#196f3d',
+            };
+        } else if (message.includes('⊨')) {
+            return {
+                backgroundColor: isDark ? '#4a361c' : '#fff3e6',
+                borderLeft: '4px solid #f39c12',
+                color: isDark ? '#fad7a1' : '#d35400',
+            };
+        } else if (message.includes('incomparable')) {
+            return {
+                backgroundColor: isDark ? '#3b1c1c' : '#ffe6e6',
+                borderLeft: '4px solid #e74c3c',
+                color: isDark ? '#f5b7b1' : '#922b21',
+            };
+        }
+        return {
+            backgroundColor: isDark ? '#1e1e1e' : '#f8f9fa',
+            borderLeft: '4px solid #6c757d',
+            color: isDark ? '#d4d4d4' : '#212529',
+        };
+    };
+
     return (
-        <div>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', flex: 1 }}>
             {witnessMessage && (
                 <pre
-                    className='plain-alloy-message-box'
-                    contentEditable={false}
                     style={{
-                        borderRadius: '8px',
-                        whiteSpace: 'pre-wrap',
-                        padding: '15px',
-                        marginBottom: '15px',
-                        maxHeight: '150px',
-                        overflowY: 'auto',
-                        width: '100%'
+                        margin: '2px 2px',
+                        padding: '2px 2px',
+                        borderRadius: '4px',
+                        fontSize: '0.85em',
+                        fontFamily: 'monospace',
+                        ...getMessageStyle(witnessMessage, isDark),
                     }}
+                    contentEditable={false}
                     dangerouslySetInnerHTML={{ __html: witnessMessage }}
                 />
             )}

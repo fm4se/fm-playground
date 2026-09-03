@@ -71,7 +71,7 @@ export interface LayoutConfig {
 
 export const getLayoutConfig = (layoutName: LayoutName): LayoutConfig => {
     const baseConfig = {
-        animate: true,
+        animate: false,
         animationDuration: 500,
         fit: true,
         padding: 50,
