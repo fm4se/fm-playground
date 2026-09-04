@@ -79,6 +79,8 @@ export const limbooleDiffWitnessAtom = atom<any>(null);
 export const limbooleDiffFilterAtom = atom('');
 
 export const alloyDiffOptionsAtom = atom('common-witness');
+export const alloyDiffCmd1Atom = atom<{ value: number; label: string }>({ value: -1, label: 'Global (No Command)' });
+export const alloyDiffCmd2Atom = atom<{ value: number; label: string }>({ value: -1, label: 'Global (No Command)' });
 export const alloyDiffWitnessAtom = atom<any>(null);
 
 export const smtModelAtom = atom<any>(null);

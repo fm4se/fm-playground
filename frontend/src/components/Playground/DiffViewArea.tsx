@@ -42,7 +42,7 @@ const DiffViewArea: React.FC<DiffViewAreaProps> = ({ editorTheme, onBackToEditin
     const [language] = useAtom(languageAtom);
     const [isFullScreen] = useAtom(isFullScreenAtom);
     const [isExecuting, setIsExecuting] = useAtom(isExecutingAtom);
-    const [diffComparisonCode] = useAtom(diffComparisonCodeAtom);
+    const [diffComparisonCode, setDiffComparisonCode] = useAtom(diffComparisonCodeAtom);
     const [, setDiffComparisonHistoryId] = useAtom(diffComparisonHistoryIdAtom);
     const [, setSmtDiffWitness] = useAtom(smtDiffWitnessAtom);
     const [, setLimbooleDiffWitness] = useAtom(limbooleDiffWitnessAtom);
@@ -53,7 +53,7 @@ const DiffViewArea: React.FC<DiffViewAreaProps> = ({ editorTheme, onBackToEditin
     const [permalinkInput, setPermalinkInput] = useState('');
     const [isLoadingFromPermalink, setIsLoadingFromPermalink] = useState(false);
     const [permalinkError, setPermalinkError] = useState('');
-    const [loadedPermalinkCode, setLoadedPermalinkCode] = useState('');
+
     const [isAnalyzeMode, setIsAnalyzeMode] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [isErrorMessageModalOpen, setIsErrorMessageModalOpen] = useState(false);
@@ -137,7 +137,7 @@ const DiffViewArea: React.FC<DiffViewAreaProps> = ({ editorTheme, onBackToEditin
             }
 
             const response = await getCodeByParmalink(check, permalink);
-            setLoadedPermalinkCode(response.code);
+            setDiffComparisonCode(response.code);
             setDiffComparisonHistoryId(response.data_id);
             setPermalinkError('');
             // setPermalinkInput('');
@@ -152,7 +152,7 @@ const DiffViewArea: React.FC<DiffViewAreaProps> = ({ editorTheme, onBackToEditin
                     error.message || 'Failed to load code from permalink. Please check the URL and try again.'
                 );
             }
-            setLoadedPermalinkCode('');
+            setDiffComparisonCode('');
         } finally {
             setIsLoadingFromPermalink(false);
         }
@@ -166,7 +166,7 @@ const DiffViewArea: React.FC<DiffViewAreaProps> = ({ editorTheme, onBackToEditin
 
     const handleAnalyzeClick = async () => {
         // if diffComparisonCode is empty, show error modal
-        if (!diffComparisonCode && !loadedPermalinkCode) {
+        if (!diffComparisonCode) {
             showErrorModal(
                 'No Specification to compare with. Please load a specification using the permalink field above or from history.'
             );
@@ -352,11 +352,10 @@ const DiffViewArea: React.FC<DiffViewAreaProps> = ({ editorTheme, onBackToEditin
                         <small>{permalinkError}</small>
                     </div>
                 )}
-                {(loadedPermalinkCode || diffComparisonCode) && !permalinkError && (
+                {diffComparisonCode && !permalinkError && (
                     <div role='alert' style={{ marginTop: '8px', color: 'green' }}>
                         <small>
-                            ✓ Code loaded successfully for comparison{' '}
-                            {diffComparisonCode ? '(from history)' : '(from permalink)'}
+                            ✓ Code loaded successfully for comparison
                         </small>
                     </div>
                 )}
@@ -366,10 +365,10 @@ const DiffViewArea: React.FC<DiffViewAreaProps> = ({ editorTheme, onBackToEditin
                 <CodeDiffEditor
                     height={getEditorHeight()}
                     editorTheme={editorTheme}
-                    originalValue={diffComparisonCode || loadedPermalinkCode}
+                    originalValue={diffComparisonCode}
                     modifiedValue={editorValue}
                     readOnly={false}
-                    showDiffActions={!!(diffComparisonCode || loadedPermalinkCode)}
+                    showDiffActions={!!diffComparisonCode}
                     isAnalyzeMode={isAnalyzeMode}
                 />
             ) : (
@@ -386,10 +385,10 @@ const DiffViewArea: React.FC<DiffViewAreaProps> = ({ editorTheme, onBackToEditin
                         <CodeDiffEditor
                             height={getEditorHeight()}
                             editorTheme={editorTheme}
-                            originalValue={diffComparisonCode || loadedPermalinkCode}
+                            originalValue={diffComparisonCode}
                             modifiedValue={editorValue}
                             readOnly={false}
-                            showDiffActions={!!(diffComparisonCode || loadedPermalinkCode)}
+                            showDiffActions={!!diffComparisonCode}
                             isAnalyzeMode={isAnalyzeMode}
                         />
                     </div>

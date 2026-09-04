@@ -10,12 +10,14 @@ import {
     alloyDiffOptionsAtom,
     diffComparisonHistoryIdAtom,
     alloyDiffWitnessAtom,
+    alloyDiffCmd1Atom,
+    alloyDiffCmd2Atom,
 } from '@/atoms';
 import { Permalink } from '@/types';
 import axios from 'axios';
 
-async function getAlloyDiffWitness(permalink: Permalink, analysis: string) {
-    let url = `/alloy/alloy/diff/run/?check=${permalink.check}&p=${permalink.permalink}&analysis=${analysis}`;
+async function getAlloyDiffWitness(permalink: Permalink, analysis: string, cmdIndex1: number, cmdIndex2: number) {
+    let url = `/diff-alloy/alloy/diff/run/?check=${permalink.check}&p=${permalink.permalink}&analysis=${analysis}&cmdIndex1=${cmdIndex1}&cmdIndex2=${cmdIndex2}`;
     try {
         const response = await axios.get(url);
         return response.data;
@@ -25,7 +27,7 @@ async function getAlloyDiffWitness(permalink: Permalink, analysis: string) {
 }
 
 export async function getNextAlloyDiffWitness(specId: string, p: string) {
-    let url = `/alloy/alloy/diff/next/${specId}?p=${p}`;
+    let url = `/diff-alloy/alloy/diff/next/${specId}?p=${p}`;
     try {
         const response = await axios.get(url);
         return response.data;
@@ -39,6 +41,8 @@ export const executeAlloyDiffTool = async () => {
     const language = jotaiStore.get(languageAtom);
     const permalink = jotaiStore.get(permalinkAtom);
     const alloyDiffOption = jotaiStore.get(alloyDiffOptionsAtom);
+    const cmd1 = jotaiStore.get(alloyDiffCmd1Atom);
+    const cmd2 = jotaiStore.get(alloyDiffCmd2Atom);
     const diffComparisonHistoryId = jotaiStore.get(diffComparisonHistoryIdAtom);
 
     if (!diffComparisonHistoryId || diffComparisonHistoryId === -1) {
@@ -74,8 +78,8 @@ export const executeAlloyDiffTool = async () => {
 
     try {
         if (alloyDiffOption === 'semantic-relation') {
-            const resF1NotF2 = await getAlloyDiffWitness(response.data, 'not-previous-but-current').catch(e => ({ error: e.message || 'error' }));
-            const resNotF1ButF2 = await getAlloyDiffWitness(response.data, 'not-current-but-previous').catch(e => ({ error: e.message || 'error' }));
+            const resF1NotF2 = await getAlloyDiffWitness(response.data, 'not-previous-but-current', cmd1.value, cmd2.value).catch(e => ({ error: e.message || 'error' }));
+            const resNotF1ButF2 = await getAlloyDiffWitness(response.data, 'not-current-but-previous', cmd1.value, cmd2.value).catch(e => ({ error: e.message || 'error' }));
 
             const isF1NotF2Unsat = !!resF1NotF2.error;
             const isNotF1ButF2Unsat = !!resNotF1ButF2.error;
@@ -99,7 +103,7 @@ export const executeAlloyDiffTool = async () => {
 
             jotaiStore.set(alloyDiffWitnessAtom, finalRes);
         } else {
-            const res = await getAlloyDiffWitness(response.data, alloyDiffOption);
+            const res = await getAlloyDiffWitness(response.data, alloyDiffOption, cmd1.value, cmd2.value);
             jotaiStore.set(alloyDiffWitnessAtom, res);
         }
     } catch (err: any) {

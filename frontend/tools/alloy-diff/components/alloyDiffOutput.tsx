@@ -291,6 +291,7 @@ const AlloyDiffOutput = () => {
                             state={instanceIndexToShow}
                             evaluatorOutput={evaluatorOutput}
                             setEvaluatorOutput={setEvaluatorOutput}
+                            apiPrefix="/diff-alloy"
                         />
                     )}
 
