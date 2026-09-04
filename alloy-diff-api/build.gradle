@@ -1,0 +1,43 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.4.1'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'de.buw'
+version = '0.0.1'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    // Exclude Spring's Logback to use SLF4J from Alloy JAR
+    all {
+        exclude group: 'ch.qos.logback', module: 'logback-classic'
+        exclude group: 'ch.qos.logback', module: 'logback-core'
+    }
+}
+
+dependencies {
+    implementation('org.springframework.boot:spring-boot-starter-web')
+    implementation('org.springframework.boot:spring-boot-starter-actuator')
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    implementation files('lib/diff.jar')
+    // https://mvnrepository.com/artifact/org.json/json
+    implementation 'org.json:json:20240303'
+    // Override old Gson bundled in Alloy JAR (needed for Spring Boot 3.4.x compatibility)
+    implementation 'com.google.code.gson:gson:2.13.0'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
