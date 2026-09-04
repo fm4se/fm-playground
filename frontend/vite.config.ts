@@ -77,6 +77,12 @@ export default defineConfig({
                 secure: false,
                 rewrite: (path) => path.replace(/^\/alloy/, ''),
             },
+            '/diff-alloy': {
+                target: 'http://alloy-diff:8080',
+                changeOrigin: true,
+                secure: false,
+                rewrite: (path) => path.replace(/^\/diff-alloy/, ''),
+            },
             '/spectra': {
                 target: 'http://spectra:8080',
                 changeOrigin: true,
@@ -143,6 +149,12 @@ export default defineConfig({
                 changeOrigin: true,
                 secure: false,
                 rewrite: (path) => path.replace(/^\/alloy/, ''),
+            },
+            '/diff-alloy': {
+                target: 'http://localhost:8050',
+                changeOrigin: true,
+                secure: false,
+                rewrite: (path) => path.replace(/^\/diff-alloy/, ''),
             },
             '/spectra': {
                 target: 'http://localhost:8083',
