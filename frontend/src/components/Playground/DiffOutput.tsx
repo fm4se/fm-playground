@@ -25,6 +25,7 @@ const DiffOutput: React.FC<DiffOutputProps> = ({ editorTheme }) => {
                 overflow: 'auto',
                 display: 'flex',
                 flexDirection: 'column',
+                height: '100%',
             }}
         >
             <div className='col-md-12'>

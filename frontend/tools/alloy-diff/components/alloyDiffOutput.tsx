@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useAtom } from 'jotai';
 import { IconButton } from '@mui/material';
 import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
@@ -17,6 +18,19 @@ import { getGraphData, getTraceLengthAndBackloop } from '@/../tools/alloy/alloyU
 import '@/../tools/alloy/components/AlloyOutput.css';
 
 const AlloyDiffOutput = () => {
+    const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const target = document.getElementById('diff-navigation-portal-target');
+            if (target) {
+                setPortalTarget(target);
+                clearInterval(interval);
+            }
+        }, 100);
+        return () => clearInterval(interval);
+    }, []);
+
     const [isFullScreen] = useAtom(isFullScreenAtom);
     const [alloyDiffWitness, setAlloyDiffWitness] = useAtom(alloyDiffWitnessAtom);
     const [alloyDiffOption] = useAtom(alloyDiffOptionsAtom);
@@ -244,7 +258,7 @@ const AlloyDiffOutput = () => {
     };
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', flex: 1 }}>
+        <div>
             {witnessMessage && (
                 <pre
                     style={{
@@ -332,56 +346,111 @@ const AlloyDiffOutput = () => {
                         </MDBTabsPane>
                     </MDBTabsContent>
 
-                    <div
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            marginTop: '10px',
-                        }}
-                    >
-                        {showNavigation && (
-                            <div style={{ display: 'flex', gap: '8px' }}>
-                                <MDBBtn
-                                    color='warning'
-                                    onClick={handlePreviousWitness}
-                                    disabled={currentWitnessIndex === 0}
-                                >
-                                    Previous Witness
-                                </MDBBtn>
-                                <MDBBtn
-                                    color='success'
-                                    onClick={handleNextWitness}
-                                    disabled={isNextWitnessExecuting || isLastWitness}
-                                >
-                                    {isNextWitnessExecuting ? 'Computing...' : 'Next Witness'}
-                                </MDBBtn>
-                            </div>
-                        )}
+                    {portalTarget ? createPortal(
+                        <div
+                            style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                marginTop: '15px',
+                                paddingRight: '8px'
+                            }}
+                        >
+                            {showNavigation && (
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                    <MDBBtn
+                                        color='warning'
+                                        onClick={handlePreviousWitness}
+                                        disabled={currentWitnessIndex === 0}
+                                    >
+                                        Previous Witness
+                                    </MDBBtn>
+                                    <MDBBtn
+                                        color='success'
+                                        onClick={handleNextWitness}
+                                        disabled={isNextWitnessExecuting || isLastWitness}
+                                    >
+                                        {isNextWitnessExecuting ? 'Computing...' : 'Next Witness'}
+                                    </MDBBtn>
+                                </div>
+                            )}
 
-                        {isTemporal && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <IconButton
-                                    aria-label='backward'
-                                    size='small'
-                                    disabled={alloyTraceIndex === 0}
-                                    color='info'
-                                    onClick={handleBackwardTrace}
-                                >
-                                    <FaArrowLeft />
-                                </IconButton>
-                                <span style={{ fontWeight: 'bold' }}>State {instanceIndexToShow}</span>
-                                <IconButton aria-label='forward' size='small' color='info' onClick={handleForwardTrace}>
-                                    <FaArrowRight />
-                                </IconButton>
-                                {alloyTraceLoop && (
-                                    <span style={{ fontSize: '0.85em', color: '#666', marginLeft: '8px' }}>
-                                        ({alloyTraceLoop})
-                                    </span>
-                                )}
-                            </div>
-                        )}
-                    </div>
+                            {isTemporal && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <IconButton
+                                        aria-label='backward'
+                                        size='small'
+                                        disabled={alloyTraceIndex === 0}
+                                        color='info'
+                                        onClick={handleBackwardTrace}
+                                    >
+                                        <FaArrowLeft />
+                                    </IconButton>
+                                    <span style={{ fontWeight: 'bold' }}>State {instanceIndexToShow}</span>
+                                    <IconButton aria-label='forward' size='small' color='info' onClick={handleForwardTrace}>
+                                        <FaArrowRight />
+                                    </IconButton>
+                                    {alloyTraceLoop && (
+                                        <span style={{ fontSize: '0.85em', color: '#666', marginLeft: '8px' }}>
+                                            ({alloyTraceLoop})
+                                        </span>
+                                    )}
+                                </div>
+                            )}
+                        </div>,
+                        portalTarget
+                    ) : (
+                        <div
+                            style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                marginTop: '10px',
+                            }}
+                        >
+                            {showNavigation && (
+                                <div style={{ display: 'flex', gap: '8px' }}>
+                                    <MDBBtn
+                                        color='warning'
+                                        onClick={handlePreviousWitness}
+                                        disabled={currentWitnessIndex === 0}
+                                    >
+                                        Previous Witness
+                                    </MDBBtn>
+                                    <MDBBtn
+                                        color='success'
+                                        onClick={handleNextWitness}
+                                        disabled={isNextWitnessExecuting || isLastWitness}
+                                    >
+                                        {isNextWitnessExecuting ? 'Computing...' : 'Next Witness'}
+                                    </MDBBtn>
+                                </div>
+                            )}
+
+                            {isTemporal && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <IconButton
+                                        aria-label='backward'
+                                        size='small'
+                                        disabled={alloyTraceIndex === 0}
+                                        color='info'
+                                        onClick={handleBackwardTrace}
+                                    >
+                                        <FaArrowLeft />
+                                    </IconButton>
+                                    <span style={{ fontWeight: 'bold' }}>State {instanceIndexToShow}</span>
+                                    <IconButton aria-label='forward' size='small' color='info' onClick={handleForwardTrace}>
+                                        <FaArrowRight />
+                                    </IconButton>
+                                    {alloyTraceLoop && (
+                                        <span style={{ fontSize: '0.85em', color: '#666', marginLeft: '8px' }}>
+                                            ({alloyTraceLoop})
+                                        </span>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             ) : (
                 <div style={{ height: isFullScreen ? '80vh' : '45vh' }}>

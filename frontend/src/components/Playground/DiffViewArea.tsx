@@ -419,7 +419,7 @@ const DiffViewArea: React.FC<DiffViewAreaProps> = ({ editorTheme, onBackToEditin
                             </MDBBtn>
                         </div>
                     </div>
-                    <div className='col-md-6'>
+                    <div className='col-md-6' id='diff-navigation-portal-target'>
                         {/* Right half intentionally left for auxiliary controls or output previews */}
                     </div>
                 </div>
