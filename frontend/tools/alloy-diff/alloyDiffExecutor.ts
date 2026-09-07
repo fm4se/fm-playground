@@ -56,6 +56,8 @@ export const executeAlloyDiffTool = async () => {
     const metadata = {
         leftSideCodeId: diffComparisonHistoryId,
         diff_option: alloyDiffOption,
+        cmdIndex1_prev: cmd1,
+        cmdIndex2_curr: cmd2
     };
 
     const response = await saveCodeAndRefreshHistory(
