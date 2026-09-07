@@ -1,5 +1,9 @@
 # Change Log
 
+## v2.17.0[2026-09-07]
+
+- Integrated Alloy Diff
+
 ## v2.16.0[2026-08-04]
 
 - Upgraded Langium grammar to 4

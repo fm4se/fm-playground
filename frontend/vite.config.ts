@@ -151,7 +151,7 @@ export default defineConfig({
                 rewrite: (path) => path.replace(/^\/alloy/, ''),
             },
             '/diff-alloy': {
-                target: 'http://localhost:8050',
+                target: 'http://localhost:8080',
                 changeOrigin: true,
                 secure: false,
                 rewrite: (path) => path.replace(/^\/diff-alloy/, ''),
