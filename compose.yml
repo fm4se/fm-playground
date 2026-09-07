@@ -89,6 +89,17 @@ services:
     networks:
       - my_network
     restart: unless-stopped
+  
+  alloy-diff:
+    build:
+      context: ./alloy-diff-api
+    container_name: fmp-alloy-diff-api
+    environment:
+      API_URL: http://fmp-backend:8000/
+    networks:
+      - my_network
+    restart: unless-stopped
+
 
   spectra:
     build:
