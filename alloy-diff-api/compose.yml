@@ -1,9 +1,9 @@
 services:
-  limboole-diff:
+  alloy-diff:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: limboole-diff-api
+    container_name: alloy-diff-api
     ports:
       - "8080:8080"
     environment:

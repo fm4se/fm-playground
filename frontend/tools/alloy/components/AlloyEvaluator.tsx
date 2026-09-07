@@ -8,10 +8,11 @@ interface AlloyEvaluatorProps {
     state: number;
     evaluatorOutput: string;
     setEvaluatorOutput: (evaluatorOutput: string) => void;
+    apiPrefix?: string;
 }
 
-async function getAlloyEval(specId: string, expr: string, state: number) {
-    let url = `/alloy/alloy/eval?specId=${specId}&expr=${encodeURIComponent(expr)}&state=${state}`;
+async function getAlloyEval(specId: string, expr: string, state: number, apiPrefix: string = '/alloy') {
+    let url = `${apiPrefix}/alloy/eval?specId=${specId}&expr=${encodeURIComponent(expr)}&state=${state}`;
     try {
         const response = await axios.get(url);
         return response.data;
@@ -26,10 +27,11 @@ const AlloyEvaluator: React.FC<AlloyEvaluatorProps> = ({
     state,
     evaluatorOutput,
     setEvaluatorOutput,
+    apiPrefix = '/alloy',
 }) => {
     const handleEvaluate = (expr: string) => {
         if (!expr || !specId) return;
-        getAlloyEval(specId, expr, state).then((res) => {
+        getAlloyEval(specId, expr, state, apiPrefix).then((res) => {
             if (res.result) {
                 setEvaluatorOutput(expr + '<br>&nbsp;&nbsp;' + res.result + '<br>' + evaluatorOutput);
             } else if (res.error) {

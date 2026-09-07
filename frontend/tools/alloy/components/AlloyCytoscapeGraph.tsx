@@ -70,6 +70,8 @@ const AlloyCytoscapeGraph: React.FC<AlloyCytoscapeGraphProps> = ({ alloyVizGraph
     const [activeRelationship, setActiveRelationship] = useState<string | null>(null);
     const [contextMenu, setContextMenu] = useState<ContextMenuState>(initialContextMenuState);
     const [colorPicker, setColorPicker] = useState<ColorPickerState>(initialColorPickerState);
+    const needsLayoutRef = useRef<boolean>(false);
+    const containerRef = useRef<HTMLDivElement>(null);
 
     const {
         customColors,
@@ -359,6 +361,35 @@ const AlloyCytoscapeGraph: React.FC<AlloyCytoscapeGraphProps> = ({ alloyVizGraph
         setStylesheet(createCytoscapeStylesheet(uniqueRels, customColors));
     }, [alloyVizGraph, customColors]);
 
+    // Function to run the layout
+    const runLayout = useCallback(() => {
+        if (!cyRef.current) return;
+        
+        // Give Cytoscape a tick to render nodes and compute their bounding boxes.
+        // Layouts like Dagre will squash nodes to (0,0) if they don't have dimensions yet.
+        setTimeout(() => {
+            if (!cyRef.current) return;
+            try {
+                const layoutConfig = getLayoutConfig(currentLayout);
+                const layout = cyRef.current.layout(layoutConfig);
+                layout.run();
+            } catch (error) {
+                console.warn('Layout failed, falling back to breadthfirst:', error);
+                const fallbackLayout = cyRef.current.layout({
+                    name: 'breadthfirst',
+                    animate: true,
+                    animationDuration: 500,
+                    fit: true,
+                    padding: 50,
+                    directed: true,
+                    spacingFactor: 1.5,
+                });
+                fallbackLayout.run();
+            }
+            cyRef.current.fit(undefined, 50);
+        }, 100);
+    }, [currentLayout]);
+
     // Run layout only when graph data changes (not when colors change)
     useEffect(() => {
         // Create a simple hash of the graph structure to detect actual data changes
@@ -369,27 +400,16 @@ const AlloyCytoscapeGraph: React.FC<AlloyCytoscapeGraphProps> = ({ alloyVizGraph
         if (cyRef.current) {
             // Only run layout on initial mount or when graph structure changes
             if (isInitialMount.current || graphChanged) {
-                try {
-                    const layoutConfig = getLayoutConfig(currentLayout);
-                    const layout = cyRef.current.layout(layoutConfig);
-                    layout.run();
-                } catch (error) {
-                    console.warn('Layout failed, falling back to breadthfirst:', error);
-                    // Fallback to built-in layout if extension layout fails
-                    const fallbackLayout = cyRef.current.layout({
-                        name: 'breadthfirst',
-                        animate: true,
-                        animationDuration: 500,
-                        fit: true,
-                        padding: 50,
-                        directed: true,
-                        spacingFactor: 1.5,
-                    });
-                    fallbackLayout.run();
+                const width = cyRef.current.width();
+                const height = cyRef.current.height();
+                
+                if (width === 0 || height === 0) {
+                    // Container is hidden, defer layout
+                    needsLayoutRef.current = true;
+                } else {
+                    runLayout();
+                    needsLayoutRef.current = false;
                 }
-
-                // Fit the graph to viewport with padding
-                cyRef.current.fit(undefined, 50);
 
                 isInitialMount.current = false;
             }
@@ -400,10 +420,34 @@ const AlloyCytoscapeGraph: React.FC<AlloyCytoscapeGraphProps> = ({ alloyVizGraph
             // Setup context menu
             setupContextMenu(cyRef.current);
         }
-    }, [alloyVizGraph, stylesheet, currentLayout, setupInteractions, setupContextMenu]);
+    }, [alloyVizGraph, stylesheet, currentLayout, setupInteractions, setupContextMenu, runLayout]);
+
+    // Watch for container resize to trigger deferred layout
+    useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
+
+        const resizeObserver = new ResizeObserver((entries) => {
+            for (let entry of entries) {
+                const { width, height } = entry.contentRect;
+                if (width > 0 && height > 0) {
+                    if (cyRef.current) {
+                        cyRef.current.resize();
+                    }
+                    if (needsLayoutRef.current) {
+                        runLayout();
+                        needsLayoutRef.current = false;
+                    }
+                }
+            }
+        });
+
+        resizeObserver.observe(container);
+        return () => resizeObserver.disconnect();
+    }, [runLayout]);
 
     return (
-        <div style={{ position: 'relative', width: '100%', height: height }}>
+        <div ref={containerRef} style={{ position: 'relative', width: '100%', height: height }}>
             <CytoscapeComponent
                 className='alloy-viz-area'
                 elements={alloyVizGraph}

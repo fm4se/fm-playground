@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useAtom } from 'jotai';
 import { MDBBtn } from 'mdb-react-ui-kit';
 import { isFullScreenAtom, limbooleDiffWitnessAtom } from '@/atoms';
@@ -7,6 +8,19 @@ import { jotaiStore, permalinkAtom } from '@/atoms';
 import { logToDb } from '@/api/playgroundApi';
 
 const LimbooleDiffOutput = () => {
+    const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const target = document.getElementById('diff-navigation-portal-target');
+            if (target) {
+                setPortalTarget(target);
+                clearInterval(interval);
+            }
+        }, 100);
+        return () => clearInterval(interval);
+    }, []);
+
     const [isFullScreen] = useAtom(isFullScreenAtom);
     const [limbooleDiffWitness, setLimbooleDiffWitness] = useAtom(limbooleDiffWitnessAtom);
     const permalink = jotaiStore.get(permalinkAtom);
@@ -135,27 +149,51 @@ const LimbooleDiffOutput = () => {
                         dangerouslySetInnerHTML={{ __html: getCurrentWitness() }}
                     />
 
-                    {specId !== 'semantic-relation' && (
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div style={{ display: 'flex', gap: '8px' }}>
-                                <MDBBtn
-                                    color='warning'
-                                    onClick={handlePreviousWitness}
-                                    disabled={currentWitnessIndex === 0 || isUnsatisfiable()}
-                                >
-                                    Previous
-                                </MDBBtn>
+                    {specId !== 'semantic-relation' &&
+                        (portalTarget
+                            ? createPortal(
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px', paddingRight: '8px' }}>
+                                      <div style={{ display: 'flex', gap: '8px' }}>
+                                          <MDBBtn
+                                              color='warning'
+                                              onClick={handlePreviousWitness}
+                                              disabled={currentWitnessIndex === 0 || isUnsatisfiable()}
+                                          >
+                                              Previous
+                                          </MDBBtn>
 
-                                <MDBBtn
-                                    color='success'
-                                    onClick={handleNextWitness}
-                                    disabled={isNextWitnessExecuting || isLastWitness || isUnsatisfiable()}
-                                >
-                                    {isNextWitnessExecuting ? 'Computing...' : 'Next'}
-                                </MDBBtn>
-                            </div>
-                        </div>
-                    )}
+                                          <MDBBtn
+                                              color='success'
+                                              onClick={handleNextWitness}
+                                              disabled={isNextWitnessExecuting || isLastWitness || isUnsatisfiable()}
+                                          >
+                                              {isNextWitnessExecuting ? 'Computing...' : 'Next'}
+                                          </MDBBtn>
+                                      </div>
+                                  </div>,
+                                  portalTarget
+                              )
+                            : (
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                      <div style={{ display: 'flex', gap: '8px' }}>
+                                          <MDBBtn
+                                              color='warning'
+                                              onClick={handlePreviousWitness}
+                                              disabled={currentWitnessIndex === 0 || isUnsatisfiable()}
+                                          >
+                                              Previous
+                                          </MDBBtn>
+
+                                          <MDBBtn
+                                              color='success'
+                                              onClick={handleNextWitness}
+                                              disabled={isNextWitnessExecuting || isLastWitness || isUnsatisfiable()}
+                                          >
+                                              {isNextWitnessExecuting ? 'Computing...' : 'Next'}
+                                          </MDBBtn>
+                                      </div>
+                                  </div>
+                              ))}
                     {witnessMessage && <div style={{ textAlign: 'center', color: '#ff0000ff' }}>{witnessMessage}</div>}
                 </div>
             ) : (
