@@ -84,7 +84,7 @@ else:
         f"postgresql://{os.getenv('DB_USERNAME')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}"
     )
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["CACHE_TYPE"] = "simple"
+app.config["CACHE_TYPE"] = "SimpleCache"
 app.config["GOOGLE_CLIENT_ID"] = os.getenv("GOOGLE_CLIENT_ID", None)
 app.config["GOOGLE_CLIENT_SECRET"] = os.getenv("GOOGLE_CLIENT_SECRET", None)
 app.config["GOOGLE_DISCOVERY_URL"] = (
