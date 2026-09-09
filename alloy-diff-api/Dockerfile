@@ -3,9 +3,10 @@ FROM ubuntu:24.04
 WORKDIR /app
 COPY . /app
 
-RUN apt-get update && apt-get install -y bash openjdk-21-jdk curl socat jq && \
+RUN apt-get update && apt-get install -y bash openjdk-21-jdk curl socat && \
 	mkdir -p lib && \
-	curl -sL https://api.github.com/repos/se-buw/alloy-diff/releases/latest | jq -r '.assets[] | select(.name | endswith(".jar")) | .browser_download_url' | xargs curl -L -o lib/diff.jar && \
+	curl -L https://github.com/se-buw/alloy-diff/releases/download/v6.3.0/org.alloytools.alloy.dist.jar \
+  -o lib/diff.jar && \
 	sed -i -e 's/\r$//' gradlew entrypoint.sh && \
 	chmod +x gradlew entrypoint.sh && \
 	./gradlew clean build -x test && \
