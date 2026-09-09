@@ -106,12 +106,33 @@ export const executeAlloyDiffTool = async () => {
             jotaiStore.set(alloyDiffWitnessAtom, finalRes);
         } else {
             const res = await getAlloyDiffWitness(response.data, alloyDiffOption, cmd1.value, cmd2.value);
-            jotaiStore.set(alloyDiffWitnessAtom, res);
+            let semanticRelationMessage = '';
+            if (alloyDiffOption === 'common-witness') {
+                semanticRelationMessage = "<details><summary>Instances that satisfy both the previous and the current model.</summary></details>";
+            } else if (alloyDiffOption === 'not-previous-but-current') {
+                semanticRelationMessage = "<details><summary>Instances that satisfy the current model but not the previous model.</summary></details>";
+            } else if (alloyDiffOption === 'not-current-but-previous') {
+                semanticRelationMessage = "<details><summary>Instances that satisfy the previous model but not the current model.</summary></details>";
+            }
+            jotaiStore.set(alloyDiffWitnessAtom, { ...res, semanticRelationMessage });
         }
     } catch (err: any) {
         if (err.response?.status === 404) {
+            let semanticRelationMessage = '';
+            let errorMsg = 'No witnesses found';
+            if (alloyDiffOption === 'common-witness') {
+                semanticRelationMessage = "<details><summary>No Common Witness</summary>No instance satisfies both the previous and the current model.</details>";
+                errorMsg = semanticRelationMessage;
+            } else if (alloyDiffOption === 'not-previous-but-current') {
+                semanticRelationMessage = "<details><summary>Current ⊨ Previous</summary>All instances that satisfy the current model also satisfy the previous model. No instance satisfies the current model but not the previous model.</details>";
+                errorMsg = semanticRelationMessage;
+            } else if (alloyDiffOption === 'not-current-but-previous') {
+                semanticRelationMessage = "<details><summary>Previous ⊨ Current</summary>All instances that satisfy the previous model also satisfy the current model. No instance satisfies the previous model but not the current model.</details>";
+                errorMsg = semanticRelationMessage;
+            }
             jotaiStore.set(alloyDiffWitnessAtom, {
-                error: 'No witnesses found',
+                error: errorMsg,
+                semanticRelationMessage
             });
         } else {
             jotaiStore.set(alloyDiffWitnessAtom, {
