@@ -1,6 +1,6 @@
 babel==2.17.0
 backrefs==5.8
-certifi==2026.10.19
+certifi==2026.10.23
 charset-normalizer==3.4.2
 click==8.2.1
 colorama==0.4.6
