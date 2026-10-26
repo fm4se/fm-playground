@@ -84,6 +84,7 @@ export const alloyDiffCmd2Atom = atom<{ value: number; label: string }>({ value:
 export const alloyDiffWitnessAtom = atom<any>(null);
 
 export const smtModelAtom = atom<any>(null);
+export const limbooleResultAtom = atom<{ formula: string; checkMode: string; output: string } | null>(null);
 
 jotaiStore.sub(editorValueAtom, () => {});
 jotaiStore.sub(languageAtom, () => {});

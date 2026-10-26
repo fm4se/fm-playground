@@ -12,6 +12,7 @@ import {
     lineToHighlightAtom,
     enableLspAtom,
     limbooleCliOptionsAtom,
+    limbooleResultAtom,
     outputAtom,
 } from '@/atoms';
 
@@ -21,6 +22,8 @@ export const executeLimboole = async () => {
     const permalink: Permalink = jotaiStore.get(permalinkAtom);
     const enableLsp = jotaiStore.get(enableLspAtom);
     const limbooleCheckOption = jotaiStore.get(limbooleCliOptionsAtom);
+
+    jotaiStore.set(limbooleResultAtom, null);
 
     const metadata = { check: limbooleCheckOption.label, ls: enableLsp };
     const response = await saveCodeAndRefreshHistory(
@@ -38,11 +41,9 @@ export const executeLimboole = async () => {
         );
         jotaiStore.set(isExecutingAtom, false);
     }
-    const infoElement = document.getElementById('info');
-    run_limboole(window.Wrappers[limbooleCheckOption.value], editorValue);
+    const output = run_limboole(window.Wrappers[limbooleCheckOption.value], editorValue);
+    jotaiStore.set(limbooleResultAtom, { formula: editorValue, checkMode: limbooleCheckOption.value, output });
 
-    if (infoElement) {
-        jotaiStore.set(lineToHighlightAtom, getLineToHighlight(infoElement.innerHTML, language.id) || []);
-    }
+    jotaiStore.set(lineToHighlightAtom, getLineToHighlight(output, language.id) || []);
     jotaiStore.set(isExecutingAtom, false);
 };

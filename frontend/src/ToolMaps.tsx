@@ -13,6 +13,7 @@ import { executeDafnyTool } from '@/../tools/dafny/dafnyExecutor';
 import TextualOutput from '@/components/Playground/TextualOutput';
 import AlloyOutput from '@/../tools/alloy/components/AlloyOutput';
 import SmtOutput from '@/../tools/smt/components/SmtOutput';
+import LimbooleOutput from '@/../tools/limboole/components/LimbooleOutput';
 
 // Language configurations for the different tools
 import { limbooleConf, limbooleLang } from '@/../tools/limboole/limbooleTextMateGrammar';
@@ -69,7 +70,7 @@ export const toolExecutionMap: Record<string, () => void> = {
 };
 
 export const toolOutputMap: Record<string, React.FC<any>> = {
-    SAT: TextualOutput,
+    SAT: LimbooleOutput,
     SMT: SmtOutput,
     XMV: TextualOutput,
     ALS: AlloyOutput,

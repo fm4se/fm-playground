@@ -93,7 +93,7 @@ class StdinToStdoutProcessor {
             this.stdout_buf = '';
         }
         if (this.stderr_buf != '') {
-            this.print_line_stderr(this.stdout_buf);
+            this.print_line_stderr(this.stderr_buf);
             this.stderr_buf = '';
         }
     }
@@ -128,26 +128,19 @@ window.Wrappers = [
     new ProcessorWrapper(window.Processors[0], 'Limboole QBF Satisfiability', 2),
 ];
 
+// Runs limboole on `code` and returns its output (stdout and stderr) as a string.
 function run_limboole(wrapper, code) {
-    const info = document.getElementById('info');
-    info.innerText = '';
-
     let non_ascii = findNonASCII(code);
     if (non_ascii != null) {
-        info.innerText += `<stdin>:${non_ascii.position}:parse error at '${non_ascii.character}' can not parse ASCII character\n`;
-        run_button_enable();
-        return;
+        return `<stdin>:${non_ascii.position}:parse error at '${non_ascii.character}' can not parse ASCII character\n`;
     }
 
-    wrapper.run.bind(wrapper)(
-        code,
-        function (line) {
-            info.innerText += line + '\n';
-        },
-        function (line) {
-            info.innerText += line + '\n';
-        }
-    );
+    let output = '';
+    const appendLine = function (line) {
+        output += line.endsWith('\n') ? line : line + '\n';
+    };
+    wrapper.run.bind(wrapper)(code, appendLine, appendLine);
+    return output;
 }
 
 function findNonASCII(input) {
