@@ -38,19 +38,13 @@ export class AlloyScopeComputation extends DefaultScopeComputation {
                         }
                     }
 
-                    // Export fields inside the signature
+                    // Export fields inside the signature, one description per field name
                     if (paragraph.fields) {
                         for (const field of paragraph.fields) {
                             if (isFieldDecl(field) && isDecl(field.decl)) {
-                                const decl = field.decl;
-                                if (decl.name && decl.name.name) {
-                                    exportedSymbols.push(this.descriptions.createDescription(decl, decl.name.name, document));
-                                }
-                                if (decl.additionalNames) {
-                                    for (const additionalName of decl.additionalNames) {
-                                        if (additionalName.name) {
-                                            exportedSymbols.push(this.descriptions.createDescription(decl, additionalName.name, document));
-                                        }
+                                for (const declName of field.decl.names) {
+                                    if (declName.name) {
+                                        exportedSymbols.push(this.descriptions.createDescription(declName, declName.name, document));
                                     }
                                 }
                             }
@@ -60,12 +54,9 @@ export class AlloyScopeComputation extends DefaultScopeComputation {
                     if (paragraph.name) {
                         exportedSymbols.push(this.descriptions.createDescription(paragraph, paragraph.name, document));
                     }
-                    if (paragraph.values) {
-                        for (const value of paragraph.values) {
-                            // paragraph is the EnumDecl, but the values are just strings/IDs in the AST
-                            // We need an AstNode for the description. Since values are just strings,
-                            // we'll use the EnumDecl as the node, but with the value's name.
-                            exportedSymbols.push(this.descriptions.createDescription(paragraph, value, document));
+                    for (const value of paragraph.values) {
+                        if (value.name) {
+                            exportedSymbols.push(this.descriptions.createDescription(value, value.name, document));
                         }
                     }
                 } else if (isPredDecl(paragraph) || isFunDecl(paragraph) || isAssertDecl(paragraph)) {

@@ -121,7 +121,7 @@ fun rem [n1, n2: Int]: Int { int[rem[n1, n2]] }
 
 fun negate [n: Int]: Int { int[negate[n]] }
 
-fun signum [n: Int]: Int { n<0 => -1 else (n>0 => 1 else 0) }
+fun signum [n: Int]: Int { n<0 => (0 fun/sub 1) else (n>0 => 1 else 0) }
 
 fun max [n1, n2: Int]: Int { n1>=n2 => n1 else n2 }
 

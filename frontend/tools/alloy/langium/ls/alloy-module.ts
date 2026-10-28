@@ -8,6 +8,7 @@ import { AlloyCompletionProvider } from './alloy-completion-provider.js';
 import { AlloyScopeProvider } from './alloy-scope-provider.js';
 import { AlloyWorkspaceManager } from './alloy-workspace-manager.js';
 import { AlloyScopeComputation } from './alloy-scope-computation.js';
+import { AlloyValueConverter } from './alloy-value-converter.js';
 
 /**
  * Declaration of custom services - add your own service classes here.
@@ -34,6 +35,9 @@ export const AlloyLanguageModule: Module<AlloyServices, PartialLangiumServices &
     validation: {
         AlloyUsageValidator: (services) => new AlloyUsageValidator(services),
         AlloyNameValidator: (services) => new AlloyNameValidator(services)
+    },
+    parser: {
+        ValueConverter: () => new AlloyValueConverter()
     },
     references: {
         ScopeProvider: (services) => new AlloyScopeProvider(services),
