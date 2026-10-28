@@ -1,5 +1,10 @@
 # Change Log
 
+## v2.19.0[2026-10-28]
+
+- Fixed bug on Alloy language support and [updated to upstream](https://github.com/soaibsafi/alloy-langium/commit/df15a241cf39622debcf03f6a06781eb2726edc4)
+- Added language support for nuxmv based on [vscode-nusmv](https://github.com/LiamWalsh98/vscode-nusmv) (limited to nuxmv)
+
 ## v2.18.0[2026-10-13]
 
 - Integrated SMT code lens and summary to the editor
