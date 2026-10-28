@@ -9,6 +9,7 @@ import {
     isExecutingAtom,
     lineToHighlightAtom,
     outputAtom,
+    enableLspAtom,
 } from '@/atoms';
 import { Permalink } from '@/types';
 import axios from 'axios';
@@ -27,7 +28,17 @@ export const executeNuxmvTool = async () => {
     const editorValue = jotaiStore.get(editorValueAtom);
     const language = jotaiStore.get(languageAtom);
     const permalink = jotaiStore.get(permalinkAtom);
-    const response = await saveCodeAndRefreshHistory(editorValue, language.short, permalink.permalink || null, null);
+
+    const enableLsp = jotaiStore.get(enableLspAtom);
+
+    const metadata = { ls: enableLsp };
+
+    const response = await saveCodeAndRefreshHistory(
+        editorValue, 
+        language.short, 
+        permalink.permalink || null, 
+        metadata
+    );
     if (response) {
         jotaiStore.set(permalinkAtom, response.data);
     } else {
