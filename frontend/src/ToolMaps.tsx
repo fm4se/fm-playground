@@ -109,7 +109,7 @@ export const languageConfigMap: Record<string, { tokenProvider: any; configurati
 export const lspSupportMap: Record<string, boolean> = {
     SAT: true,
     SMT: true,
-    XMV: false,
+    XMV: true,
     ALS: true,
     SPECTRA: true,
     DFY: true,
