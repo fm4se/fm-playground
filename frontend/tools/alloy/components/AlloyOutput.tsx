@@ -7,8 +7,9 @@ import { TbBinaryTree } from 'react-icons/tb';
 import { CiViewTable } from 'react-icons/ci';
 import { CiTextAlignLeft } from 'react-icons/ci';
 import { LiaClipboardListSolid } from 'react-icons/lia';
+import { MdAccountTree } from 'react-icons/md';
 import { MDBBtn, MDBInput, MDBTabs, MDBTabsItem, MDBTabsLink, MDBTabsContent, MDBTabsPane } from 'mdb-react-ui-kit';
-import AlloyCytoscapeGraph from './AlloyCytoscapeGraph';
+import { AlloyVisualizer, InstanceTree } from '../viz';
 import AlloyEvaluator from './AlloyEvaluator';
 import { getLineToHighlight } from '@/../tools/common/lineHighlightingUtil';
 import { getGraphData, parseAlloyErrorMessage, getTraceLengthAndBackloop } from '@/../tools/alloy/alloyUtils';
@@ -39,13 +40,13 @@ const AlloyOutput = () => {
     const [isFullScreen] = useAtom(isFullScreenAtom);
     const [alloyTraceIndex, setalloyTraceIndex] = useState(0);
     const [alloySpecId, setAlloySpecId] = useState(null);
-    const [alloyVizGraph, setAlloyVizGraph] = useState<{ data: { id: any; label: any } }[]>([]);
+    // The last response holding a solution; it stays visualized when no more instances exist.
+    const [vizResponse, setVizResponse] = useState<unknown>(null);
     const [isTemporal, setIsTemporal] = useState(false);
     const [isInstance, setIsInstance] = useState(true);
     const [alloyErrorMessage, setAlloyErrorMessage] = useState('');
     const [alloyPlainMessage, setAlloyPlainMessage] = useState('');
     const [alloyTraceLoop, setAlloyTraceLoop] = useState('');
-    const [lastInstance, setLastInstance] = useState<{ data: { id: any; label: any } }[]>([]);
     const [isLastInstance, setIsLastInstance] = useState(false);
     const [alloyTabularInstance, setAlloyTabularInstance] = useState('');
     const [alloyTextInstance, setAlloyTextInstance] = useState('');
@@ -101,16 +102,14 @@ const AlloyOutput = () => {
                 }
                 const graphData = getGraphData(instances[instanceIndexToShow]);
                 setAlloyPlainMessage(graphData.length === 0 ? 'Empty Instance' : '');
-                setAlloyVizGraph(graphData);
-                setLastInstance(graphData);
+                setVizResponse(alloyInstance);
                 if (isTemporal) setAlloyTraceLoop(`Trace Length: ${traceLength} | Backloop: ${backloop}`);
                 else setAlloyTraceLoop('');
             } else {
                 // instance found but empty
                 const graphData = getGraphData(instances[0]);
                 setAlloyPlainMessage(graphData.length === 0 ? 'Empty Instance' : '');
-                setAlloyVizGraph(graphData);
-                setLastInstance(graphData);
+                setVizResponse(alloyInstance);
                 if (isTemporal) setAlloyTraceLoop(`Trace Length: ${traceLength} | Backloop: ${backloop}`);
                 else setAlloyTraceLoop('');
             }
@@ -119,7 +118,6 @@ const AlloyOutput = () => {
             setAlloyErrorMessage((alloyInstance as any).message || '');
         } else if (alloyInstance && 'error' in alloyInstance) {
             // instance not found and error message is present
-            setAlloyVizGraph([]);
             if (
                 typeof alloyInstance === 'object' &&
                 alloyInstance !== null &&
@@ -137,7 +135,6 @@ const AlloyOutput = () => {
             ) {
                 // when we reach the last instance, keep the last instance in the graph and show the message
                 setIsInstance(true);
-                setAlloyVizGraph(lastInstance);
                 setAlloyPlainMessage('No more instances');
             } else if (alloyInstance['error']) {
                 // other errors like syntax error, type error etc.
@@ -160,26 +157,6 @@ const AlloyOutput = () => {
         // Text instance
         if (alloyInstance && 'textInstance' in alloyInstance) {
             setAlloyTextInstance((alloyInstance as any)['textInstance'][0]);
-        }
-    }, [alloyInstance, alloyTraceIndex, isTemporal]);
-
-    // FIXME: This might be merged with the above useEffect.
-    // cause: asynchronous updates in React's state when we change the instanceIndexToShow to useState.
-    useEffect(() => {
-        if (alloyInstance && 'alloy' in alloyInstance && 'specId' in alloyInstance) {
-            const alloy = (alloyInstance as { [key: string]: any })['alloy'];
-            const instances = Array.isArray(alloy['instance']) ? alloy['instance'] : [alloy['instance']];
-
-            if (isTemporal && instances.length > 1) {
-                const { traceLength, backloop } = getTraceLengthAndBackloop(instances[0]);
-                const instanceIndexToShow =
-                    alloyTraceIndex < traceLength
-                        ? alloyTraceIndex
-                        : backloop + ((alloyTraceIndex - traceLength) % (traceLength - backloop));
-
-                const graphData = getGraphData(instances[instanceIndexToShow]);
-                setAlloyVizGraph(graphData);
-            }
         }
     }, [alloyInstance, alloyTraceIndex, isTemporal]);
 
@@ -285,6 +262,11 @@ const AlloyOutput = () => {
                             </MDBTabsLink>
                         </MDBTabsItem>
                         <MDBTabsItem>
+                            <MDBTabsLink onClick={() => handleTabClick('tree')} active={activeTab === 'tree'}>
+                                <MdAccountTree /> Tree
+                            </MDBTabsLink>
+                        </MDBTabsItem>
+                        <MDBTabsItem>
                             <MDBTabsLink onClick={() => handleTabClick('tabular')} active={activeTab === 'tabular'}>
                                 <CiViewTable /> Table
                             </MDBTabsLink>
@@ -313,10 +295,23 @@ const AlloyOutput = () => {
 
                     <MDBTabsContent>
                         <MDBTabsPane open={activeTab === 'graph'}>
-                            <AlloyCytoscapeGraph
-                                alloyVizGraph={alloyVizGraph}
-                                height={isFullScreen ? '80vh' : '57vh'}
-                            />
+                            {vizResponse !== null && (
+                                <AlloyVisualizer
+                                    response={vizResponse}
+                                    height={isFullScreen ? '80vh' : '57vh'}
+                                    position={alloyTraceIndex}
+                                    onPositionChange={setalloyTraceIndex}
+                                />
+                            )}
+                        </MDBTabsPane>
+                        <MDBTabsPane open={activeTab === 'tree'}>
+                            {activeTab === 'tree' && vizResponse !== null && (
+                                <InstanceTree
+                                    response={vizResponse}
+                                    state={instanceIndexToShow}
+                                    height={isFullScreen ? '80vh' : '57vh'}
+                                />
+                            )}
                         </MDBTabsPane>
                         <MDBTabsPane open={activeTab === 'tabular'}>
                             <pre

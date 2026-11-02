@@ -1,0 +1,323 @@
+.alloy-viz {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--output-box-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    color: var(--primary-text-color);
+    font-size: 13px;
+}
+
+.alloy-viz button,
+.alloy-viz select,
+.alloy-viz input {
+    font-size: 12px;
+    color: var(--primary-text-color);
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.alloy-viz button {
+    padding: 2px 8px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.alloy-viz button:hover:not(:disabled),
+.alloy-viz button.active {
+    background-color: var(--select-hover);
+}
+
+.alloy-viz button:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.alloy-viz-toolbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.alloy-viz-spacer {
+    flex: 1;
+}
+
+.alloy-viz-help {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    color: var(--secondary-text-color);
+    cursor: help;
+    font-size: 12px;
+}
+
+.alloy-viz-dropdown {
+    position: relative;
+}
+
+.alloy-viz-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 20;
+    min-width: 160px;
+    max-height: 260px;
+    overflow-y: auto;
+    margin-top: 2px;
+    padding: 4px;
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.alloy-viz-dropdown-item {
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.alloy-viz-dropdown-item:hover {
+    background-color: var(--select-hover);
+}
+
+.alloy-viz-check {
+    display: inline-block;
+    width: 16px;
+}
+
+.alloy-viz-timeline {
+    flex: 0 0 auto;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--primary-text-color);
+    overflow: hidden;
+    user-select: none;
+}
+
+.alloy-viz-body {
+    position: relative;
+    flex: 1 1 auto;
+    display: flex;
+    min-height: 0;
+}
+
+.alloy-viz-panes {
+    flex: 1 1 auto;
+    display: flex;
+    min-width: 0;
+}
+
+.alloy-viz-canvas {
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
+    background-color: #ffffff;
+    cursor: grab;
+    user-select: none;
+}
+
+.alloy-viz-canvas + .alloy-viz-canvas {
+    border-left: 1px solid var(--border-color);
+}
+
+.alloy-viz-canvas:active {
+    cursor: grabbing;
+}
+
+.alloy-viz-canvas svg {
+    display: block;
+}
+
+.alloy-viz-legend {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    max-height: calc(100% - 12px);
+    overflow-y: auto;
+    padding: 4px 8px;
+    border: 1px solid #a0a0a0;
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.85);
+    font-family: 'Lucida Grande', 'Lucida Sans Unicode', 'Segoe UI', Arial, sans-serif;
+    font-size: 12px;
+    line-height: 16px;
+    cursor: default;
+}
+
+.alloy-viz-caption {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0.55);
+    color: #ffffff;
+    font-size: 11px;
+    pointer-events: none;
+}
+
+.alloy-viz-projection {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    padding: 6px 8px;
+    border-top: 1px solid var(--border-color);
+}
+
+.alloy-viz-projection-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.alloy-viz-projection-type {
+    font-weight: 600;
+    margin-right: 2px;
+}
+
+.alloy-viz-projection-item select {
+    min-width: 90px;
+}
+
+/* Theme panel */
+
+.alloy-theme-panel {
+    flex: 0 0 280px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    border-right: 1px solid var(--border-color);
+    background-color: var(--background-color);
+}
+
+.alloy-theme-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 8px;
+    font-weight: 600;
+}
+
+.alloy-viz .alloy-viz-icon-btn {
+    border: none;
+    background: transparent;
+    font-size: 18px;
+    line-height: 1;
+    padding: 0 4px;
+}
+
+.alloy-theme-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 0 8px 6px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.alloy-theme-editor {
+    flex: 0 0 auto;
+    max-height: 55%;
+    overflow-y: auto;
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.alloy-theme-title {
+    font-weight: 600;
+    margin-bottom: 6px;
+    word-break: break-word;
+}
+
+.alloy-theme-field {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.alloy-theme-field select,
+.alloy-theme-field input {
+    width: 150px;
+    padding: 1px 4px;
+}
+
+.alloy-theme-check {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 2px 0;
+    cursor: pointer;
+}
+
+.alloy-theme-check.inherited input {
+    opacity: 0.55;
+}
+
+.alloy-theme-muted {
+    color: var(--secondary-text-color);
+    font-size: 11px;
+}
+
+.alloy-theme-tree {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 4px 0;
+    font-size: 12px;
+}
+
+.alloy-theme-row {
+    padding: 2px 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.alloy-theme-row:hover {
+    background-color: var(--select-hover);
+}
+
+.alloy-theme-row.selected {
+    background-color: var(--select-hover);
+    font-weight: 600;
+}
+
+/* Tree view */
+
+.alloy-viz-tree {
+    overflow: auto;
+    border-radius: 8px;
+    font-size: 13px;
+    white-space: normal;
+}
+
+.alloy-viz-tree-row {
+    cursor: pointer;
+    padding: 1px 0;
+    white-space: nowrap;
+}
+
+.alloy-viz-tree-row:hover {
+    background-color: var(--select-hover);
+}
+
+.alloy-viz-tree-toggle {
+    display: inline-block;
+    width: 14px;
+    color: var(--secondary-text-color);
+}
