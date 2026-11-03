@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { saveCodeAndRefreshHistory } from '@/utils/codeExecutionUtils';
 import { logToDb } from '@/api/playgroundApi';
 import { fmpConfig } from '@/ToolMaps';
@@ -30,6 +29,7 @@ import {
     setupAlloyRedundancyCodeLens,
     triggerAlloyCodeLensUpdate,
 } from './features';
+import { getAlloyEngine } from './engine';
 
 // Fixme: Checking redundancy by default. Disable later.
 export const ENABLE_DEFAULT_REDUNDANCY_CHECK = true;
@@ -47,17 +47,21 @@ export function computeCharOffset(code: string, line: number, col: number): numb
     return offset + 1; // 1-based character offset
 }
 
-async function getAlloyInstance(permalink: Permalink, cmd: number) {
-    let url = `/alloy/alloy/instance?check=${permalink.check}&p=${permalink.permalink}&cmd=${cmd}`;
-    try {
-        const response = await axios.get(url);
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
+/**
+ * Finds the first instance of command `cmd`. Depending on the configured execution mode this runs
+ * in the user's browser or on the Alloy API (see tools/alloy/engine).
+ */
+// Returns `any`: alloyInstanceAtom is (loosely) typed as an array although it holds this document.
+function getAlloyInstance(code: string, permalink: Permalink, cmd: number): Promise<any> {
+    return getAlloyEngine().findInstance({ code, permalink, cmd });
 }
 
-async function performAlloyRedundancyCheck(editorValue: string, cmd: number, permalinkStr?: string, isDefault: boolean = false) {
+async function performAlloyRedundancyCheck(
+    editorValue: string,
+    cmd: number,
+    permalinkStr?: string,
+    isDefault: boolean = false
+) {
     const res = await checkAlloyRedundancyApi(editorValue, cmd);
     jotaiStore.set(alloyRedundancyResultsAtom, { ...res, isDefault });
 
@@ -130,7 +134,7 @@ async function executeAlloyCheckRedundancy() {
         // Fetch standard instance output so the UI (viz, table, text, eval tabs) stays identical to execute Alloy!
         const cmdToFetch = alloySelectedCmd < 0 ? 0 : alloySelectedCmd;
         jotaiStore.set(alloyInstanceAtom, []);
-        const instanceRes = await getAlloyInstance(response?.data, cmdToFetch);
+        const instanceRes = await getAlloyInstance(editorValue, response?.data, cmdToFetch);
         jotaiStore.set(alloyInstanceAtom, instanceRes);
     } catch (err: any) {
         if (err.response?.status === 429) {
@@ -240,7 +244,7 @@ export async function executeAlloyExplainRedundancy() {
         // Fetch standard instance output so UI tabs (viz, table, text, eval) populate identically to execute Alloy!
         const cmdToFetch = alloySelectedCmd < 0 ? 0 : alloySelectedCmd;
         jotaiStore.set(alloyInstanceAtom, []);
-        const instanceRes = await getAlloyInstance(response?.data, cmdToFetch);
+        const instanceRes = await getAlloyInstance(editorValue, response?.data, cmdToFetch);
         jotaiStore.set(alloyInstanceAtom, instanceRes);
     } catch (err: any) {
         if (err.response?.status === 429) {
@@ -295,7 +299,7 @@ async function executeAlloyNormal() {
 
     try {
         jotaiStore.set(alloyInstanceAtom, []);
-        const res = await getAlloyInstance(response?.data, cmdIndex);
+        const res = await getAlloyInstance(editorValue, response?.data, cmdIndex);
         jotaiStore.set(alloyInstanceAtom, res);
 
         if (ENABLE_DEFAULT_REDUNDANCY_CHECK) {

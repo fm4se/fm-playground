@@ -8,7 +8,10 @@ interface AlloyEvaluatorProps {
     state: number;
     evaluatorOutput: string;
     setEvaluatorOutput: (evaluatorOutput: string) => void;
+    /** Used by the default HTTP evaluator (e.g. "/diff-alloy" for the diff tool). */
     apiPrefix?: string;
+    /** Custom evaluator, e.g. the Alloy engine (which may run in the browser). Overrides `apiPrefix`. */
+    evaluate?: (specId: string, expr: string, state: number) => Promise<any>;
 }
 
 async function getAlloyEval(specId: string, expr: string, state: number, apiPrefix: string = '/alloy') {
@@ -28,10 +31,12 @@ const AlloyEvaluator: React.FC<AlloyEvaluatorProps> = ({
     evaluatorOutput,
     setEvaluatorOutput,
     apiPrefix = '/alloy',
+    evaluate,
 }) => {
     const handleEvaluate = (expr: string) => {
         if (!expr || !specId) return;
-        getAlloyEval(specId, expr, state, apiPrefix).then((res) => {
+        const run = evaluate ?? ((id: string, e: string, s: number) => getAlloyEval(id, e, s, apiPrefix));
+        run(specId, expr, state).then((res) => {
             if (res.result) {
                 setEvaluatorOutput(expr + '<br>&nbsp;&nbsp;' + res.result + '<br>' + evaluatorOutput);
             } else if (res.error) {

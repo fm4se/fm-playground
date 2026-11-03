@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useAtom } from 'jotai';
 import { IconButton } from '@mui/material';
 import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
@@ -15,23 +14,15 @@ import { getGraphData, parseAlloyErrorMessage, getTraceLengthAndBackloop } from 
 import './AlloyOutput.css';
 import { lineToHighlightAtom, isFullScreenAtom, alloyInstanceAtom } from '@/atoms';
 import { RedundancySummary } from '../features';
+import { getAlloyEngine } from '../engine';
 
-async function getAlloyNextInstance(specId: string | null) {
-    let url = '/alloy/alloy/nextInstance';
-    if (!url) {
-        throw new Error('Alloy Next Instance API URL not found');
-    }
-    try {
-        const response = await axios.post(url, specId, {
-            headers: {
-                'Content-Type': 'text/plain',
-            },
-        });
-        return response.data;
-    } catch (error) {
-        throw error;
-    }
+// Returns `any`: alloyInstanceAtom is (loosely) typed as an array although it holds this document.
+async function getAlloyNextInstance(specId: string | null): Promise<any> {
+    return getAlloyEngine().nextInstance(specId ?? '');
 }
+
+const evaluateWithEngine = (specId: string, expr: string, state: number) =>
+    getAlloyEngine().evaluate(specId, expr, state);
 
 const AlloyOutput = () => {
     const [, setLineToHighlight] = useAtom(lineToHighlightAtom);
@@ -308,6 +299,7 @@ const AlloyOutput = () => {
                             state={instanceIndexToShow}
                             evaluatorOutput={evaluatorOutput}
                             setEvaluatorOutput={setEvaluatorOutput}
+                            evaluate={evaluateWithEngine}
                         />
                     )}
 

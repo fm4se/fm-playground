@@ -1,1 +1,10 @@
 rootProject.name = 'fmp.alloy.api'
+
+// Shared, framework-free Alloy analysis core used by both the Spring Boot API (root project)
+// and the in-browser build. Keeping all analysis logic here guarantees that server-side and
+// client-side execution produce identical responses.
+include 'alloy-engine'
+
+// TeaVM build that compiles alloy-engine (plus the Alloy/Kodkod/SAT4J bytecode) to WebAssembly
+// GC and JavaScript so the playground frontend can run analyses in the user's browser.
+include 'alloy-browser'

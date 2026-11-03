@@ -2,6 +2,8 @@ package de.buw.fmp.alloy.api;
 
 import de.buw.alloy.redundancy.AlloyRedundancyChecker;
 import de.buw.alloy.redundancy.ModuleTransformer;
+import de.buw.fmp.alloy.engine.AlloyEngine;
+import de.buw.fmp.alloy.engine.json.JsonResponses;
 import edu.mit.csail.sdg.alloy4.A4Reporter;
 import edu.mit.csail.sdg.alloy4.Pos;
 import edu.mit.csail.sdg.ast.Command;
@@ -31,9 +33,20 @@ import org.springframework.web.bind.annotation.RestController;
  * All endpoints accept an Alloy model as source code in the request body and
  * return JSON
  * responses with redundancy analysis results.
+ *
+ * <p>
+ * {@code maxRedundantSet} and {@code explain} delegate to the shared {@link AlloyEngine} (the
+ * browser engine runs the same code). {@code check} and {@code explainNative} are server-only:
+ * the latter needs a native SAT solver with UNSAT-core support.
  */
 @RestController
 public class RedundancyController {
+
+  private final AlloyEngine engine;
+
+  public RedundancyController(AlloyEngine engine) {
+    this.engine = engine;
+  }
 
   /**
    * Check for redundant constraints in an Alloy model.
@@ -56,7 +69,7 @@ public class RedundancyController {
     File tmpFile = null;
     try {
       tmpFile = writeToTempFile(request.getCode());
-      A4Options opt = AlloyInstanceController.getOptions();
+      A4Options opt = AlloyEngineConfiguration.SERVER_SOLVER.create();
       AlloyRedundancyChecker checker = new AlloyRedundancyChecker(opt);
 
       List<Expr> redundant = checker.redundantConstraints(tmpFile.getAbsolutePath(), request.getCmdId());
@@ -115,52 +128,7 @@ public class RedundancyController {
     if (request.getCode() == null || request.getCode().isBlank()) {
       return errorJson("No Alloy model code provided");
     }
-
-    File tmpFile = null;
-    try {
-      tmpFile = writeToTempFile(request.getCode());
-      A4Options opt = AlloyInstanceController.getOptions();
-      AlloyRedundancyChecker checker = new AlloyRedundancyChecker(opt);
-
-      CompModule m = CompUtil.parseEverything_fromFile(A4Reporter.NOP, null, tmpFile.getAbsolutePath());
-      m = ModuleTransformer.globalizeInlineFacts(m);
-      List<Expr> allConstraints = ModuleTransformer.flatten(m.getAllReachableFacts());
-
-      List<Expr> maxSet;
-      if (request.getCmdId() == -1) {
-        maxSet = checker.maxRedundantSet(tmpFile.getAbsolutePath());
-      } else {
-        maxSet = checker.maxRedundantSet(tmpFile.getAbsolutePath(), request.getCmdId());
-      }
-
-      JSONObject result = new JSONObject();
-      result.put("status", HttpStatus.OK.value());
-      result.put("redundantCount", maxSet.size());
-      result.put("totalConstraints", allConstraints.size());
-      result.put("cmdId", request.getCmdId());
-
-      JSONArray items = new JSONArray();
-      for (Expr e : maxSet) {
-        JSONObject item = new JSONObject();
-        item.put("position", posToJson(e.span()));
-        item.put("expression", e.toString());
-        for (int j = 0; j < allConstraints.size(); j++) {
-          if (allConstraints.get(j).span().contains(e.pos)) {
-            item.put("constraintIndex", j);
-            break;
-          }
-        }
-        item.put("sourceText", extractSourceText(request.getCode(), e.span()));
-        items.put(item);
-      }
-      result.put("redundantConstraints", items);
-      return result.toString(2);
-
-    } catch (Exception e) {
-      return errorJson(e.getMessage());
-    } finally {
-      deleteTempFile(tmpFile);
-    }
+    return engine.maxRedundantSet(request.getCode(), request.getCmdId());
   }
 
   /**
@@ -184,114 +152,11 @@ public class RedundancyController {
     if (request.getCode() == null || request.getCode().isBlank()) {
       return errorJson("No Alloy model code provided");
     }
-
-    File tmpFile = null;
-    try {
-      tmpFile = writeToTempFile(request.getCode());
-      A4Options opt = AlloyInstanceController.getOptions();
-      AlloyRedundancyChecker checker = new AlloyRedundancyChecker(opt);
-
-      if (request.getCursorPos() > 0) {
-        // Explain by cursor position (like the GUI does)
-        Pos p = Pos.toPos(request.getCode(), request.getCursorPos(), request.getCursorPos(), 4);
-        List<Expr> entailingSet = checker.explainRedundancy(tmpFile.getAbsolutePath(), p);
-
-        JSONObject result = new JSONObject();
-        result.put("status", HttpStatus.OK.value());
-
-        Expr selectedConstraint = checker.getSelectedConstraint();
-        if (selectedConstraint != null) {
-          JSONObject selected = new JSONObject();
-          selected.put("position", posToJson(selectedConstraint.span()));
-          selected.put("expression", selectedConstraint.toString());
-          selected.put("sourceText", extractSourceText(request.getCode(), selectedConstraint.span()));
-          result.put("selectedConstraint", selected);
-
-          if (entailingSet == null) {
-            result.put("redundant", false);
-            result.put("message", "The selected constraint is not redundant.");
-          } else if (entailingSet.isEmpty()) {
-            result.put("redundant", true);
-            result.put("message",
-                "No explanation based on other facts found. Redundancy originates from structural elements.");
-            result.put("entailingSet", new JSONArray());
-          } else {
-            result.put("redundant", true);
-            result.put("entailingCount", entailingSet.size());
-            JSONArray items = new JSONArray();
-            for (Expr e : entailingSet) {
-              JSONObject item = new JSONObject();
-              item.put("position", posToJson(e.span()));
-              item.put("expression", e.toString());
-              item.put("sourceText", extractSourceText(request.getCode(), e.span()));
-              items.put(item);
-            }
-            result.put("entailingSet", items);
-          }
-        } else {
-          result.put("message",
-              "Unable to determine selected constraint. Is the cursor on a constraint?");
-        }
-        return result.toString(2);
-
-      } else if (request.getCmdId() >= -1 && request.getConstraintId() >= 0) {
-        // Explain by command ID and constraint ID
-        CompModule m = CompUtil.parseEverything_fromFile(A4Reporter.NOP, null, tmpFile.getAbsolutePath());
-        m = ModuleTransformer.globalizeInlineFacts(m);
-        List<Expr> constraints = ModuleTransformer.flatten(m.getAllReachableFacts());
-
-        if (request.getConstraintId() >= constraints.size()) {
-          return errorJson(
-              "Constraint ID " + request.getConstraintId() + " out of range. Total constraints: " + constraints.size());
-        }
-
-        Expr target = constraints.get(request.getConstraintId());
-        Command cmd = request.getCmdId() == -1 ? null : m.getAllCommands().get(request.getCmdId());
-
-        List<Expr> entailingSet = checker.explainRedundancy(m, cmd, constraints, target);
-
-        JSONObject result = new JSONObject();
-        result.put("status", HttpStatus.OK.value());
-
-        JSONObject selected = new JSONObject();
-        selected.put("position", posToJson(target.span()));
-        selected.put("expression", target.toString());
-        selected.put("constraintIndex", request.getConstraintId());
-        selected.put("sourceText", extractSourceText(request.getCode(), target.span()));
-        result.put("selectedConstraint", selected);
-
-        if (entailingSet == null) {
-          result.put("redundant", false);
-          result.put("message", "The selected constraint is not redundant.");
-        } else if (entailingSet.isEmpty()) {
-          result.put("redundant", true);
-          result.put("message",
-              "No explanation based on other facts found. Redundancy originates from structural elements.");
-          result.put("entailingSet", new JSONArray());
-        } else {
-          result.put("redundant", true);
-          result.put("entailingCount", entailingSet.size());
-          JSONArray items = new JSONArray();
-          for (Expr e : entailingSet) {
-            JSONObject item = new JSONObject();
-            item.put("position", posToJson(e.span()));
-            item.put("expression", e.toString());
-            item.put("sourceText", extractSourceText(request.getCode(), e.span()));
-            items.put(item);
-          }
-          result.put("entailingSet", items);
-        }
-        return result.toString(2);
-
-      } else {
-        return errorJson("Provide either 'cursorPos' or both 'cmdId' and 'constraintId'");
-      }
-
-    } catch (Exception e) {
-      return errorJson(e.getMessage());
-    } finally {
-      deleteTempFile(tmpFile);
+    if (request.getCursorPos() > 0) {
+      return engine.explainRedundancyAtCursor(request.getCode(), request.getCursorPos());
     }
+    return engine.explainRedundancy(
+        request.getCode(), request.getCmdId(), request.getConstraintId());
   }
 
   /**
@@ -315,7 +180,7 @@ public class RedundancyController {
     File tmpFile = null;
     try {
       tmpFile = writeToTempFile(request.getCode());
-      A4Options opt = AlloyInstanceController.getOptions();
+      A4Options opt = AlloyEngineConfiguration.SERVER_SOLVER.create();
       AlloyRedundancyChecker checker = new AlloyRedundancyChecker(opt);
 
       if (request.getCursorPos() > 0) {
@@ -445,44 +310,15 @@ public class RedundancyController {
     }
   }
 
-  /**
-   * Convert an Alloy Pos to a JSON object with line/column info.
-   */
-  private JSONObject posToJson(Pos p) {
-    JSONObject obj = new JSONObject();
-    if (p != null) {
-      obj.put("startLine", p.y);
-      obj.put("startCol", p.x);
-      obj.put("endLine", p.y2);
-      obj.put("endCol", p.x2);
-    }
-    return obj;
+  private static JSONObject posToJson(Pos p) {
+    return JsonResponses.position(p);
   }
 
-  /**
-   * Extract the source text corresponding to a position span.
-   * Returns the substring of the source code covered by the position, or an empty
-   * string if
-   * extraction fails.
-   */
-  private String extractSourceText(String code, Pos p) {
-    if (p == null || code == null) {
-      return "";
-    }
-    try {
-      return p.substring(code);
-    } catch (Exception e) {
-      return "";
-    }
+  private static String extractSourceText(String code, Pos p) {
+    return JsonResponses.sourceText(code, p);
   }
 
-  /**
-   * Create an error JSON response.
-   */
-  private String errorJson(String message) {
-    JSONObject obj = new JSONObject();
-    obj.put("error", message);
-    obj.put("status", HttpStatus.BAD_REQUEST.value());
-    return obj.toString(2);
+  private static String errorJson(String message) {
+    return JsonResponses.error(message).toString(2);
   }
 }

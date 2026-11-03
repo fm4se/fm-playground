@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import de.buw.fmp.alloy.engine.AlloyEngine;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,7 +20,9 @@ public class RedundancyControllerTest {
 
   @BeforeEach
   void setUp() {
-    controller = new RedundancyController();
+    controller =
+        new RedundancyController(
+            AlloyEngine.builder().solverOptions(AlloyEngineConfiguration.SERVER_SOLVER).build());
   }
 
   @Test

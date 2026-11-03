@@ -1,0 +1,134 @@
+import java.security.MessageDigest
+
+plugins {
+    id 'java'
+    id 'org.teavm' version '0.16.0'
+}
+
+// ---------------------------------------------------------------------------------------------
+// In-browser Alloy engine.
+//
+// Compiles alloy-engine (and, transitively, the Alloy Analyzer, Pardinus/Kodkod and SAT4J
+// bytecode) with TeaVM into
+//   * a WebAssembly GC module (preferred; Chrome 119+, Firefox 120+, Safari 18.2+) and
+//   * an ES module in plain JavaScript (fallback for browsers without WasmGC).
+//
+//   ./gradlew :alloy-browser:installToFrontend   build both and copy them to the frontend
+//   ./gradlew :alloy-browser:parityCheck         compare compiled engines with the JVM engine
+//   -PalloyBrowserDebug                          unobfuscated output with debug information
+// ---------------------------------------------------------------------------------------------
+
+group = 'de.buw'
+version = '0.0.1'
+
+repositories {
+    mavenCentral()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 17
+    options.encoding = 'UTF-8'
+}
+
+def teavmVersion = '0.16.0'
+def debugBuild = project.hasProperty('alloyBrowserDebug')
+
+dependencies {
+    implementation project(':alloy-engine')
+    implementation teavm.libs.jso
+
+    // Compile-time only: the TeaVM plugin (de.buw.fmp.alloy.browser.teavm) and the class library
+    // emulation (org.teavm.classlib...) are consumed by the TeaVM compiler, not shipped.
+    compileOnly "org.teavm:teavm-core:${teavmVersion}"
+    compileOnly "org.teavm:teavm-classlib:${teavmVersion}"
+}
+
+teavm {
+    all {
+        mainClass = 'de.buw.fmp.alloy.browser.AlloyBrowserMain'
+        optimization = org.teavm.gradle.api.OptimizationLevel.AGGRESSIVE
+        debugInformation = debugBuild
+    }
+    wasmGC {
+        targetFileName = 'alloy-engine.wasm'
+        obfuscated = !debugBuild
+        copyRuntime = true
+        // ES module runtime, so a module Web Worker can import() it.
+        modularRuntime = true
+    }
+    js {
+        targetFileName = 'alloy-engine.js'
+        moduleType = org.teavm.gradle.api.JSModuleType.ES2015
+        obfuscated = !debugBuild
+        sourceMap = debugBuild
+    }
+}
+
+def teavmOutput = layout.buildDirectory.dir('generated/teavm')
+
+// --- Verification -----------------------------------------------------------------------------
+
+tasks.register('parityCheck', Exec) {
+    group = 'verification'
+    description = 'Replays the JVM engine results against the compiled WasmGC and JS engines (needs Node.js 22+).'
+    dependsOn ':alloy-engine:test', 'buildWasmGC', 'generateJavaScript'
+    def fixtures = project(':alloy-engine').layout.buildDirectory.file('parity/fixtures.json')
+    workingDir = projectDir
+    // --liftoff-only: V8's optimizing tier (TurboFan) needs minutes for some of the very large
+    // generated functions and Node waits for it on exit. Results are identical either way; browsers
+    // compile in the background and are unaffected.
+    commandLine 'node', '--liftoff-only', 'scripts/parity-check.mjs',
+            fixtures.get().asFile.absolutePath,
+            '--wasm', teavmOutput.get().dir('wasm-gc').asFile.absolutePath,
+            '--js', teavmOutput.get().file('js/alloy-engine.js').asFile.absolutePath
+}
+
+// --- Publishing to the frontend -----------------------------------------------------------------
+
+def frontendEngineDir = providers.gradleProperty('frontendDir')
+        .map { new File(it) }
+        .orElse(rootProject.layout.projectDirectory.dir('../frontend/public/engines/alloy').asFile)
+
+tasks.register('installToFrontend') {
+    group = 'build'
+    description = 'Builds the browser engine and copies it, with a manifest, into the frontend.'
+    dependsOn 'buildWasmGC', 'generateJavaScript'
+
+    def wasmDir = teavmOutput.get().dir('wasm-gc').asFile
+    def jsFile = teavmOutput.get().file('js/alloy-engine.js').asFile
+    def target = frontendEngineDir.get()
+    def apiVersionSource = file('src/main/java/de/buw/fmp/alloy/browser/AlloyBrowserMain.java')
+    def engineVersion = project.version
+
+    inputs.dir(wasmDir)
+    inputs.file(jsFile)
+    inputs.file(apiVersionSource)
+    outputs.dir(target)
+
+    doLast {
+        def files = [
+                new File(wasmDir, 'alloy-engine.wasm'),
+                new File(wasmDir, 'alloy-engine.wasm-runtime.js'),
+                jsFile,
+        ]
+        target.deleteDir()
+        target.mkdirs()
+        def digest = MessageDigest.getInstance('SHA-256')
+        files.each { f ->
+            digest.update(f.bytes)
+            new File(target, f.name).bytes = f.bytes
+        }
+        def hash = digest.digest().encodeHex().toString().substring(0, 16)
+        def apiVersion = (apiVersionSource.text =~ /API_VERSION\s*=\s*(\d+)/)[0][1]
+        new File(target, 'manifest.json').text = groovy.json.JsonOutput.prettyPrint(
+                groovy.json.JsonOutput.toJson([
+                        apiVersion   : apiVersion as int,
+                        engineVersion: engineVersion,
+                        contentHash  : hash,
+                        wasm         : 'alloy-engine.wasm',
+                        wasmRuntime  : 'alloy-engine.wasm-runtime.js',
+                        js           : 'alloy-engine.js',
+                ])) + '\n'
+        logger.lifecycle("Installed browser engine ${hash} into ${target}")
+    }
+}

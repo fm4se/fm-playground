@@ -3,254 +3,146 @@ package de.buw.fmp.alloy.api;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 class ApplicationTests {
 
-  @BeforeEach
-  void setUp() {
-    AlloyInstanceController.instances.clear();
-  }
+  @Autowired AlloyInstanceController wiredController;
+  @Autowired RedundancyController wiredRedundancyController;
 
   @Test
   void contextLoads() {
-    AlloyInstanceController.TIME_OUT = 5;
+    assertTrue(wiredController != null && wiredRedundancyController != null);
+  }
 
-    AlloyInstanceControllerLocal controller = new AlloyInstanceControllerLocal();
-    List<String> instanceList = new ArrayList<>();
-    String result = "";
-    try {
-      result = controller.getInstance(Specs.SHORT_CODE, 0);
-    } catch (Exception e) {
-      fail();
-    }
+  @Test
+  void enumeratesAllInstances() throws Exception {
+    AlloyInstanceControllerLocal controller = new AlloyInstanceControllerLocal(5, 10);
+    String result = controller.getInstance(Specs.SHORT_CODE, 0);
     assertTrue(result.contains("specId") && result.contains("alloy"));
+    String specId = getField(result, "specId");
 
-    String specId = AlloyInstanceController.instances.keySet().iterator().next();
-
-    instanceList.add(result);
+    List<String> instances = new ArrayList<>();
+    instances.add(result);
     while (!result.contains("error")) {
-      try {
-        result = controller.getNextInstance(specId);
-        System.out.println(result);
-        assertFalse(instanceList.contains(result));
-        instanceList.add(result);
-      } catch (Exception e) {
-        fail();
-      }
-      instanceList.add(result);
-    }
-  }
-
-  @Test
-  void longRunningCodeTest() {
-    AlloyInstanceController.TIME_OUT = 5;
-    AlloyInstanceControllerLocal controller = new AlloyInstanceControllerLocal();
-    String result = "";
-    try {
-      result = controller.getInstance(Specs.LONG_CODE, 0);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    assertTrue(result.contains("error") && result.contains("timed out"));
-  }
-
-  @Test
-  void shortRunningCodeTest() {
-    AlloyInstanceController.TIME_OUT = 5;
-    AlloyInstanceControllerLocal controller = new AlloyInstanceControllerLocal();
-    String result = "";
-    long start = System.currentTimeMillis();
-    try {
-      result = controller.getInstance(Specs.SHORT_CODE, 0);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    long duration = System.currentTimeMillis() - start;
-    assertTrue(duration < 2000);
-    assertFalse(result.contains("error"));
-  }
-
-  @Test
-  void lessThanMaxRunningTest() {
-    AlloyInstanceController.MAX_RUNNING = 10;
-    AlloyInstanceController.running = 0;
-    AlloyInstanceControllerLocal controller = new AlloyInstanceControllerLocal();
-    String result = "";
-    try {
-      result = controller.getInstance(Specs.SHORT_CODE, 0);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    assertFalse(result.contains("error"));
-  }
-
-  @Test
-  void moreThanMaxRunningTest() {
-    AlloyInstanceController.MAX_RUNNING = 10;
-    AlloyInstanceController.running = 10;
-    AlloyInstanceControllerLocal controller = new AlloyInstanceControllerLocal();
-    String result = "";
-    try {
-      result = controller.getInstance(Specs.SHORT_CODE, 0);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    assertTrue(result.contains("error") && result.contains("Too many instances running."));
-  }
-
-  @Test
-  void updateRunningTest() {
-    AlloyInstanceController.MAX_RUNNING = 10;
-    AlloyInstanceController.running = 0;
-    AlloyInstanceControllerLocal controller = new AlloyInstanceControllerLocal();
-    String result = "";
-    try {
-      result = controller.getInstance(Specs.SHORT_CODE, 0);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    assertEquals(AlloyInstanceController.running, 0);
-
-    String specId = AlloyInstanceController.instances.keySet().iterator().next();
-    assertTrue(result.contains(specId));
-    try {
       result = controller.getNextInstance(specId);
-    } catch (Exception e) {
-      e.printStackTrace();
+      assertFalse(instances.contains(result));
+      instances.add(result);
     }
+    assertTrue(instances.size() > 1);
+  }
+
+  @Test
+  void longRunningCodeTimesOut() {
+    AlloyInstanceControllerLocal controller = new AlloyInstanceControllerLocal(1, 10);
+    String result = controller.getInstance(Specs.LONG_CODE, 0);
+    assertTrue(result.contains("error") && result.contains("timed out"), result);
+    assertEquals(0, controller.runner.running());
+  }
+
+  @Test
+  void shortRunningCodeIsFast() {
+    AlloyInstanceControllerLocal controller = new AlloyInstanceControllerLocal(5, 10);
+    long start = System.currentTimeMillis();
+    String result = controller.getInstance(Specs.SHORT_CODE, 0);
+    assertTrue(System.currentTimeMillis() - start < 2000);
     assertFalse(result.contains("error"));
-    assertEquals(AlloyInstanceController.running, 0);
   }
 
   @Test
-  void updateRunningTimeoutTest() {
-    AlloyInstanceController.TIME_OUT = 1;
-    AlloyInstanceController.MAX_RUNNING = 10;
-    AlloyInstanceController.running = 0;
+  void rejectsWorkBeyondConcurrencyLimit() throws Exception {
+    AlloyInstanceControllerLocal controller = new AlloyInstanceControllerLocal(3, 1);
+    Thread busy = new Thread(() -> controller.getInstance(Specs.LONG_CODE, 0));
+    busy.start();
+    Thread.sleep(1000); // let the long analysis occupy the only slot
+    assertEquals(1, controller.runner.running());
 
-    AlloyInstanceControllerLocal controller = new AlloyInstanceControllerLocal();
-    String result = "";
-    try {
-      result = controller.getInstance(Specs.LONG_CODE, 0);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    assertTrue(result.contains("error") && result.contains("timed out"));
-    assertEquals(AlloyInstanceController.running, 0);
+    String result = controller.getInstance(Specs.SHORT_CODE, 0);
+    assertTrue(result.contains("error") && result.contains("Too many instances running."));
+
+    busy.join();
+    assertEquals(0, controller.runner.running());
+    assertFalse(controller.getInstance(Specs.SHORT_CODE, 0).contains("error"));
   }
 
   @Test
-  void increaseRunningTest() throws InterruptedException {
-    AlloyInstanceController.TIME_OUT = 2;
-    AlloyInstanceController.MAX_RUNNING = 10;
-    AlloyInstanceController.running = 0;
-
-    AlloyInstanceControllerLocal controller = new AlloyInstanceControllerLocal();
-    // execute get instance in a thread
-    Thread t =
-        new Thread(
-            () -> {
-              try {
-                controller.getInstance(Specs.LONG_CODE, 0);
-              } catch (Exception e) {
-                fail(e);
-              }
-            });
-    t.start();
-    // give it some time to get to Alloy execution
-    Thread.sleep(1000);
-    assertEquals(AlloyInstanceController.running, 1);
-    t.join();
-    assertEquals(AlloyInstanceController.running, 0);
+  void runningCountIsReleasedAfterNextInstance() throws Exception {
+    AlloyInstanceControllerLocal controller = new AlloyInstanceControllerLocal(5, 10);
+    String result = controller.getInstance(Specs.SHORT_CODE, 0);
+    assertEquals(0, controller.runner.running());
+    String specId = getField(result, "specId");
+    assertFalse(controller.getNextInstance(specId).contains("error"));
+    assertEquals(0, controller.runner.running());
   }
 
   @Test
   void evaluateListTest() throws Exception {
-    AlloyInstanceControllerLocal controller = new AlloyInstanceControllerLocal();
-    String result = "";
-    String resultJson = controller.getInstance(Specs.LIST_CODE, 0);
-    String specId = getField(resultJson, "specId");
-    result = controller.eval(specId, "# Node", 0);
-    assertEquals("4", getField(result, "result"));
-
-    result = controller.eval(specId, "# List", 0);
-    assertEquals("1", getField(result, "result"));
-
-    result = controller.eval(specId, "# Node", 1);
-    assertEquals("1", getField(result, "result"));
+    AlloyInstanceControllerLocal controller = new AlloyInstanceControllerLocal(60, 10);
+    String specId = getField(controller.getInstance(Specs.LIST_CODE, 0), "specId");
+    assertEquals("4", getField(controller.eval(specId, "# Node", 0), "result"));
+    assertEquals("1", getField(controller.eval(specId, "# List", 0), "result"));
+    assertEquals("1", getField(controller.eval(specId, "# Node", 1), "result"));
   }
 
   @Test
   void evaluateAtomTest() throws Exception {
-    AlloyInstanceControllerLocal controller = new AlloyInstanceControllerLocal();
-    String result = "";
-    String resultJson = controller.getInstance(Specs.LIST_CODE, 0);
-    String specId = getField(resultJson, "specId");
-    result = controller.eval(specId, "List", 0);
-    assertEquals("{List$0}", getField(result, "result"));
-    result = controller.eval(specId, "List$0", 0);
-    assertEquals("{List$0}", getField(result, "result"));
+    AlloyInstanceControllerLocal controller = new AlloyInstanceControllerLocal(60, 10);
+    String specId = getField(controller.getInstance(Specs.LIST_CODE, 0), "specId");
+    assertEquals("{List$0}", getField(controller.eval(specId, "List", 0), "result"));
+    assertEquals("{List$0}", getField(controller.eval(specId, "List$0", 0), "result"));
   }
 
   @Test
   void evaluateErrorsTest() throws Exception {
-    AlloyInstanceControllerLocal controller = new AlloyInstanceControllerLocal();
-    String result = "";
-    String resultJson = controller.getInstance(Specs.SHORT_CODE, 0);
-    String specId = getField(resultJson, "specId");
+    AlloyInstanceControllerLocal controller = new AlloyInstanceControllerLocal(60, 10);
+    String specId = getField(controller.getInstance(Specs.SHORT_CODE, 0), "specId");
     // Node does not exist in this model
-    result = controller.eval(specId, "# Node", 0);
-    assertTrue(getField(result, "error").contains("Syntax error"));
+    assertTrue(getField(controller.eval(specId, "# Node", 0), "error").contains("Syntax error"));
   }
 
   @Test
   void checkListTabularTest() throws Exception {
-    AlloyInstanceControllerLocal controller = new AlloyInstanceControllerLocal();
-    String resultJson = controller.getInstance(Specs.LIST_CODE, 0);
-    assertTrue(getField(resultJson, "tabularInstance").contains("this/"));
+    AlloyInstanceControllerLocal controller = new AlloyInstanceControllerLocal(60, 10);
+    assertTrue(
+        getField(controller.getInstance(Specs.LIST_CODE, 0), "tabularInstance").contains("this/"));
   }
 
   @Test
   void checkTrafficTabularTest() throws Exception {
-    AlloyInstanceControllerLocal controller = new AlloyInstanceControllerLocal();
-    String resultJson = controller.getInstance(Specs.TRAFFIC_CODE, 0);
-    assertTrue(getField(resultJson, "tabularInstance").contains("this/"));
+    AlloyInstanceControllerLocal controller = new AlloyInstanceControllerLocal(60, 10);
+    assertTrue(
+        getField(controller.getInstance(Specs.TRAFFIC_CODE, 0), "tabularInstance")
+            .contains("this/"));
   }
 
   @Test
-  void translationErrorTest() throws Exception {
-    AlloyInstanceControllerLocal controller = new AlloyInstanceControllerLocal();
-    String result = "";
-    try {
-      result = controller.getInstance(Specs.FARMER_CODE, 0);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+  void translationErrorTest() {
+    AlloyInstanceControllerLocal controller = new AlloyInstanceControllerLocal(60, 10);
+    String result = controller.getInstance(Specs.FARMER_CODE, 0);
     assertFalse(result.contains("is not bound to a legal value during translation"));
+    // Nested module name (module examples/tutorial/farmer) + util/ordering must resolve.
+    assertFalse(result.contains("error"), result);
   }
 
-  /**
-   * Get a field from a JSON string
-   *
-   * @param json
-   * @param field
-   * @return
-   * @throws Exception
-   */
+  @Test
+  void rejectsInvalidPermalinkType() {
+    AlloyInstanceControllerLocal controller = new AlloyInstanceControllerLocal(60, 10);
+    assertTrue(controller.getInstance("SMT", "x", 0).contains("Invalid Permalink"));
+  }
+
+  /** Reads a field; single-element arrays (specId, tabularInstance, ...) are unwrapped. */
   private String getField(String json, String field) throws Exception {
     ObjectReader reader = new ObjectMapper().readerFor(Map.class);
-    Map<String, String> map = reader.readValue(json);
+    Map<String, Object> map = reader.readValue(json);
     Object value = map.get(field);
     if (value instanceof List) {
       return ((List<?>) value).get(0).toString();

@@ -9,7 +9,7 @@ version = '0.0.1'
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
 
@@ -31,9 +31,9 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    implementation files('lib/org.alloytools.alloy.dist.jar')
-    // https://mvnrepository.com/artifact/org.json/json
-    implementation 'org.json:json:20240303'
+    // Shared analysis core (also compiled to WebAssembly by :alloy-browser). It brings the Alloy
+    // distribution JAR and org.json as API dependencies.
+    implementation project(':alloy-engine')
     // Override old Gson bundled in Alloy JAR (needed for Spring Boot 3.4.x compatibility)
     implementation 'com.google.code.gson:gson:2.13.0'
 }
