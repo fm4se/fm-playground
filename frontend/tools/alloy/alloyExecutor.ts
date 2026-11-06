@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { saveCodeAndRefreshHistory } from '@/utils/codeExecutionUtils';
-import { logToDb } from '@/api/playgroundApi';
+import { logToDb, beaconToDb } from '@/api/playgroundApi';
 import { fmpConfig } from '@/ToolMaps';
+import { alloyLspTelemetry } from './langium/config/alloyLspTelemetry';
 import {
     editorValueAtom,
     jotaiStore,
@@ -33,6 +34,45 @@ import {
 
 // Fixme: Checking redundancy by default. Disable later.
 export const ENABLE_DEFAULT_REDUNDANCY_CHECK = true;
+
+let exitBeaconRegistered = false;
+
+function ensureAlloyLspExitBeacon() {
+    if (exitBeaconRegistered || typeof window === 'undefined') return;
+    exitBeaconRegistered = true;
+
+    window.addEventListener('pagehide', () => {
+        const enableLsp = jotaiStore.get(enableLspAtom);
+        const language = jotaiStore.get(languageAtom);
+        const permalink = jotaiStore.get(permalinkAtom);
+
+        if (
+            enableLsp &&
+            language?.short === 'ALS' &&
+            permalink?.permalink &&
+            alloyLspTelemetry.hasUnflushedActivity()
+        ) {
+            beaconToDb(permalink.permalink, {
+                analysis: 'alloy-lsp-exit-flush',
+                lsp: alloyLspTelemetry.flushEpisodeStats(),
+            });
+        }
+    });
+}
+
+function buildAlloyExecutionMetadata(enableLsp: boolean, cmdIndex: number, action: string) {
+    ensureAlloyLspExitBeacon();
+    const lspStats = enableLsp ? alloyLspTelemetry.flushEpisodeStats() : null;
+    if (!enableLsp) {
+        alloyLspTelemetry.resetEpisodeCounters();
+    }
+    return {
+        ls: enableLsp,
+        cmd: cmdIndex + 1,
+        action,
+        ...(lspStats ? { lsp: lspStats } : {}),
+    };
+}
 
 export function computeCharOffset(code: string, line: number, col: number): number {
     let currentLine = 1;
@@ -102,11 +142,11 @@ async function executeAlloyCheckRedundancy() {
     jotaiStore.set(targetAssertionRangeAtom, null);
 
     const cmdIndex = alloySelectedCmd < 0 ? 0 : alloySelectedCmd;
-    const metadata = {
-        ls: enableLsp,
-        cmd: cmdIndex + 1,
-        action: alloyCliOption?.value || 'check-redundancy',
-    };
+    const metadata = buildAlloyExecutionMetadata(
+        enableLsp,
+        cmdIndex,
+        alloyCliOption?.value || 'check-redundancy'
+    );
     const response = await saveCodeAndRefreshHistory(
         editorValue,
         language.short,
@@ -163,11 +203,7 @@ export async function executeAlloyExplainRedundancy() {
     jotaiStore.set(targetAssertionRangeAtom, null);
 
     const cmdIndex = alloySelectedCmd < 0 ? 0 : alloySelectedCmd;
-    const metadata = {
-        ls: enableLsp,
-        cmd: cmdIndex + 1,
-        action: 'explain-redundancy',
-    };
+    const metadata = buildAlloyExecutionMetadata(enableLsp, cmdIndex, 'explain-redundancy');
     const response = await saveCodeAndRefreshHistory(
         editorValue,
         language.short,
@@ -271,11 +307,11 @@ async function executeAlloyNormal() {
     triggerAlloyCodeLensUpdate();
 
     const cmdIndex = alloySelectedCmd < 0 ? 0 : alloySelectedCmd;
-    const metadata = {
-        ls: enableLsp,
-        cmd: cmdIndex + 1,
-        action: alloyCliOption?.value || 'execute-alloy',
-    };
+    const metadata = buildAlloyExecutionMetadata(
+        enableLsp,
+        cmdIndex,
+        alloyCliOption?.value || 'execute-alloy'
+    );
     const response = await saveCodeAndRefreshHistory(
         editorValue,
         language.short,
