@@ -1,14 +1,39 @@
-import { type Module, inject } from 'langium';
-import { createDefaultModule, createDefaultSharedModule, type DefaultSharedModuleContext, type LangiumServices, type LangiumSharedServices, type PartialLangiumServices } from 'langium/lsp';
+import { type Module, createGrammarConfig, inject } from 'langium';
+import {
+    createDefaultModule, createDefaultSharedModule, type DefaultSharedModuleContext, type LangiumServices,
+    type LangiumSharedServices, type PartialLangiumServices, type PartialLangiumSharedServices
+} from 'langium/lsp';
 import { SmtGeneratedModule, SmtGeneratedSharedModule } from './generated/module.js';
-import { SmtValidator, registerValidationChecks } from './smt-validator.js';
-import { SmtScopeComputation } from './smt-scope-computation.js';
-import { SmtCompletionProvider } from './smt-completion-provider.js';
+import { BuiltinLibrary } from './builtins/library.js';
+import { SmtValidator, registerValidationChecks } from './validation/smt-validator.js';
+import { SmtScopeProvider } from './scoping/smt-scope-provider.js';
+import { SmtScopeComputation } from './scoping/smt-scope-computation.js';
+import { SmtLinker } from './scoping/smt-linker.js';
+import { SortChecker } from './typing/sort-checker.js';
+import { SmtValueConverter } from './smt-value-converter.js';
+import { createSmtParser } from './smt-parser.js';
+import { SmtWorkspaceManager } from './workspace/smt-workspace-manager.js';
+import { SmtCompletionProvider } from './lsp/smt-completion-provider.js';
+import { SmtHoverProvider } from './lsp/smt-hover-provider.js';
+import { SmtNodeKindProvider } from './lsp/smt-node-kind-provider.js';
+import { SmtDefinitionProvider } from './lsp/smt-definition-provider.js';
+import { SmtRenameProvider } from './lsp/smt-rename-provider.js';
+import { SmtSemanticTokenProvider } from './lsp/smt-semantic-tokens.js';
+import { SmtFormatter } from './lsp/smt-formatter.js';
+import { SmtSignatureHelpProvider } from './lsp/smt-signature-help.js';
+import { SmtCodeActionProvider } from './lsp/smt-code-actions.js';
+import { SmtDocumentSymbolProvider } from './lsp/smt-document-symbols.js';
 
 /**
  * Declaration of custom services - add your own service classes here.
  */
 export type SmtAddedServices = {
+    builtins: {
+        BuiltinLibrary: BuiltinLibrary
+    },
+    typing: {
+        SortChecker: SortChecker
+    },
     validation: {
         SmtValidator: SmtValidator
     }
@@ -26,23 +51,58 @@ export type SmtServices = LangiumServices & SmtAddedServices
  * selected services, while the custom services must be fully specified.
  */
 export const SmtModule: Module<SmtServices, PartialLangiumServices & SmtAddedServices> = {
+    builtins: {
+        BuiltinLibrary: (services) => new BuiltinLibrary(services)
+    },
+    typing: {
+        SortChecker: (services) => new SortChecker(services)
+    },
     validation: {
-        SmtValidator: () => new SmtValidator()
+        SmtValidator: (services) => new SmtValidator(services)
+    },
+    parser: {
+        LangiumParser: (services) => createSmtParser(services),
+        ValueConverter: () => new SmtValueConverter(),
+        // Characters that can be part of an SMT-LIB / Z3 symbol (used to find the symbol under the cursor).
+        GrammarConfig: (services) => ({ ...createGrammarConfig(services), nameRegexp: /^[a-zA-Z0-9~!@$%^&*_\-+=<>.?/,|]$/ })
     },
     references: {
+        ScopeProvider: (services) => new SmtScopeProvider(services),
         ScopeComputation: (services) => new SmtScopeComputation(services),
+        Linker: (services) => new SmtLinker(services)
     },
-    lsp:{
-        CompletionProvider: (services) => new SmtCompletionProvider(services)
+    lsp: {
+        CompletionProvider: (services) => new SmtCompletionProvider(services),
+        HoverProvider: (services) => new SmtHoverProvider(services),
+        DefinitionProvider: (services) => new SmtDefinitionProvider(services),
+        RenameProvider: (services) => new SmtRenameProvider(services),
+        SemanticTokenProvider: (services) => new SmtSemanticTokenProvider(services),
+        Formatter: () => new SmtFormatter(),
+        SignatureHelp: (services) => new SmtSignatureHelpProvider(services),
+        CodeActionProvider: (services) => new SmtCodeActionProvider(services),
+        DocumentSymbolProvider: (services) => new SmtDocumentSymbolProvider(services)
+    }
+};
+
+/**
+ * Shared services: the workspace manager loads the builtin library document.
+ */
+export const SmtSharedModule: Module<LangiumSharedServices, PartialLangiumSharedServices> = {
+    workspace: {
+        WorkspaceManager: (services) => new SmtWorkspaceManager(services)
+    },
+    lsp: {
+        NodeKindProvider: () => new SmtNodeKindProvider()
     }
 };
 
 /**
  * Create the full set of services required by Langium.
  *
- * First inject the shared services by merging two modules:
+ * First inject the shared services by merging three modules:
  *  - Langium default shared services
  *  - Services generated by langium-cli
+ *  - Custom shared services
  *
  * Then inject the language-specific services by merging three modules:
  *  - Langium default language-specific services
@@ -58,7 +118,8 @@ export function createSmtServices(context: DefaultSharedModuleContext): {
 } {
     const shared = inject(
         createDefaultSharedModule(context),
-        SmtGeneratedSharedModule
+        SmtGeneratedSharedModule,
+        SmtSharedModule
     );
     const Smt = inject(
         createDefaultModule({ shared }),

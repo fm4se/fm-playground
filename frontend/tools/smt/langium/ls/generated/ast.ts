@@ -7,175 +7,167 @@
 import * as langium from 'langium';
 
 export const SmtTerminals = {
-    PSEUDO_BOOL_KEYWORD: /pbeq|pbge|pble/,
-    CARDINALITY_KEYWORD: /at-least|at-most/,
-    BV_LITERAL: /#b[01]+|#x[0-9a-fA-F]+/,
-    PAR_OPEN: /\(/,
-    PAR_CLOSE: /\)/,
-    BValue: /true|false/,
-    DECIMAL: /(?:0|[0-9][0-9]*)\.(?:0|[0-9][0-9]*)/,
-    NUMERAL: /0|[0-9][0-9]*/,
+    WS: /\s+/,
+    SL_COMMENT: /;[^\n\r]*/,
+    ML_COMMENT: /#\|[\s\S]*?\|#/,
+    DECIMAL: /-?[0-9]+\.[0-9]*/,
+    NUMERAL: /-?[0-9]+/,
     HEXADECIMAL: /#x[0-9a-fA-F]+/,
     BINARY: /#b[01]+/,
-    STRING: /"([^"\\]|\\.|(WS|PRINTABLE_CHAR))+"/,
-    SEPERATOR: /,/,
-    WS: /\s+/,
-    ARITHMETIC_OPERATOR: /div|mod|abs|<=|<|>=|>|to_real|to_int|is_int/,
-    BOOLEAN_OPERATOR: /not|=>|and|or|xor|ite|distinct/,
-    SIMPLE_SYMBOL: /((?:[a-zA-Z])|\+|-|\/|\*|,|=|%|\?|!|\.|\$|_|~|&|\^|<|>|@)((?:[a-zA-Z])|(?:[0-9])|\+|-|\/|\*|=|%|\?|!|\.|\$|_|~|&|\^|<|>|@)*/,
-    SL_COMMENT: /;[^\n\r]*/,
+    STRING: /"(?:[^"]|"")*"/,
+    QUOTED_SYMBOL: /\|[^|\\]*\|/,
+    KEYWORD: /:[a-zA-Z0-9~!@$%^&*_\-+=<>.?\/,]+/,
+    SIMPLE_SYMBOL: /[a-zA-Z~!@$%^&*_\-+=<>.?\/,][a-zA-Z0-9~!@$%^&*_\-+=<>.?\/,]*/,
 };
 
 export type SmtTerminalNames = keyof typeof SmtTerminals;
 
 export type SmtKeywordNames =
     | "!"
-    | "*"
-    | "+"
-    | "-"
-    | "/"
-    | ":"
-    | ":diagnostic-output-channel"
-    | ":global-declarations"
-    | ":interactive-mode"
-    | ":model.compact"
+    | "("
+    | ")"
     | ":named"
-    | ":opt.priority"
+    | ":no-pattern"
     | ":pattern"
-    | ":pp.bv-literals"
-    | ":print-success"
-    | ":produce-assertions"
-    | ":produce-assignments"
-    | ":produce-models"
-    | ":produce-proofs"
-    | ":produce-unsat-assumptions"
-    | ":produce-unsat-cores"
-    | ":random-seed"
-    | ":regular-output-channel"
-    | ":reproducible-resource-limit"
-    | ":smt-auto-config"
-    | ":smt.macro-finder"
-    | ":smt.mbqi"
-    | ":verbosity"
-    | "="
-    | "Array"
-    | "BitVec"
-    | "Bool"
-    | "Int"
-    | "List"
-    | "Real"
-    | "RegLan"
-    | "RoundingMode"
-    | "String"
+    | ":subterm"
     | "_"
-    | "all-statistics"
+    | "apply"
     | "as"
     | "assert"
-    | "assertion-stack-levels"
-    | "authors"
-    | "bv2nat"
-    | "bvadd"
-    | "bvand"
-    | "bvashr"
-    | "bvcomp"
-    | "bvlshr"
-    | "bvmul"
-    | "bvnand"
-    | "bvneg"
-    | "bvnor"
-    | "bvnot"
-    | "bvor"
-    | "bvsdiv"
-    | "bvsge"
-    | "bvsgt"
-    | "bvshl"
-    | "bvsle"
-    | "bvslt"
-    | "bvsmod"
-    | "bvsrem"
-    | "bvsub"
-    | "bvudiv"
-    | "bvuge"
-    | "bvugt"
-    | "bvule"
-    | "bvult"
-    | "bvurem"
-    | "bvxnor"
-    | "bvxor"
+    | "assert-soft"
     | "check-sat"
     | "check-sat-assuming"
-    | "concat"
+    | "check-sat-using"
     | "declare-const"
     | "declare-datatype"
     | "declare-datatypes"
     | "declare-fun"
+    | "declare-rel"
     | "declare-sort"
+    | "declare-sort-parameter"
+    | "declare-type-var"
+    | "declare-var"
+    | "define-const"
     | "define-fun"
     | "define-fun-rec"
     | "define-funs-rec"
     | "define-sort"
+    | "display"
     | "echo"
-    | "error-behavior"
     | "eval"
     | "exists"
     | "exit"
     | "forall"
     | "get-assertions"
     | "get-assignment"
+    | "get-consequences"
     | "get-info"
     | "get-model"
+    | "get-objectives"
     | "get-option"
     | "get-proof"
     | "get-unsat-assumptions"
     | "get-unsat-core"
     | "get-value"
-    | "head"
-    | "if"
-    | "incremental"
-    | "is"
+    | "lambda"
     | "let"
+    | "match"
     | "maximize"
     | "minimize"
-    | "name"
-    | "nat2bv"
-    | "nil"
     | "par"
     | "pop"
     | "push"
-    | "reason-unknown"
+    | "query"
     | "reset"
     | "reset-assertions"
-    | "select"
+    | "rule"
     | "set-info"
+    | "set-initial-value"
     | "set-logic"
     | "set-option"
-    | "status"
-    | "store"
-    | "str.++"
-    | "str.at"
-    | "str.contains"
-    | "str.from_int"
-    | "str.indexof"
-    | "str.len"
-    | "str.prefixof"
-    | "str.replace"
-    | "str.substr"
-    | "str.suffixof"
-    | "str.to_int"
-    | "tail"
-    | "version";
+    | "simplify";
 
 export type SmtTokenNames = SmtTerminalNames | SmtKeywordNames;
 
+/**
+ * All parenthesized term forms are inlined into this one rule so that every nesting
+ * level costs a single rule invocation. Machine-generated benchmarks nest terms
+ * hundreds of levels deep and the parser is recursive.
+ */
+export interface AnnotatedTerm extends langium.AstNode {
+    readonly $container: AnnotatedTerm | Application | Assert | CheckSatAssuming | DefineConst | DefineFunsRec | FixedpointRule | FunctionDef | GetConsequences | GetValue | LambdaTerm | LetTerm | MatchCase | MatchTerm | Objective | PatternAttribute | QuantifiedTerm | SetInitialValue | TermCommand | VarBinding;
+    readonly $type: 'AnnotatedTerm';
+    attributes: Array<TermAttribute>;
+    term: Term;
+}
+
+export const AnnotatedTerm = {
+    $type: 'AnnotatedTerm',
+    attributes: 'attributes',
+    term: 'term'
+} as const;
+
+export function isAnnotatedTerm(item: unknown): item is AnnotatedTerm {
+    return reflection.isInstance(item, AnnotatedTerm.$type);
+}
+
+/** Any symbol including SMT-LIB reserved words, as allowed inside s-expressions. */
+export type AnySymbol = '!' | '_' | 'as' | 'assert' | 'check-sat' | 'check-sat-assuming' | 'declare-const' | 'declare-datatype' | 'declare-datatypes' | 'declare-fun' | 'declare-sort' | 'declare-sort-parameter' | 'define-const' | 'define-fun' | 'define-fun-rec' | 'define-funs-rec' | 'define-sort' | 'echo' | 'exists' | 'forall' | 'get-info' | 'get-option' | 'get-value' | 'lambda' | 'let' | 'match' | 'par' | 'pop' | 'push' | 'set-info' | 'set-logic' | 'set-option' | SimpleCommandName | SmtSymbol;
+
+export function isAnySymbol(item: unknown): item is AnySymbol {
+    return isSmtSymbol(item) || isSimpleCommandName(item) || item === '_' || item === '!' || item === 'as' || item === 'let' || item === 'forall' || item === 'exists' || item === 'lambda' || item === 'match' || item === 'assert' || item === 'check-sat' || item === 'check-sat-assuming' || item === 'declare-const' || item === 'declare-datatype' || item === 'declare-datatypes' || item === 'declare-fun' || item === 'declare-sort' || item === 'declare-sort-parameter' || item === 'define-const' || item === 'define-fun' || item === 'define-fun-rec' || item === 'define-funs-rec' || item === 'define-sort' || item === 'echo' || item === 'get-info' || item === 'get-option' || item === 'get-value' || item === 'push' || item === 'pop' || item === 'set-info' || item === 'set-logic' || item === 'set-option' || item === 'par';
+}
+
+/**
+ * All parenthesized term forms are inlined into this one rule so that every nesting
+ * level costs a single rule invocation. Machine-generated benchmarks nest terms
+ * hundreds of levels deep and the parser is recursive.
+ */
+export interface Application extends langium.AstNode {
+    readonly $container: AnnotatedTerm | Application | Assert | CheckSatAssuming | DefineConst | DefineFunsRec | FixedpointRule | FunctionDef | GetConsequences | GetValue | LambdaTerm | LetTerm | MatchCase | MatchTerm | Objective | PatternAttribute | QuantifiedTerm | SetInitialValue | TermCommand | VarBinding;
+    readonly $type: 'Application';
+    arguments: Array<Term>;
+    function: QualIdentifier;
+}
+
+export const Application = {
+    $type: 'Application',
+    arguments: 'arguments',
+    function: 'function'
+} as const;
+
+export function isApplication(item: unknown): item is Application {
+    return reflection.isInstance(item, Application.$type);
+}
+
+export interface Assert extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'Assert';
+    term: Term;
+}
+
+export const Assert = {
+    $type: 'Assert',
+    term: 'term'
+} as const;
+
+export function isAssert(item: unknown): item is Assert {
+    return reflection.isInstance(item, Assert.$type);
+}
+
+/******************************************************************************
+ * Attributes and s-expressions
+ ******************************************************************************/
 export interface Attribute extends langium.AstNode {
-    readonly $type: 'Attribute' | 'NamedAttribute';
-    keyWord?: Keyword;
+    readonly $container: AnnotatedTerm | DeclareRel | Objective | SetInfo | SetOption | TacticCommand | TermCommand;
+    readonly $type: 'Attribute';
+    keyword: ':subterm' | Keyword | string;
     value?: AttributeValue;
 }
 
 export const Attribute = {
     $type: 'Attribute',
-    keyWord: 'keyWord',
+    keyword: 'keyword',
     value: 'value'
 } as const;
 
@@ -183,789 +175,1031 @@ export function isAttribute(item: unknown): item is Attribute {
     return reflection.isInstance(item, Attribute.$type);
 }
 
-export interface AttributeValue extends langium.AstNode {
-    readonly $container: Attribute;
-    readonly $type: 'AttributeValue';
-    const?: SpecConstant;
-    exprs: Array<SExpr>;
-    string: Array<string>;
-    symbol?: SmtSymbol;
-}
+export type AttributeValue = SExprConstant | SExprList | SExprSymbol;
 
 export const AttributeValue = {
-    $type: 'AttributeValue',
-    const: 'const',
-    exprs: 'exprs',
-    string: 'string',
-    symbol: 'symbol'
+    $type: 'AttributeValue'
 } as const;
 
 export function isAttributeValue(item: unknown): item is AttributeValue {
     return reflection.isInstance(item, AttributeValue.$type);
 }
 
-export type BasicCommand = 'check-sat' | 'exit' | 'get-assertions' | 'get-assignment' | 'get-model' | 'get-proof' | 'get-unsat-assumptions' | 'get-unsat-core' | 'reset' | 'reset-assertions';
-
-export function isBasicCommand(item: unknown): item is BasicCommand {
-    return item === 'check-sat' || item === 'reset' || item === 'reset-assertions' || item === 'get-model' || item === 'exit' || item === 'get-assertions' || item === 'get-assignment' || item === 'get-proof' || item === 'get-unsat-assumptions' || item === 'get-unsat-core';
+/**
+ * All parenthesized term forms are inlined into this one rule so that every nesting
+ * level costs a single rule invocation. Machine-generated benchmarks nest terms
+ * hundreds of levels deep and the parser is recursive.
+ */
+export interface BinaryConstant extends langium.AstNode {
+    readonly $container: AnnotatedTerm | Application | Assert | CheckSatAssuming | DefineConst | DefineFunsRec | FixedpointRule | FunctionDef | GetConsequences | GetValue | LambdaTerm | LetTerm | MatchCase | MatchTerm | Objective | PatternAttribute | QuantifiedTerm | SetInitialValue | TermCommand | VarBinding;
+    readonly $type: 'BinaryConstant';
+    value: string;
 }
 
-export type BvOperation = 'bv2nat' | 'bvadd' | 'bvand' | 'bvashr' | 'bvcomp' | 'bvlshr' | 'bvmul' | 'bvnand' | 'bvneg' | 'bvnor' | 'bvnot' | 'bvor' | 'bvsdiv' | 'bvsge' | 'bvsgt' | 'bvshl' | 'bvsle' | 'bvslt' | 'bvsmod' | 'bvsrem' | 'bvsub' | 'bvudiv' | 'bvuge' | 'bvugt' | 'bvule' | 'bvult' | 'bvurem' | 'bvxnor' | 'bvxor' | 'concat' | 'nat2bv';
-
-export function isBvOperation(item: unknown): item is BvOperation {
-    return item === 'concat' || item === 'bvnot' || item === 'bvand' || item === 'bvor' || item === 'bvneg' || item === 'bvadd' || item === 'bvmul' || item === 'bvudiv' || item === 'bvurem' || item === 'bvshl' || item === 'bvlshr' || item === 'bvult' || item === 'bvnand' || item === 'bvnor' || item === 'bvxor' || item === 'bvxnor' || item === 'bvcomp' || item === 'bvsub' || item === 'bvsdiv' || item === 'bvsrem' || item === 'bvsmod' || item === 'bvashr' || item === 'bvule' || item === 'bvugt' || item === 'bvuge' || item === 'bvslt' || item === 'bvsle' || item === 'bvsgt' || item === 'bvsge' || item === 'bv2nat' || item === 'nat2bv';
-}
-
-export interface CmdAssert extends Command {
-    readonly $type: 'CmdAssert';
-    term: Term;
-}
-
-export const CmdAssert = {
-    $type: 'CmdAssert',
-    arity: 'arity',
-    attribute: 'attribute',
-    basicCommand: 'basicCommand',
-    infoFlag: 'infoFlag',
-    name: 'name',
-    option: 'option',
-    options: 'options',
-    symbol: 'symbol',
-    term: 'term'
+export const BinaryConstant = {
+    $type: 'BinaryConstant',
+    value: 'value'
 } as const;
 
-export function isCmdAssert(item: unknown): item is CmdAssert {
-    return reflection.isInstance(item, CmdAssert.$type);
+export function isBinaryConstant(item: unknown): item is BinaryConstant {
+    return reflection.isInstance(item, BinaryConstant.$type);
 }
 
-export interface CmdCheckSat extends Command {
-    readonly $type: 'CmdCheckSat';
-    propLiteral: Array<langium.Reference<NamedElement>>;
+/** Numerals, symbols and (Z3) hexadecimals/binaries or nested s-expressions, e.g. `(_ map (+ (Int Int) Int))`. */
+export interface BitVectorIndex extends langium.AstNode {
+    readonly $container: IndexedIdentifier | IndexedSort;
+    readonly $type: 'BitVectorIndex';
+    value: string;
 }
 
-export const CmdCheckSat = {
-    $type: 'CmdCheckSat',
-    arity: 'arity',
-    attribute: 'attribute',
-    basicCommand: 'basicCommand',
-    infoFlag: 'infoFlag',
-    name: 'name',
-    option: 'option',
-    options: 'options',
-    propLiteral: 'propLiteral',
-    symbol: 'symbol',
-    term: 'term'
+export const BitVectorIndex = {
+    $type: 'BitVectorIndex',
+    value: 'value'
 } as const;
 
-export function isCmdCheckSat(item: unknown): item is CmdCheckSat {
-    return reflection.isInstance(item, CmdCheckSat.$type);
+export function isBitVectorIndex(item: unknown): item is BitVectorIndex {
+    return reflection.isInstance(item, BitVectorIndex.$type);
 }
 
-export interface CmdConstDecl extends Command {
-    readonly $type: 'CmdConstDecl';
-    commandType: 'declare-const';
-    name: SmtSymbol;
-    sorts: Array<Sort>;
+export interface CheckSat extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'CheckSat';
 }
 
-export const CmdConstDecl = {
-    $type: 'CmdConstDecl',
-    arity: 'arity',
-    attribute: 'attribute',
-    basicCommand: 'basicCommand',
-    commandType: 'commandType',
-    infoFlag: 'infoFlag',
-    name: 'name',
-    option: 'option',
-    options: 'options',
-    sorts: 'sorts',
-    symbol: 'symbol',
-    term: 'term'
+export const CheckSat = {
+    $type: 'CheckSat'
 } as const;
 
-export function isCmdConstDecl(item: unknown): item is CmdConstDecl {
-    return reflection.isInstance(item, CmdConstDecl.$type);
+export function isCheckSat(item: unknown): item is CheckSat {
+    return reflection.isInstance(item, CheckSat.$type);
 }
 
-export interface CmdDecDataType extends Command {
-    readonly $type: 'CmdDecDataType';
-    commandType: 'declare-datatype';
-    dataTypeDec: DataTypeDec | DataTypeDecZ3;
-    name: SmtSymbol;
+/** SMT-LIB 2.7 accepts arbitrary Boolean terms as assumptions. */
+export interface CheckSatAssuming extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'CheckSatAssuming';
+    assumptions: Array<Term>;
 }
 
-export const CmdDecDataType = {
-    $type: 'CmdDecDataType',
-    arity: 'arity',
-    attribute: 'attribute',
-    basicCommand: 'basicCommand',
-    commandType: 'commandType',
-    dataTypeDec: 'dataTypeDec',
-    infoFlag: 'infoFlag',
-    name: 'name',
-    option: 'option',
-    options: 'options',
-    symbol: 'symbol',
-    term: 'term'
+export const CheckSatAssuming = {
+    $type: 'CheckSatAssuming',
+    assumptions: 'assumptions'
 } as const;
 
-export function isCmdDecDataType(item: unknown): item is CmdDecDataType {
-    return reflection.isInstance(item, CmdDecDataType.$type);
+export function isCheckSatAssuming(item: unknown): item is CheckSatAssuming {
+    return reflection.isInstance(item, CheckSatAssuming.$type);
 }
 
-export interface CmdDecDataTypes extends Command {
-    readonly $type: 'CmdDecDataTypes';
-    commandType: 'declare-datatypes';
-    dataTypeDecs: Array<CommonDataTypeDec>;
-    sortDec: Array<SortDec>;
-}
-
-export const CmdDecDataTypes = {
-    $type: 'CmdDecDataTypes',
-    arity: 'arity',
-    attribute: 'attribute',
-    basicCommand: 'basicCommand',
-    commandType: 'commandType',
-    dataTypeDecs: 'dataTypeDecs',
-    infoFlag: 'infoFlag',
-    name: 'name',
-    option: 'option',
-    options: 'options',
-    sortDec: 'sortDec',
-    symbol: 'symbol',
-    term: 'term'
-} as const;
-
-export function isCmdDecDataTypes(item: unknown): item is CmdDecDataTypes {
-    return reflection.isInstance(item, CmdDecDataTypes.$type);
-}
-
-export interface CmdDefFun extends Command {
-    readonly $type: 'CmdDefFun' | 'FunctionDef';
-    commandType: DefFunCommandName;
-}
-
-export const CmdDefFun = {
-    $type: 'CmdDefFun',
-    arity: 'arity',
-    attribute: 'attribute',
-    basicCommand: 'basicCommand',
-    commandType: 'commandType',
-    infoFlag: 'infoFlag',
-    name: 'name',
-    option: 'option',
-    options: 'options',
-    symbol: 'symbol',
-    term: 'term'
-} as const;
-
-export function isCmdDefFun(item: unknown): item is CmdDefFun {
-    return reflection.isInstance(item, CmdDefFun.$type);
-}
-
-export interface CmdDefFunsRec extends Command {
-    readonly $type: 'CmdDefFunsRec';
-    commandType: 'define-funs-rec';
-    functionDec: Array<FunctionDec>;
-    term: Array<Term>;
-}
-
-export const CmdDefFunsRec = {
-    $type: 'CmdDefFunsRec',
-    arity: 'arity',
-    attribute: 'attribute',
-    basicCommand: 'basicCommand',
-    commandType: 'commandType',
-    functionDec: 'functionDec',
-    infoFlag: 'infoFlag',
-    name: 'name',
-    option: 'option',
-    options: 'options',
-    symbol: 'symbol',
-    term: 'term'
-} as const;
-
-export function isCmdDefFunsRec(item: unknown): item is CmdDefFunsRec {
-    return reflection.isInstance(item, CmdDefFunsRec.$type);
-}
-
-export interface CmdDefSort extends Command {
-    readonly $type: 'CmdDefSort';
-    commandType: 'define-sort';
-    name: SmtSymbol;
-    parameters: Array<SortedParameter>;
-    resultSort: Sort;
-}
-
-export const CmdDefSort = {
-    $type: 'CmdDefSort',
-    arity: 'arity',
-    attribute: 'attribute',
-    basicCommand: 'basicCommand',
-    commandType: 'commandType',
-    infoFlag: 'infoFlag',
-    name: 'name',
-    option: 'option',
-    options: 'options',
-    parameters: 'parameters',
-    resultSort: 'resultSort',
-    symbol: 'symbol',
-    term: 'term'
-} as const;
-
-export function isCmdDefSort(item: unknown): item is CmdDefSort {
-    return reflection.isInstance(item, CmdDefSort.$type);
-}
-
-export interface CmdFunDecl extends Command {
-    readonly $type: 'CmdFunDecl';
-    commandType: 'declare-fun';
-    name: SmtSymbol;
-    paramSorts: Array<Sort>;
-    returnSort: Sort;
-}
-
-export const CmdFunDecl = {
-    $type: 'CmdFunDecl',
-    arity: 'arity',
-    attribute: 'attribute',
-    basicCommand: 'basicCommand',
-    commandType: 'commandType',
-    infoFlag: 'infoFlag',
-    name: 'name',
-    option: 'option',
-    options: 'options',
-    paramSorts: 'paramSorts',
-    returnSort: 'returnSort',
-    symbol: 'symbol',
-    term: 'term'
-} as const;
-
-export function isCmdFunDecl(item: unknown): item is CmdFunDecl {
-    return reflection.isInstance(item, CmdFunDecl.$type);
-}
-
-export interface CmdSortDeclZ3 extends Command {
-    readonly $type: 'CmdSortDeclZ3';
-    commandType: 'declare-sort';
-    name: SmtSymbol;
-    number: Array<number>;
-}
-
-export const CmdSortDeclZ3 = {
-    $type: 'CmdSortDeclZ3',
-    arity: 'arity',
-    attribute: 'attribute',
-    basicCommand: 'basicCommand',
-    commandType: 'commandType',
-    infoFlag: 'infoFlag',
-    name: 'name',
-    number: 'number',
-    option: 'option',
-    options: 'options',
-    symbol: 'symbol',
-    term: 'term'
-} as const;
-
-export function isCmdSortDeclZ3(item: unknown): item is CmdSortDeclZ3 {
-    return reflection.isInstance(item, CmdSortDeclZ3.$type);
-}
-
-export interface Command extends langium.AstNode {
-    readonly $type: 'CmdAssert' | 'CmdCheckSat' | 'CmdConstDecl' | 'CmdDecDataType' | 'CmdDecDataTypes' | 'CmdDefFun' | 'CmdDefFunsRec' | 'CmdDefSort' | 'CmdFunDecl' | 'CmdSortDeclZ3' | 'Command' | 'FunctionDef' | 'UnknownCommand';
-    arity?: number;
-    attribute?: Attribute;
-    basicCommand?: BasicCommand;
-    infoFlag?: InfoFlag;
-    name?: SmtSymbol;
-    option?: Option;
-    options?: Keyword | OptionKeyword;
-    symbol?: SmtSymbol;
-    term?: Array<Term> | Term;
-}
+/******************************************************************************
+ * Commands
+ ******************************************************************************/
+export type Command = Assert | CheckSat | CheckSatAssuming | DeclareConst | DeclareDatatype | DeclareDatatypes | DeclareFun | DeclareRel | DeclareSort | DeclareSortParameter | DeclareTypeVar | DeclareVar | DefineConst | DefineFun | DefineFunsRec | DefineSort | Echo | FixedpointRule | GenericCommand | GetConsequences | GetInfo | GetOption | GetValue | Objective | Pop | Push | SetInfo | SetInitialValue | SetLogic | SetOption | SimpleCommand | TacticCommand | TermCommand;
 
 export const Command = {
-    $type: 'Command',
-    arity: 'arity',
-    attribute: 'attribute',
-    basicCommand: 'basicCommand',
-    infoFlag: 'infoFlag',
-    name: 'name',
-    option: 'option',
-    options: 'options',
-    symbol: 'symbol',
-    term: 'term'
+    $type: 'Command'
 } as const;
 
 export function isCommand(item: unknown): item is Command {
     return reflection.isInstance(item, Command.$type);
 }
 
-export type CommonDataTypeDec = DataTypeDec | DataTypeDecZ3 | NamedDataTypeDec;
-
-export const CommonDataTypeDec = {
-    $type: 'CommonDataTypeDec'
-} as const;
-
-export function isCommonDataTypeDec(item: unknown): item is CommonDataTypeDec {
-    return reflection.isInstance(item, CommonDataTypeDec.$type);
-}
-
-export interface ConditionalTerm extends langium.AstNode {
-    readonly $container: Term;
-    readonly $type: 'ConditionalTerm' | 'SpecConstant';
-    term: Array<Term>;
-}
-
-export const ConditionalTerm = {
-    $type: 'ConditionalTerm',
-    term: 'term'
-} as const;
-
-export function isConditionalTerm(item: unknown): item is ConditionalTerm {
-    return reflection.isInstance(item, ConditionalTerm.$type);
-}
-
-export interface ConstDecVar extends langium.AstNode {
-    readonly $container: ConstructorDecZ3;
-    readonly $type: 'ConstDecVar';
-    name: SmtSymbol;
-}
-
-export const ConstDecVar = {
-    $type: 'ConstDecVar',
-    name: 'name'
-} as const;
-
-export function isConstDecVar(item: unknown): item is ConstDecVar {
-    return reflection.isInstance(item, ConstDecVar.$type);
-}
-
+/** Z3 accepts a bare symbol for a constructor without selectors. */
 export interface ConstructorDec extends langium.AstNode {
-    readonly $container: DataTypeDec;
+    readonly $container: DatatypeDec | LegacyDatatypeDec;
     readonly $type: 'ConstructorDec';
     name: SmtSymbol;
-    selectorDec: Array<SelectorDec>;
+    selectors: Array<SelectorDec>;
 }
 
 export const ConstructorDec = {
     $type: 'ConstructorDec',
     name: 'name',
-    selectorDec: 'selectorDec'
+    selectors: 'selectors'
 } as const;
 
 export function isConstructorDec(item: unknown): item is ConstructorDec {
     return reflection.isInstance(item, ConstructorDec.$type);
 }
 
-export interface ConstructorDecZ3 extends langium.AstNode {
-    readonly $container: DataTypeDecZ3;
-    readonly $type: 'ConstructorDecZ3';
-    name: ConstDecVar;
-    right: Array<ConstDecVar>;
-    selector: Array<SelectorDecZ3>;
+export interface ConstructorPattern extends langium.AstNode {
+    readonly $container: MatchCase;
+    readonly $type: 'ConstructorPattern';
+    arguments: Array<PatternVariable>;
+    constructorSymbol: langium.Reference<FunctionSymbol>;
 }
 
-export const ConstructorDecZ3 = {
-    $type: 'ConstructorDecZ3',
+export const ConstructorPattern = {
+    $type: 'ConstructorPattern',
+    arguments: 'arguments',
+    constructorSymbol: 'constructorSymbol'
+} as const;
+
+export function isConstructorPattern(item: unknown): item is ConstructorPattern {
+    return reflection.isInstance(item, ConstructorPattern.$type);
+}
+
+export interface DatatypeDec extends langium.AstNode {
+    readonly $container: DeclareDatatype | DeclareDatatypes;
+    readonly $type: 'DatatypeDec';
+    constructors: Array<ConstructorDec>;
+    parameters: Array<SortParameter>;
+}
+
+export const DatatypeDec = {
+    $type: 'DatatypeDec',
+    constructors: 'constructors',
+    parameters: 'parameters'
+} as const;
+
+export function isDatatypeDec(item: unknown): item is DatatypeDec {
+    return reflection.isInstance(item, DatatypeDec.$type);
+}
+
+/**
+ * All parenthesized term forms are inlined into this one rule so that every nesting
+ * level costs a single rule invocation. Machine-generated benchmarks nest terms
+ * hundreds of levels deep and the parser is recursive.
+ */
+export interface DecimalConstant extends langium.AstNode {
+    readonly $container: AnnotatedTerm | Application | Assert | CheckSatAssuming | DefineConst | DefineFunsRec | FixedpointRule | FunctionDef | GetConsequences | GetValue | LambdaTerm | LetTerm | MatchCase | MatchTerm | Objective | PatternAttribute | QuantifiedTerm | SetInitialValue | TermCommand | VarBinding;
+    readonly $type: 'DecimalConstant';
+    value: string;
+}
+
+export const DecimalConstant = {
+    $type: 'DecimalConstant',
+    value: 'value'
+} as const;
+
+export function isDecimalConstant(item: unknown): item is DecimalConstant {
+    return reflection.isInstance(item, DecimalConstant.$type);
+}
+
+export interface DeclareConst extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'DeclareConst';
+    name: SmtSymbol;
+    sort: Sort;
+}
+
+export const DeclareConst = {
+    $type: 'DeclareConst',
     name: 'name',
-    right: 'right',
-    selector: 'selector'
+    sort: 'sort'
 } as const;
 
-export function isConstructorDecZ3(item: unknown): item is ConstructorDecZ3 {
-    return reflection.isInstance(item, ConstructorDecZ3.$type);
+export function isDeclareConst(item: unknown): item is DeclareConst {
+    return reflection.isInstance(item, DeclareConst.$type);
 }
 
-export interface DataTypeDec extends langium.AstNode {
-    readonly $container: CmdDecDataType | CmdDecDataTypes;
-    readonly $type: 'DataTypeDec';
-    constructorDecs: Array<ConstructorDec>;
-    parameters: Array<SmtSymbol>;
-    simpleConstructors: Array<SimpleConstructor>;
+/**
+ * `(declare-datatype d datatype_dec)`; Z3 additionally accepts `:subterm name`.
+ * The command itself declares the sort `d`.
+ */
+export interface DeclareDatatype extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'DeclareDatatype';
+    datatype: DatatypeDec;
+    name: SmtSymbol;
+    subterm?: SmtSymbol;
 }
 
-export const DataTypeDec = {
-    $type: 'DataTypeDec',
-    constructorDecs: 'constructorDecs',
+export const DeclareDatatype = {
+    $type: 'DeclareDatatype',
+    datatype: 'datatype',
+    name: 'name',
+    subterm: 'subterm'
+} as const;
+
+export function isDeclareDatatype(item: unknown): item is DeclareDatatype {
+    return reflection.isInstance(item, DeclareDatatype.$type);
+}
+
+/**
+ * SMT-LIB 2.6+:  (declare-datatypes ((d1 k1) ... (dn kn)) (dt_dec1 ... dt_decn))
+ * Z3 legacy:     (declare-datatypes (T1 ... Tk) ((d1 ctor+) ... (dn ctor+)))
+ */
+export interface DeclareDatatypes extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'DeclareDatatypes';
+    datatypes: Array<DatatypeDec>;
+    legacy: boolean;
+    legacyDatatypes: Array<LegacyDatatypeDec>;
+    parameters: Array<SortParameter>;
+    sorts: Array<SortDec>;
+}
+
+export const DeclareDatatypes = {
+    $type: 'DeclareDatatypes',
+    datatypes: 'datatypes',
+    legacy: 'legacy',
+    legacyDatatypes: 'legacyDatatypes',
     parameters: 'parameters',
-    simpleConstructors: 'simpleConstructors'
+    sorts: 'sorts'
 } as const;
 
-export function isDataTypeDec(item: unknown): item is DataTypeDec {
-    return reflection.isInstance(item, DataTypeDec.$type);
+export function isDeclareDatatypes(item: unknown): item is DeclareDatatypes {
+    return reflection.isInstance(item, DeclareDatatypes.$type);
 }
 
-export interface DataTypeDecZ3 extends langium.AstNode {
-    readonly $container: CmdDecDataType | CmdDecDataTypes;
-    readonly $type: 'DataTypeDecZ3';
-    constructorDecs: ConstructorDecZ3;
+export interface DeclareFun extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'DeclareFun';
+    name: SmtSymbol;
+    parameters: Array<Sort>;
+    sort: Sort;
+}
+
+export const DeclareFun = {
+    $type: 'DeclareFun',
+    name: 'name',
+    parameters: 'parameters',
+    sort: 'sort'
+} as const;
+
+export function isDeclareFun(item: unknown): item is DeclareFun {
+    return reflection.isInstance(item, DeclareFun.$type);
+}
+
+/** Z3 fixedpoint relation declaration: `(declare-rel r (Int Int))`. */
+export interface DeclareRel extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'DeclareRel';
+    attributes: Array<Attribute>;
+    name: SmtSymbol;
+    parameters: Array<Sort>;
+}
+
+export const DeclareRel = {
+    $type: 'DeclareRel',
+    attributes: 'attributes',
+    name: 'name',
+    parameters: 'parameters'
+} as const;
+
+export function isDeclareRel(item: unknown): item is DeclareRel {
+    return reflection.isInstance(item, DeclareRel.$type);
+}
+
+/** `(declare-sort s n)`; Z3 allows omitting the arity (defaults to 0). */
+export interface DeclareSort extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'DeclareSort';
+    arity?: string;
     name: SmtSymbol;
 }
 
-export const DataTypeDecZ3 = {
-    $type: 'DataTypeDecZ3',
-    constructorDecs: 'constructorDecs',
+export const DeclareSort = {
+    $type: 'DeclareSort',
+    arity: 'arity',
     name: 'name'
 } as const;
 
-export function isDataTypeDecZ3(item: unknown): item is DataTypeDecZ3 {
-    return reflection.isInstance(item, DataTypeDecZ3.$type);
+export function isDeclareSort(item: unknown): item is DeclareSort {
+    return reflection.isInstance(item, DeclareSort.$type);
 }
 
-export type DefFunCommandName = 'define-fun' | 'define-fun-rec';
+/** SMT-LIB 2.7 global sort parameter for prenex polymorphism. */
+export interface DeclareSortParameter extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'DeclareSortParameter';
+    name: SmtSymbol;
+}
 
-export function isDefFunCommandName(item: unknown): item is DefFunCommandName {
-    return item === 'define-fun-rec' || item === 'define-fun';
+export const DeclareSortParameter = {
+    $type: 'DeclareSortParameter',
+    name: 'name'
+} as const;
+
+export function isDeclareSortParameter(item: unknown): item is DeclareSortParameter {
+    return reflection.isInstance(item, DeclareSortParameter.$type);
+}
+
+/** `(declare-type-var A)` (Z3 polymorphism). */
+export interface DeclareTypeVar extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'DeclareTypeVar';
+    name: SmtSymbol;
+}
+
+export const DeclareTypeVar = {
+    $type: 'DeclareTypeVar',
+    name: 'name'
+} as const;
+
+export function isDeclareTypeVar(item: unknown): item is DeclareTypeVar {
+    return reflection.isInstance(item, DeclareTypeVar.$type);
+}
+
+/** Z3 fixedpoint variable declaration: `(declare-var x Int)`. */
+export interface DeclareVar extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'DeclareVar';
+    name: SmtSymbol;
+    sort: Sort;
+}
+
+export const DeclareVar = {
+    $type: 'DeclareVar',
+    name: 'name',
+    sort: 'sort'
+} as const;
+
+export function isDeclareVar(item: unknown): item is DeclareVar {
+    return reflection.isInstance(item, DeclareVar.$type);
+}
+
+/** SMT-LIB 2.7 / Z3. */
+export interface DefineConst extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'DefineConst';
+    name: SmtSymbol;
+    sort: Sort;
+    value: Term;
+}
+
+export const DefineConst = {
+    $type: 'DefineConst',
+    name: 'name',
+    sort: 'sort',
+    value: 'value'
+} as const;
+
+export function isDefineConst(item: unknown): item is DefineConst {
+    return reflection.isInstance(item, DefineConst.$type);
+}
+
+export interface DefineFun extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'DefineFun';
+    definition: FunctionDef;
+    kind: 'define-fun' | 'define-fun-rec';
+}
+
+export const DefineFun = {
+    $type: 'DefineFun',
+    definition: 'definition',
+    kind: 'kind'
+} as const;
+
+export function isDefineFun(item: unknown): item is DefineFun {
+    return reflection.isInstance(item, DefineFun.$type);
+}
+
+export interface DefineFunsRec extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'DefineFunsRec';
+    bodies: Array<Term>;
+    declarations: Array<FunctionDec>;
+}
+
+export const DefineFunsRec = {
+    $type: 'DefineFunsRec',
+    bodies: 'bodies',
+    declarations: 'declarations'
+} as const;
+
+export function isDefineFunsRec(item: unknown): item is DefineFunsRec {
+    return reflection.isInstance(item, DefineFunsRec.$type);
+}
+
+export interface DefineSort extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'DefineSort';
+    name: SmtSymbol;
+    parameters: Array<SortParameter>;
+    sort: Sort;
+}
+
+export const DefineSort = {
+    $type: 'DefineSort',
+    name: 'name',
+    parameters: 'parameters',
+    sort: 'sort'
+} as const;
+
+export function isDefineSort(item: unknown): item is DefineSort {
+    return reflection.isInstance(item, DefineSort.$type);
+}
+
+export interface Echo extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'Echo';
+    text: string;
+}
+
+export const Echo = {
+    $type: 'Echo',
+    text: 'text'
+} as const;
+
+export function isEcho(item: unknown): item is Echo {
+    return reflection.isInstance(item, Echo.$type);
+}
+
+/** Z3 fixedpoint rule: `(rule t name?)`. */
+export interface FixedpointRule extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'FixedpointRule';
+    ruleName?: SmtSymbol;
+    term: Term;
+}
+
+export const FixedpointRule = {
+    $type: 'FixedpointRule',
+    ruleName: 'ruleName',
+    term: 'term'
+} as const;
+
+export function isFixedpointRule(item: unknown): item is FixedpointRule {
+    return reflection.isInstance(item, FixedpointRule.$type);
 }
 
 export interface FunctionDec extends langium.AstNode {
-    readonly $container: CmdDefFunsRec;
+    readonly $container: DefineFunsRec;
     readonly $type: 'FunctionDec';
     name: SmtSymbol;
-    returnSort: Sort;
-    vars: Array<SortedVar>;
+    parameters: Array<SortedVar>;
+    sort: Sort;
 }
 
 export const FunctionDec = {
     $type: 'FunctionDec',
     name: 'name',
-    returnSort: 'returnSort',
-    vars: 'vars'
+    parameters: 'parameters',
+    sort: 'sort'
 } as const;
 
 export function isFunctionDec(item: unknown): item is FunctionDec {
     return reflection.isInstance(item, FunctionDec.$type);
 }
 
-export interface FunctionDef extends CmdDefFun {
+export interface FunctionDef extends langium.AstNode {
+    readonly $container: DefineFun;
     readonly $type: 'FunctionDef';
     body: Term;
     name: SmtSymbol;
-    returnSort: Sort;
-    sortedVars: Array<SortedVar>;
+    parameters: Array<SortedVar>;
+    sort: Sort;
 }
 
 export const FunctionDef = {
     $type: 'FunctionDef',
-    arity: 'arity',
-    attribute: 'attribute',
-    basicCommand: 'basicCommand',
     body: 'body',
-    commandType: 'commandType',
-    infoFlag: 'infoFlag',
     name: 'name',
-    option: 'option',
-    options: 'options',
-    returnSort: 'returnSort',
-    sortedVars: 'sortedVars',
-    symbol: 'symbol',
-    term: 'term'
+    parameters: 'parameters',
+    sort: 'sort'
 } as const;
 
 export function isFunctionDef(item: unknown): item is FunctionDef {
     return reflection.isInstance(item, FunctionDef.$type);
 }
 
-export interface FunctionDefRec extends langium.AstNode {
-    readonly $type: 'FunctionDefRec';
-    body: Term;
-    name: SmtSymbol;
-    returnSort: Sort;
-    sortedVars: Array<SortedVar>;
-}
+/** Everything a term-level identifier can refer to. */
+export type FunctionSymbol = ConstructorDec | DeclareConst | DeclareFun | DeclareRel | DeclareVar | DefineConst | FunctionDec | FunctionDef | NamedAttribute | PatternVariable | SelectorDec | SortedVar | VarBinding;
 
-export const FunctionDefRec = {
-    $type: 'FunctionDefRec',
-    body: 'body',
-    name: 'name',
-    returnSort: 'returnSort',
-    sortedVars: 'sortedVars'
+export const FunctionSymbol = {
+    $type: 'FunctionSymbol'
 } as const;
 
-export function isFunctionDefRec(item: unknown): item is FunctionDefRec {
-    return reflection.isInstance(item, FunctionDefRec.$type);
+export function isFunctionSymbol(item: unknown): item is FunctionSymbol {
+    return reflection.isInstance(item, FunctionSymbol.$type);
 }
 
-export interface Index extends langium.AstNode {
-    readonly $container: SortIdentifier;
-    readonly $type: 'Index';
-    num?: number;
-    symbol?: SmtSymbol;
+/**
+ * Any other command. Known Z3 commands (help, get-info-like queries, tactics, ...)
+ * are accepted by the validator; anything else is reported as unknown.
+ */
+export interface GenericCommand extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'GenericCommand';
+    arguments: Array<SExpr>;
+    name: string;
 }
+
+export const GenericCommand = {
+    $type: 'GenericCommand',
+    arguments: 'arguments',
+    name: 'name'
+} as const;
+
+export function isGenericCommand(item: unknown): item is GenericCommand {
+    return reflection.isInstance(item, GenericCommand.$type);
+}
+
+/** `(get-consequences (assumptions) (variables))`. */
+export interface GetConsequences extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'GetConsequences';
+    assumptions: Array<Term>;
+    variables: Array<Term>;
+}
+
+export const GetConsequences = {
+    $type: 'GetConsequences',
+    assumptions: 'assumptions',
+    variables: 'variables'
+} as const;
+
+export function isGetConsequences(item: unknown): item is GetConsequences {
+    return reflection.isInstance(item, GetConsequences.$type);
+}
+
+export interface GetInfo extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'GetInfo';
+    flag: Keyword;
+}
+
+export const GetInfo = {
+    $type: 'GetInfo',
+    flag: 'flag'
+} as const;
+
+export function isGetInfo(item: unknown): item is GetInfo {
+    return reflection.isInstance(item, GetInfo.$type);
+}
+
+export interface GetOption extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'GetOption';
+    option: Keyword;
+}
+
+export const GetOption = {
+    $type: 'GetOption',
+    option: 'option'
+} as const;
+
+export function isGetOption(item: unknown): item is GetOption {
+    return reflection.isInstance(item, GetOption.$type);
+}
+
+export interface GetValue extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'GetValue';
+    terms: Array<Term>;
+}
+
+export const GetValue = {
+    $type: 'GetValue',
+    terms: 'terms'
+} as const;
+
+export function isGetValue(item: unknown): item is GetValue {
+    return reflection.isInstance(item, GetValue.$type);
+}
+
+/**
+ * All parenthesized term forms are inlined into this one rule so that every nesting
+ * level costs a single rule invocation. Machine-generated benchmarks nest terms
+ * hundreds of levels deep and the parser is recursive.
+ */
+export interface HexadecimalConstant extends langium.AstNode {
+    readonly $container: AnnotatedTerm | Application | Assert | CheckSatAssuming | DefineConst | DefineFunsRec | FixedpointRule | FunctionDef | GetConsequences | GetValue | LambdaTerm | LetTerm | MatchCase | MatchTerm | Objective | PatternAttribute | QuantifiedTerm | SetInitialValue | TermCommand | VarBinding;
+    readonly $type: 'HexadecimalConstant';
+    value: string;
+}
+
+export const HexadecimalConstant = {
+    $type: 'HexadecimalConstant',
+    value: 'value'
+} as const;
+
+export function isHexadecimalConstant(item: unknown): item is HexadecimalConstant {
+    return reflection.isInstance(item, HexadecimalConstant.$type);
+}
+
+export type Identifier = IndexedIdentifier | SimpleIdentifier;
+
+export const Identifier = {
+    $type: 'Identifier'
+} as const;
+
+export function isIdentifier(item: unknown): item is Identifier {
+    return reflection.isInstance(item, Identifier.$type);
+}
+
+/** Numerals, symbols and (Z3) hexadecimals/binaries or nested s-expressions, e.g. `(_ map (+ (Int Int) Int))`. */
+export type Index = BitVectorIndex | ListIndex | NumeralIndex | SymbolIndex;
 
 export const Index = {
-    $type: 'Index',
-    num: 'num',
-    symbol: 'symbol'
+    $type: 'Index'
 } as const;
 
 export function isIndex(item: unknown): item is Index {
     return reflection.isInstance(item, Index.$type);
 }
 
-export type InfoFlag = Keyword;
-
-export const InfoFlag = {
-    $type: 'InfoFlag'
-} as const;
-
-export function isInfoFlag(item: unknown): item is InfoFlag {
-    return reflection.isInstance(item, InfoFlag.$type);
+/**
+ * All parenthesized term forms are inlined into this one rule so that every nesting
+ * level costs a single rule invocation. Machine-generated benchmarks nest terms
+ * hundreds of levels deep and the parser is recursive.
+ */
+export interface IndexedIdentifier extends langium.AstNode {
+    readonly $container: AnnotatedTerm | Application | Assert | CheckSatAssuming | DefineConst | DefineFunsRec | FixedpointRule | FunctionDef | GetConsequences | GetValue | LambdaTerm | LetTerm | MatchCase | MatchTerm | Objective | PatternAttribute | QualifiedIdentifier | QuantifiedTerm | SetInitialValue | TermCommand | VarBinding;
+    readonly $type: 'IndexedIdentifier';
+    indices: Array<Index>;
+    symbol: langium.Reference<FunctionSymbol>;
 }
 
-export interface Keyword extends langium.AstNode {
-    readonly $container: Attribute | Command | SExpr;
-    readonly $type: 'Keyword';
-    symbol: SmtSymbol;
-}
-
-export const Keyword = {
-    $type: 'Keyword',
+export const IndexedIdentifier = {
+    $type: 'IndexedIdentifier',
+    indices: 'indices',
     symbol: 'symbol'
 } as const;
 
-export function isKeyword(item: unknown): item is Keyword {
-    return reflection.isInstance(item, Keyword.$type);
+export function isIndexedIdentifier(item: unknown): item is IndexedIdentifier {
+    return reflection.isInstance(item, IndexedIdentifier.$type);
 }
 
-export interface Model extends langium.AstNode {
-    readonly $type: 'Model';
-    commands: Array<Command>;
+export interface IndexedSort extends langium.AstNode {
+    readonly $container: DeclareConst | DeclareFun | DeclareRel | DeclareVar | DefineConst | DefineSort | FunctionDec | FunctionDef | ParametricSort | QualifiedIdentifier | SelectorDec | SortedVar;
+    readonly $type: 'IndexedSort';
+    indices: Array<Index>;
+    symbol: langium.Reference<SortSymbol>;
 }
 
-export const Model = {
-    $type: 'Model',
-    commands: 'commands'
+export const IndexedSort = {
+    $type: 'IndexedSort',
+    indices: 'indices',
+    symbol: 'symbol'
 } as const;
 
-export function isModel(item: unknown): item is Model {
-    return reflection.isInstance(item, Model.$type);
+export function isIndexedSort(item: unknown): item is IndexedSort {
+    return reflection.isInstance(item, IndexedSort.$type);
 }
 
-export interface NamedAttribute extends Attribute {
+export type Keyword = ':named' | ':no-pattern' | ':pattern' | ':subterm' | string;
+
+export function isKeyword(item: unknown): item is Keyword {
+    return item === ':named' || item === ':pattern' || item === ':no-pattern' || item === ':subterm' || (typeof item === 'string' && (/:[a-zA-Z0-9~!@$%^&*_\-+=<>.?\/,]+/.test(item)));
+}
+
+/**
+ * All parenthesized term forms are inlined into this one rule so that every nesting
+ * level costs a single rule invocation. Machine-generated benchmarks nest terms
+ * hundreds of levels deep and the parser is recursive.
+ */
+export interface LambdaTerm extends langium.AstNode {
+    readonly $container: AnnotatedTerm | Application | Assert | CheckSatAssuming | DefineConst | DefineFunsRec | FixedpointRule | FunctionDef | GetConsequences | GetValue | LambdaTerm | LetTerm | MatchCase | MatchTerm | Objective | PatternAttribute | QuantifiedTerm | SetInitialValue | TermCommand | VarBinding;
+    readonly $type: 'LambdaTerm';
+    body: Term;
+    variables: Array<SortedVar>;
+}
+
+export const LambdaTerm = {
+    $type: 'LambdaTerm',
+    body: 'body',
+    variables: 'variables'
+} as const;
+
+export function isLambdaTerm(item: unknown): item is LambdaTerm {
+    return reflection.isInstance(item, LambdaTerm.$type);
+}
+
+export interface LegacyDatatypeDec extends langium.AstNode {
+    readonly $container: DeclareDatatypes;
+    readonly $type: 'LegacyDatatypeDec';
+    constructors: Array<ConstructorDec>;
+    name: SmtSymbol;
+}
+
+export const LegacyDatatypeDec = {
+    $type: 'LegacyDatatypeDec',
+    constructors: 'constructors',
+    name: 'name'
+} as const;
+
+export function isLegacyDatatypeDec(item: unknown): item is LegacyDatatypeDec {
+    return reflection.isInstance(item, LegacyDatatypeDec.$type);
+}
+
+/**
+ * All parenthesized term forms are inlined into this one rule so that every nesting
+ * level costs a single rule invocation. Machine-generated benchmarks nest terms
+ * hundreds of levels deep and the parser is recursive.
+ */
+export interface LetTerm extends langium.AstNode {
+    readonly $container: AnnotatedTerm | Application | Assert | CheckSatAssuming | DefineConst | DefineFunsRec | FixedpointRule | FunctionDef | GetConsequences | GetValue | LambdaTerm | LetTerm | MatchCase | MatchTerm | Objective | PatternAttribute | QuantifiedTerm | SetInitialValue | TermCommand | VarBinding;
+    readonly $type: 'LetTerm';
+    bindings: Array<VarBinding>;
+    body: Term;
+}
+
+export const LetTerm = {
+    $type: 'LetTerm',
+    bindings: 'bindings',
+    body: 'body'
+} as const;
+
+export function isLetTerm(item: unknown): item is LetTerm {
+    return reflection.isInstance(item, LetTerm.$type);
+}
+
+/** Numerals, symbols and (Z3) hexadecimals/binaries or nested s-expressions, e.g. `(_ map (+ (Int Int) Int))`. */
+export interface ListIndex extends langium.AstNode {
+    readonly $container: IndexedIdentifier | IndexedSort;
+    readonly $type: 'ListIndex';
+    items: Array<SExpr>;
+}
+
+export const ListIndex = {
+    $type: 'ListIndex',
+    items: 'items'
+} as const;
+
+export function isListIndex(item: unknown): item is ListIndex {
+    return reflection.isInstance(item, ListIndex.$type);
+}
+
+export interface MatchCase extends langium.AstNode {
+    readonly $container: MatchTerm;
+    readonly $type: 'MatchCase';
+    body: Term;
+    pattern: Pattern;
+}
+
+export const MatchCase = {
+    $type: 'MatchCase',
+    body: 'body',
+    pattern: 'pattern'
+} as const;
+
+export function isMatchCase(item: unknown): item is MatchCase {
+    return reflection.isInstance(item, MatchCase.$type);
+}
+
+/**
+ * All parenthesized term forms are inlined into this one rule so that every nesting
+ * level costs a single rule invocation. Machine-generated benchmarks nest terms
+ * hundreds of levels deep and the parser is recursive.
+ */
+export interface MatchTerm extends langium.AstNode {
+    readonly $container: AnnotatedTerm | Application | Assert | CheckSatAssuming | DefineConst | DefineFunsRec | FixedpointRule | FunctionDef | GetConsequences | GetValue | LambdaTerm | LetTerm | MatchCase | MatchTerm | Objective | PatternAttribute | QuantifiedTerm | SetInitialValue | TermCommand | VarBinding;
+    readonly $type: 'MatchTerm';
+    cases: Array<MatchCase>;
+    term: Term;
+}
+
+export const MatchTerm = {
+    $type: 'MatchTerm',
+    cases: 'cases',
+    term: 'term'
+} as const;
+
+export function isMatchTerm(item: unknown): item is MatchTerm {
+    return reflection.isInstance(item, MatchTerm.$type);
+}
+
+/** In-line definition `(! t :named n)`: declares `n` as a nullary function. */
+export interface NamedAttribute extends langium.AstNode {
+    readonly $container: AnnotatedTerm;
     readonly $type: 'NamedAttribute';
     name: SmtSymbol;
 }
 
 export const NamedAttribute = {
     $type: 'NamedAttribute',
-    keyWord: 'keyWord',
-    name: 'name',
-    value: 'value'
+    name: 'name'
 } as const;
 
 export function isNamedAttribute(item: unknown): item is NamedAttribute {
     return reflection.isInstance(item, NamedAttribute.$type);
 }
 
-export interface NamedDataTypeDec extends langium.AstNode {
-    readonly $container: CmdDecDataTypes;
-    readonly $type: 'NamedDataTypeDec';
-    name: SmtSymbol;
-    simpleConstructors: Array<SimpleConstructor>;
+/**
+ * All parenthesized term forms are inlined into this one rule so that every nesting
+ * level costs a single rule invocation. Machine-generated benchmarks nest terms
+ * hundreds of levels deep and the parser is recursive.
+ */
+export interface NumeralConstant extends langium.AstNode {
+    readonly $container: AnnotatedTerm | Application | Assert | CheckSatAssuming | DefineConst | DefineFunsRec | FixedpointRule | FunctionDef | GetConsequences | GetValue | LambdaTerm | LetTerm | MatchCase | MatchTerm | Objective | PatternAttribute | QuantifiedTerm | SetInitialValue | TermCommand | VarBinding;
+    readonly $type: 'NumeralConstant';
+    value: string;
 }
 
-export const NamedDataTypeDec = {
-    $type: 'NamedDataTypeDec',
-    name: 'name',
-    simpleConstructors: 'simpleConstructors'
-} as const;
-
-export function isNamedDataTypeDec(item: unknown): item is NamedDataTypeDec {
-    return reflection.isInstance(item, NamedDataTypeDec.$type);
-}
-
-export type NamedElement = CmdConstDecl | CmdFunDecl | ConstructorDec | FunctionDec | FunctionDef | NamedAttribute | SimpleConstructor | SortedVar;
-
-export const NamedElement = {
-    $type: 'NamedElement'
-} as const;
-
-export function isNamedElement(item: unknown): item is NamedElement {
-    return reflection.isInstance(item, NamedElement.$type);
-}
-
-export type NamedSort = CmdDecDataType | CmdDefSort | CmdSortDeclZ3 | DataTypeDec | DataTypeDecZ3 | NamedDataTypeDec | SortDec | SortDecZ3 | SortedParameter;
-
-export const NamedSort = {
-    $type: 'NamedSort'
-} as const;
-
-export function isNamedSort(item: unknown): item is NamedSort {
-    return reflection.isInstance(item, NamedSort.$type);
-}
-
-export type Operator = '*' | '+' | '-' | '/' | '=' | BvOperation | StringOperation | string;
-
-export function isOperator(item: unknown): item is Operator {
-    return isBvOperation(item) || isStringOperation(item) || item === '+' || item === '-' || item === '*' || item === '/' || item === '=' || (typeof item === 'string' && (/div|mod|abs|<=|<|>=|>|to_real|to_int|is_int/.test(item) || /not|=>|and|or|xor|ite|distinct/.test(item)));
-}
-
-export type Option = Attribute | OptionKeyword;
-
-export const Option = {
-    $type: 'Option'
-} as const;
-
-export function isOption(item: unknown): item is Option {
-    return reflection.isInstance(item, Option.$type);
-}
-
-export interface OptionKeyword extends langium.AstNode {
-    readonly $container: Command;
-    readonly $type: 'OptionKeyword';
-    option: ':diagnostic-output-channel' | ':global-declarations' | ':interactive-mode' | ':model.compact' | ':opt.priority' | ':pp.bv-literals' | ':print-success' | ':produce-assertions' | ':produce-assignments' | ':produce-models' | ':produce-proofs' | ':produce-unsat-assumptions' | ':produce-unsat-cores' | ':random-seed' | ':regular-output-channel' | ':reproducible-resource-limit' | ':smt-auto-config' | ':smt.macro-finder' | ':smt.mbqi' | ':verbosity';
-    value?: number | string;
-}
-
-export const OptionKeyword = {
-    $type: 'OptionKeyword',
-    option: 'option',
+export const NumeralConstant = {
+    $type: 'NumeralConstant',
     value: 'value'
 } as const;
 
-export function isOptionKeyword(item: unknown): item is OptionKeyword {
-    return reflection.isInstance(item, OptionKeyword.$type);
+export function isNumeralConstant(item: unknown): item is NumeralConstant {
+    return reflection.isInstance(item, NumeralConstant.$type);
 }
 
-export interface Pattern extends langium.AstNode {
-    readonly $type: 'Pattern';
-    symbol: SmtSymbol;
-    symbols: Array<SmtSymbol>;
+/** Numerals, symbols and (Z3) hexadecimals/binaries or nested s-expressions, e.g. `(_ map (+ (Int Int) Int))`. */
+export interface NumeralIndex extends langium.AstNode {
+    readonly $container: IndexedIdentifier | IndexedSort;
+    readonly $type: 'NumeralIndex';
+    value: string;
 }
+
+export const NumeralIndex = {
+    $type: 'NumeralIndex',
+    value: 'value'
+} as const;
+
+export function isNumeralIndex(item: unknown): item is NumeralIndex {
+    return reflection.isInstance(item, NumeralIndex.$type);
+}
+
+/** `(maximize t)` / `(minimize t)` with optional attributes such as `:id`. */
+export interface Objective extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'Objective';
+    attributes: Array<Attribute>;
+    direction: 'maximize' | 'minimize';
+    term: Term;
+}
+
+export const Objective = {
+    $type: 'Objective',
+    attributes: 'attributes',
+    direction: 'direction',
+    term: 'term'
+} as const;
+
+export function isObjective(item: unknown): item is Objective {
+    return reflection.isInstance(item, Objective.$type);
+}
+
+/** Z3 also accepts a parenthesized nullary sort such as `(U)`. */
+export interface ParametricSort extends langium.AstNode {
+    readonly $container: DeclareConst | DeclareFun | DeclareRel | DeclareVar | DefineConst | DefineSort | FunctionDec | FunctionDef | ParametricSort | QualifiedIdentifier | SelectorDec | SortedVar;
+    readonly $type: 'ParametricSort';
+    arguments: Array<Sort>;
+    identifier: SortIdentifier;
+}
+
+export const ParametricSort = {
+    $type: 'ParametricSort',
+    arguments: 'arguments',
+    identifier: 'identifier'
+} as const;
+
+export function isParametricSort(item: unknown): item is ParametricSort {
+    return reflection.isInstance(item, ParametricSort.$type);
+}
+
+/**
+ * A bare symbol pattern is either a nullary constructor or a variable binding;
+ * this is decided during scoping (see SmtScopeProvider). `_` is a wildcard (2.7).
+ */
+export type Pattern = ConstructorPattern | PatternVariable;
 
 export const Pattern = {
-    $type: 'Pattern',
-    symbol: 'symbol',
-    symbols: 'symbols'
+    $type: 'Pattern'
 } as const;
 
 export function isPattern(item: unknown): item is Pattern {
     return reflection.isInstance(item, Pattern.$type);
 }
 
+/** Quantifier instantiation patterns: `:pattern (t+)`, `:pattern ()` (2.7) and Z3's `:no-pattern t`. */
 export interface PatternAttribute extends langium.AstNode {
-    readonly $container: PatternedTerm;
+    readonly $container: AnnotatedTerm;
     readonly $type: 'PatternAttribute';
-    term: Array<Term>;
+    key: ':no-pattern' | ':pattern';
+    terms: Array<Term>;
 }
 
 export const PatternAttribute = {
     $type: 'PatternAttribute',
-    term: 'term'
+    key: 'key',
+    terms: 'terms'
 } as const;
 
 export function isPatternAttribute(item: unknown): item is PatternAttribute {
     return reflection.isInstance(item, PatternAttribute.$type);
 }
 
-export interface PatternedTerm extends langium.AstNode {
-    readonly $container: QuantifiedTerm;
-    readonly $type: 'PatternedTerm';
-    bodyterm: Term;
-    patternAttribute: Array<PatternAttribute>;
+export interface PatternVariable extends langium.AstNode {
+    readonly $container: ConstructorPattern | MatchCase;
+    readonly $type: 'PatternVariable';
+    name: '_' | SmtSymbol;
 }
 
-export const PatternedTerm = {
-    $type: 'PatternedTerm',
-    bodyterm: 'bodyterm',
-    patternAttribute: 'patternAttribute'
+export const PatternVariable = {
+    $type: 'PatternVariable',
+    name: 'name'
 } as const;
 
-export function isPatternedTerm(item: unknown): item is PatternedTerm {
-    return reflection.isInstance(item, PatternedTerm.$type);
+export function isPatternVariable(item: unknown): item is PatternVariable {
+    return reflection.isInstance(item, PatternVariable.$type);
 }
 
-export interface PreDefinedSort extends langium.AstNode {
-    readonly $container: SortIdentifier | SortedParameter;
-    readonly $type: 'PreDefinedSort';
-    ID: 'Bool' | 'Int' | 'List' | 'Real' | 'RegLan' | 'RoundingMode' | 'String';
+export interface Pop extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'Pop';
+    levels?: string;
 }
 
-export const PreDefinedSort = {
-    $type: 'PreDefinedSort',
-    ID: 'ID'
+export const Pop = {
+    $type: 'Pop',
+    levels: 'levels'
 } as const;
 
-export function isPreDefinedSort(item: unknown): item is PreDefinedSort {
-    return reflection.isInstance(item, PreDefinedSort.$type);
+export function isPop(item: unknown): item is Pop {
+    return reflection.isInstance(item, Pop.$type);
 }
 
-export interface QualIdentifier extends Term {
-    readonly $container: Term;
-    readonly $type: 'QualIdentifier';
-    ID: langium.Reference<NamedElement>;
+/** The numeral is optional in Z3 (defaults to 1). */
+export interface Push extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'Push';
+    levels?: string;
 }
+
+export const Push = {
+    $type: 'Push',
+    levels: 'levels'
+} as const;
+
+export function isPush(item: unknown): item is Push {
+    return reflection.isInstance(item, Push.$type);
+}
+
+/** Head of an application: `f`, `(_ extract 7 0)` or `(as const (Array Int Int))`. */
+export type QualIdentifier = Identifier | QualifiedIdentifier;
 
 export const QualIdentifier = {
-    $type: 'QualIdentifier',
-    args: 'args',
-    array: 'array',
-    attribute: 'attribute',
-    body: 'body',
-    boolean: 'boolean',
-    condition: 'condition',
-    ID: 'ID',
-    index: 'index',
-    listKey: 'listKey',
-    operands: 'operands',
-    qualId: 'qualId',
-    sort: 'sort',
-    statement: 'statement',
-    term: 'term',
-    terms: 'terms',
-    value: 'value',
-    varBinding: 'varBinding'
+    $type: 'QualIdentifier'
 } as const;
 
 export function isQualIdentifier(item: unknown): item is QualIdentifier {
     return reflection.isInstance(item, QualIdentifier.$type);
 }
 
-export interface QuantifiedTerm extends Term {
+/**
+ * All parenthesized term forms are inlined into this one rule so that every nesting
+ * level costs a single rule invocation. Machine-generated benchmarks nest terms
+ * hundreds of levels deep and the parser is recursive.
+ */
+export interface QualifiedIdentifier extends langium.AstNode {
+    readonly $container: AnnotatedTerm | Application | Assert | CheckSatAssuming | DefineConst | DefineFunsRec | FixedpointRule | FunctionDef | GetConsequences | GetValue | LambdaTerm | LetTerm | MatchCase | MatchTerm | Objective | PatternAttribute | QuantifiedTerm | SetInitialValue | TermCommand | VarBinding;
+    readonly $type: 'QualifiedIdentifier';
+    identifier: Identifier;
+    sort: Sort;
+}
+
+export const QualifiedIdentifier = {
+    $type: 'QualifiedIdentifier',
+    identifier: 'identifier',
+    sort: 'sort'
+} as const;
+
+export function isQualifiedIdentifier(item: unknown): item is QualifiedIdentifier {
+    return reflection.isInstance(item, QualifiedIdentifier.$type);
+}
+
+/**
+ * All parenthesized term forms are inlined into this one rule so that every nesting
+ * level costs a single rule invocation. Machine-generated benchmarks nest terms
+ * hundreds of levels deep and the parser is recursive.
+ */
+export interface QuantifiedTerm extends langium.AstNode {
+    readonly $container: AnnotatedTerm | Application | Assert | CheckSatAssuming | DefineConst | DefineFunsRec | FixedpointRule | FunctionDef | GetConsequences | GetValue | LambdaTerm | LetTerm | MatchCase | MatchTerm | Objective | PatternAttribute | QuantifiedTerm | SetInitialValue | TermCommand | VarBinding;
     readonly $type: 'QuantifiedTerm';
-    innerTerm: PatternedTerm | Term;
-    sortedVar: Array<SortedVar>;
+    body: Term;
+    quantifier: 'exists' | 'forall';
+    variables: Array<SortedVar>;
 }
 
 export const QuantifiedTerm = {
     $type: 'QuantifiedTerm',
-    args: 'args',
-    array: 'array',
-    attribute: 'attribute',
     body: 'body',
-    boolean: 'boolean',
-    condition: 'condition',
-    index: 'index',
-    innerTerm: 'innerTerm',
-    listKey: 'listKey',
-    operands: 'operands',
-    qualId: 'qualId',
-    sort: 'sort',
-    sortedVar: 'sortedVar',
-    statement: 'statement',
-    term: 'term',
-    terms: 'terms',
-    value: 'value',
-    varBinding: 'varBinding'
+    quantifier: 'quantifier',
+    variables: 'variables'
 } as const;
 
 export function isQuantifiedTerm(item: unknown): item is QuantifiedTerm {
     return reflection.isInstance(item, QuantifiedTerm.$type);
 }
 
+export interface Script extends langium.AstNode {
+    readonly $type: 'Script';
+    commands: Array<Command>;
+}
+
+export const Script = {
+    $type: 'Script',
+    commands: 'commands'
+} as const;
+
+export function isScript(item: unknown): item is Script {
+    return reflection.isInstance(item, Script.$type);
+}
+
 export interface SelectorDec extends langium.AstNode {
     readonly $container: ConstructorDec;
     readonly $type: 'SelectorDec';
-    listKey?: 'head' | 'tail';
-    name?: SmtSymbol;
+    name: SmtSymbol;
     sort: Sort;
 }
 
 export const SelectorDec = {
     $type: 'SelectorDec',
-    listKey: 'listKey',
     name: 'name',
     sort: 'sort'
 } as const;
@@ -974,76 +1208,212 @@ export function isSelectorDec(item: unknown): item is SelectorDec {
     return reflection.isInstance(item, SelectorDec.$type);
 }
 
-export interface SelectorDecZ3 extends langium.AstNode {
-    readonly $container: ConstructorDecZ3;
-    readonly $type: 'SelectorDecZ3';
-    name: SmtSymbol;
-    sort: Array<Sort>;
+export interface SetInfo extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'SetInfo';
+    attribute: Attribute;
 }
 
-export const SelectorDecZ3 = {
-    $type: 'SelectorDecZ3',
-    name: 'name',
-    sort: 'sort'
+export const SetInfo = {
+    $type: 'SetInfo',
+    attribute: 'attribute'
 } as const;
 
-export function isSelectorDecZ3(item: unknown): item is SelectorDecZ3 {
-    return reflection.isInstance(item, SelectorDecZ3.$type);
+export function isSetInfo(item: unknown): item is SetInfo {
+    return reflection.isInstance(item, SetInfo.$type);
 }
 
-export interface SExpr extends langium.AstNode {
-    readonly $container: AttributeValue | SExpr | UnknownCommand;
-    readonly $type: 'SExpr';
-    const?: SpecConstant;
-    exprs: Array<SExpr>;
-    keyWord?: Keyword;
-    symbol?: SmtSymbol;
+/** `(set-initial-value x v)` (Z3 phase/value hints). */
+export interface SetInitialValue extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'SetInitialValue';
+    value: Term;
+    variable: Term;
 }
+
+export const SetInitialValue = {
+    $type: 'SetInitialValue',
+    value: 'value',
+    variable: 'variable'
+} as const;
+
+export function isSetInitialValue(item: unknown): item is SetInitialValue {
+    return reflection.isInstance(item, SetInitialValue.$type);
+}
+
+export interface SetLogic extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'SetLogic';
+    logic: SmtSymbol;
+}
+
+export const SetLogic = {
+    $type: 'SetLogic',
+    logic: 'logic'
+} as const;
+
+export function isSetLogic(item: unknown): item is SetLogic {
+    return reflection.isInstance(item, SetLogic.$type);
+}
+
+export interface SetOption extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'SetOption';
+    attribute: Attribute;
+}
+
+export const SetOption = {
+    $type: 'SetOption',
+    attribute: 'attribute'
+} as const;
+
+export function isSetOption(item: unknown): item is SetOption {
+    return reflection.isInstance(item, SetOption.$type);
+}
+
+export type SExpr = SExprConstant | SExprKeyword | SExprList | SExprSymbol;
 
 export const SExpr = {
-    $type: 'SExpr',
-    const: 'const',
-    exprs: 'exprs',
-    keyWord: 'keyWord',
-    symbol: 'symbol'
+    $type: 'SExpr'
 } as const;
 
 export function isSExpr(item: unknown): item is SExpr {
     return reflection.isInstance(item, SExpr.$type);
 }
 
-export interface SimpleConstructor extends langium.AstNode {
-    readonly $container: DataTypeDec | NamedDataTypeDec;
-    readonly $type: 'SimpleConstructor';
-    name: SmtSymbol;
+export interface SExprConstant extends langium.AstNode {
+    readonly $container: Attribute | GenericCommand | ListIndex | SExprList | TacticCommand;
+    readonly $type: 'SExprConstant';
+    value: SpecConstantValue;
 }
 
-export const SimpleConstructor = {
-    $type: 'SimpleConstructor',
+export const SExprConstant = {
+    $type: 'SExprConstant',
+    value: 'value'
+} as const;
+
+export function isSExprConstant(item: unknown): item is SExprConstant {
+    return reflection.isInstance(item, SExprConstant.$type);
+}
+
+export interface SExprKeyword extends langium.AstNode {
+    readonly $container: GenericCommand | ListIndex | SExprList | TacticCommand;
+    readonly $type: 'SExprKeyword';
+    value: Keyword;
+}
+
+export const SExprKeyword = {
+    $type: 'SExprKeyword',
+    value: 'value'
+} as const;
+
+export function isSExprKeyword(item: unknown): item is SExprKeyword {
+    return reflection.isInstance(item, SExprKeyword.$type);
+}
+
+export interface SExprList extends langium.AstNode {
+    readonly $container: Attribute | GenericCommand | ListIndex | SExprList | TacticCommand;
+    readonly $type: 'SExprList';
+    items: Array<SExpr>;
+}
+
+export const SExprList = {
+    $type: 'SExprList',
+    items: 'items'
+} as const;
+
+export function isSExprList(item: unknown): item is SExprList {
+    return reflection.isInstance(item, SExprList.$type);
+}
+
+export interface SExprSymbol extends langium.AstNode {
+    readonly $container: Attribute | GenericCommand | ListIndex | SExprList | TacticCommand;
+    readonly $type: 'SExprSymbol';
+    value: AnySymbol;
+}
+
+export const SExprSymbol = {
+    $type: 'SExprSymbol',
+    value: 'value'
+} as const;
+
+export function isSExprSymbol(item: unknown): item is SExprSymbol {
+    return reflection.isInstance(item, SExprSymbol.$type);
+}
+
+export interface SimpleCommand extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'SimpleCommand';
+    name: SimpleCommandName;
+}
+
+export const SimpleCommand = {
+    $type: 'SimpleCommand',
     name: 'name'
 } as const;
 
-export function isSimpleConstructor(item: unknown): item is SimpleConstructor {
-    return reflection.isInstance(item, SimpleConstructor.$type);
+export function isSimpleCommand(item: unknown): item is SimpleCommand {
+    return reflection.isInstance(item, SimpleCommand.$type);
 }
 
-export type SmtSymbol = string;
+export type SimpleCommandName = 'exit' | 'get-assertions' | 'get-assignment' | 'get-model' | 'get-objectives' | 'get-proof' | 'get-unsat-assumptions' | 'get-unsat-core' | 'reset' | 'reset-assertions';
+
+export function isSimpleCommandName(item: unknown): item is SimpleCommandName {
+    return item === 'exit' || item === 'get-assertions' || item === 'get-assignment' || item === 'get-model' || item === 'get-proof' || item === 'get-unsat-assumptions' || item === 'get-unsat-core' || item === 'reset' || item === 'reset-assertions' || item === 'get-objectives';
+}
+
+/**
+ * All parenthesized term forms are inlined into this one rule so that every nesting
+ * level costs a single rule invocation. Machine-generated benchmarks nest terms
+ * hundreds of levels deep and the parser is recursive.
+ */
+export interface SimpleIdentifier extends langium.AstNode {
+    readonly $container: AnnotatedTerm | Application | Assert | CheckSatAssuming | DefineConst | DefineFunsRec | FixedpointRule | FunctionDef | GetConsequences | GetValue | LambdaTerm | LetTerm | MatchCase | MatchTerm | Objective | PatternAttribute | QualifiedIdentifier | QuantifiedTerm | SetInitialValue | TermCommand | VarBinding;
+    readonly $type: 'SimpleIdentifier';
+    symbol: langium.Reference<FunctionSymbol>;
+}
+
+export const SimpleIdentifier = {
+    $type: 'SimpleIdentifier',
+    symbol: 'symbol'
+} as const;
+
+export function isSimpleIdentifier(item: unknown): item is SimpleIdentifier {
+    return reflection.isInstance(item, SimpleIdentifier.$type);
+}
+
+export interface SimpleSort extends langium.AstNode {
+    readonly $container: DeclareConst | DeclareFun | DeclareRel | DeclareVar | DefineConst | DefineSort | FunctionDec | FunctionDef | ParametricSort | QualifiedIdentifier | SelectorDec | SortedVar;
+    readonly $type: 'SimpleSort';
+    symbol: langium.Reference<SortSymbol>;
+}
+
+export const SimpleSort = {
+    $type: 'SimpleSort',
+    symbol: 'symbol'
+} as const;
+
+export function isSimpleSort(item: unknown): item is SimpleSort {
+    return reflection.isInstance(item, SimpleSort.$type);
+}
+
+/**
+ * A user symbol. Includes Z3 command names, which Z3 does not reserve.
+ * Quoted symbols `|...|` are unquoted by the value converter, so `|x|` and `x` are equal.
+ */
+export type SmtSymbol = 'apply' | 'assert-soft' | 'check-sat-using' | 'declare-rel' | 'declare-type-var' | 'declare-var' | 'display' | 'eval' | 'get-consequences' | 'get-objectives' | 'lambda' | 'maximize' | 'minimize' | 'query' | 'rule' | 'set-initial-value' | 'simplify' | string;
 
 export function isSmtSymbol(item: unknown): item is SmtSymbol {
-    return (typeof item === 'string' && (/((?:[a-zA-Z])|\+|-|\/|\*|,|=|%|\?|!|\.|\$|_|~|&|\^|<|>|@)((?:[a-zA-Z])|(?:[0-9])|\+|-|\/|\*|=|%|\?|!|\.|\$|_|~|&|\^|<|>|@)*/.test(item)));
+    return item === 'eval' || item === 'simplify' || item === 'assert-soft' || item === 'display' || item === 'query' || item === 'rule' || item === 'maximize' || item === 'minimize' || item === 'check-sat-using' || item === 'apply' || item === 'declare-rel' || item === 'declare-var' || item === 'get-consequences' || item === 'set-initial-value' || item === 'declare-type-var' || item === 'get-objectives' || item === 'lambda' || (typeof item === 'string' && (/[a-zA-Z~!@$%^&*_\-+=<>.?\/,][a-zA-Z0-9~!@$%^&*_\-+=<>.?\/,]*/.test(item) || /\|[^|\\]*\|/.test(item)));
 }
 
-export interface Sort extends langium.AstNode {
-    readonly $container: CmdConstDecl | CmdDefSort | CmdFunDecl | FunctionDec | FunctionDef | FunctionDefRec | SelectorDec | SelectorDecZ3 | Sort | SortedVar | Term;
-    readonly $type: 'Sort';
-    identifier: SortIdentifier;
-    sorts: Array<Sort>;
-}
+/******************************************************************************
+ * Sorts
+ ******************************************************************************/
+export type Sort = ParametricSort | SortIdentifier;
 
 export const Sort = {
-    $type: 'Sort',
-    identifier: 'identifier',
-    sorts: 'sorts'
+    $type: 'Sort'
 } as const;
 
 export function isSort(item: unknown): item is Sort {
@@ -1051,53 +1421,24 @@ export function isSort(item: unknown): item is Sort {
 }
 
 export interface SortDec extends langium.AstNode {
-    readonly $container: CmdDecDataTypes;
+    readonly $container: DeclareDatatypes;
     readonly $type: 'SortDec';
+    arity: string;
     name: SmtSymbol;
-    num?: number;
 }
 
 export const SortDec = {
     $type: 'SortDec',
-    name: 'name',
-    num: 'num'
+    arity: 'arity',
+    name: 'name'
 } as const;
 
 export function isSortDec(item: unknown): item is SortDec {
     return reflection.isInstance(item, SortDec.$type);
 }
 
-export interface SortDecZ3 extends langium.AstNode {
-    readonly $type: 'SortDecZ3';
-    symbols: Array<SmtSymbol>;
-}
-
-export const SortDecZ3 = {
-    $type: 'SortDecZ3',
-    symbols: 'symbols'
-} as const;
-
-export function isSortDecZ3(item: unknown): item is SortDecZ3 {
-    return reflection.isInstance(item, SortDecZ3.$type);
-}
-
-export interface SortedParameter extends langium.AstNode {
-    readonly $container: CmdDefSort;
-    readonly $type: 'SortedParameter';
-    name: PreDefinedSort | SmtSymbol;
-}
-
-export const SortedParameter = {
-    $type: 'SortedParameter',
-    name: 'name'
-} as const;
-
-export function isSortedParameter(item: unknown): item is SortedParameter {
-    return reflection.isInstance(item, SortedParameter.$type);
-}
-
 export interface SortedVar extends langium.AstNode {
-    readonly $container: FunctionDec | FunctionDef | FunctionDefRec | QuantifiedTerm;
+    readonly $container: FunctionDec | FunctionDef | LambdaTerm | QuantifiedTerm;
     readonly $type: 'SortedVar';
     name: SmtSymbol;
     sort: Sort;
@@ -1113,117 +1454,176 @@ export function isSortedVar(item: unknown): item is SortedVar {
     return reflection.isInstance(item, SortedVar.$type);
 }
 
-export interface SortIdentifier extends langium.AstNode {
-    readonly $container: Sort;
-    readonly $type: 'SortIdentifier';
-    ID?: langium.Reference<NamedSort>;
-    indices: Array<Index>;
-    name?: SmtSymbol;
-    size?: number;
-    sort?: PreDefinedSort;
-}
+export type SortIdentifier = IndexedSort | SimpleSort;
 
 export const SortIdentifier = {
-    $type: 'SortIdentifier',
-    ID: 'ID',
-    indices: 'indices',
-    name: 'name',
-    size: 'size',
-    sort: 'sort'
+    $type: 'SortIdentifier'
 } as const;
 
 export function isSortIdentifier(item: unknown): item is SortIdentifier {
     return reflection.isInstance(item, SortIdentifier.$type);
 }
 
-export type SpecConstant = number | string;
-
-
-export type StringOperation = 'str.++' | 'str.at' | 'str.contains' | 'str.from_int' | 'str.indexof' | 'str.len' | 'str.prefixof' | 'str.replace' | 'str.substr' | 'str.suffixof' | 'str.to_int';
-
-export function isStringOperation(item: unknown): item is StringOperation {
-    return item === 'str.len' || item === 'str.substr' || item === 'str.indexof' || item === 'str.replace' || item === 'str.++' || item === 'str.at' || item === 'str.contains' || item === 'str.prefixof' || item === 'str.suffixof' || item === 'str.from_int' || item === 'str.to_int';
+export interface SortParameter extends langium.AstNode {
+    readonly $container: DatatypeDec | DeclareDatatypes | DefineSort;
+    readonly $type: 'SortParameter';
+    name: SmtSymbol;
 }
 
-export interface Term extends langium.AstNode {
-    readonly $type: 'BvOperation' | 'Operator' | 'QualIdentifier' | 'QuantifiedTerm' | 'SmtSymbol' | 'SpecConstant' | 'StringOperation' | 'Term';
-    args: Array<Term>;
-    array?: Term;
-    attribute: Array<Attribute>;
-    body: Array<Term>;
-    boolean?: string;
-    condition: Array<Term>;
-    index?: Term;
-    listKey?: 'head' | 'tail';
-    operands: Array<Term>;
-    qualId?: QualIdentifier;
-    sort?: Sort;
-    statement: Array<ConditionalTerm>;
-    term?: Term;
-    terms: Array<Term>;
-    value?: Term;
-    varBinding: Array<VarBinding>;
+export const SortParameter = {
+    $type: 'SortParameter',
+    name: 'name'
+} as const;
+
+export function isSortParameter(item: unknown): item is SortParameter {
+    return reflection.isInstance(item, SortParameter.$type);
 }
+
+/** Everything a sort identifier can refer to. */
+export type SortSymbol = DeclareDatatype | DeclareSort | DeclareSortParameter | DeclareTypeVar | DefineSort | LegacyDatatypeDec | SortDec | SortParameter;
+
+export const SortSymbol = {
+    $type: 'SortSymbol'
+} as const;
+
+export function isSortSymbol(item: unknown): item is SortSymbol {
+    return reflection.isInstance(item, SortSymbol.$type);
+}
+
+export type SpecConstant = BinaryConstant | DecimalConstant | HexadecimalConstant | NumeralConstant | StringConstant;
+
+export const SpecConstant = {
+    $type: 'SpecConstant'
+} as const;
+
+export function isSpecConstant(item: unknown): item is SpecConstant {
+    return reflection.isInstance(item, SpecConstant.$type);
+}
+
+export type SpecConstantValue = string;
+
+export function isSpecConstantValue(item: unknown): item is SpecConstantValue {
+    return (typeof item === 'string' && (/-?[0-9]+/.test(item) || /-?[0-9]+\.[0-9]*/.test(item) || /#x[0-9a-fA-F]+/.test(item) || /#b[01]+/.test(item) || /"(?:[^"]|"")*"/.test(item)));
+}
+
+/**
+ * All parenthesized term forms are inlined into this one rule so that every nesting
+ * level costs a single rule invocation. Machine-generated benchmarks nest terms
+ * hundreds of levels deep and the parser is recursive.
+ */
+export interface StringConstant extends langium.AstNode {
+    readonly $container: AnnotatedTerm | Application | Assert | CheckSatAssuming | DefineConst | DefineFunsRec | FixedpointRule | FunctionDef | GetConsequences | GetValue | LambdaTerm | LetTerm | MatchCase | MatchTerm | Objective | PatternAttribute | QuantifiedTerm | SetInitialValue | TermCommand | VarBinding;
+    readonly $type: 'StringConstant';
+    value: string;
+}
+
+export const StringConstant = {
+    $type: 'StringConstant',
+    value: 'value'
+} as const;
+
+export function isStringConstant(item: unknown): item is StringConstant {
+    return reflection.isInstance(item, StringConstant.$type);
+}
+
+/** Numerals, symbols and (Z3) hexadecimals/binaries or nested s-expressions, e.g. `(_ map (+ (Int Int) Int))`. */
+export interface SymbolIndex extends langium.AstNode {
+    readonly $container: IndexedIdentifier | IndexedSort;
+    readonly $type: 'SymbolIndex';
+    value: SmtSymbol;
+}
+
+export const SymbolIndex = {
+    $type: 'SymbolIndex',
+    value: 'value'
+} as const;
+
+export function isSymbolIndex(item: unknown): item is SymbolIndex {
+    return reflection.isInstance(item, SymbolIndex.$type);
+}
+
+/** `(check-sat-using tactic ...)`, `(apply tactic ...)`. Tactics are s-expressions. */
+export interface TacticCommand extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'TacticCommand';
+    attributes: Array<Attribute>;
+    name: 'apply' | 'check-sat-using';
+    tactic: SExpr;
+}
+
+export const TacticCommand = {
+    $type: 'TacticCommand',
+    attributes: 'attributes',
+    name: 'name',
+    tactic: 'tactic'
+} as const;
+
+export function isTacticCommand(item: unknown): item is TacticCommand {
+    return reflection.isInstance(item, TacticCommand.$type);
+}
+
+/**
+ * All parenthesized term forms are inlined into this one rule so that every nesting
+ * level costs a single rule invocation. Machine-generated benchmarks nest terms
+ * hundreds of levels deep and the parser is recursive.
+ */
+export type Term = AnnotatedTerm | Application | BinaryConstant | DecimalConstant | HexadecimalConstant | IndexedIdentifier | LambdaTerm | LetTerm | MatchTerm | NumeralConstant | QualifiedIdentifier | QuantifiedTerm | SimpleIdentifier | StringConstant;
 
 export const Term = {
-    $type: 'Term',
-    args: 'args',
-    array: 'array',
-    attribute: 'attribute',
-    body: 'body',
-    boolean: 'boolean',
-    condition: 'condition',
-    index: 'index',
-    listKey: 'listKey',
-    operands: 'operands',
-    qualId: 'qualId',
-    sort: 'sort',
-    statement: 'statement',
-    term: 'term',
-    terms: 'terms',
-    value: 'value',
-    varBinding: 'varBinding'
+    $type: 'Term'
 } as const;
 
 export function isTerm(item: unknown): item is Term {
     return reflection.isInstance(item, Term.$type);
 }
 
-export interface UnknownCommand extends Command {
-    readonly $type: 'UnknownCommand';
-    elements: Array<SExpr>;
-    name: SmtSymbol;
+export type TermAttribute = Attribute | NamedAttribute | PatternAttribute;
+
+export const TermAttribute = {
+    $type: 'TermAttribute'
+} as const;
+
+export function isTermAttribute(item: unknown): item is TermAttribute {
+    return reflection.isInstance(item, TermAttribute.$type);
 }
 
-export const UnknownCommand = {
-    $type: 'UnknownCommand',
-    arity: 'arity',
-    attribute: 'attribute',
-    basicCommand: 'basicCommand',
-    elements: 'elements',
-    infoFlag: 'infoFlag',
+/** `(eval t :opt v ...)`, `(simplify t ...)`, `(assert-soft t :weight w :id g)`, `(display t)`, `(query r ...)`. */
+export interface TermCommand extends langium.AstNode {
+    readonly $container: Script;
+    readonly $type: 'TermCommand';
+    attributes: Array<Attribute>;
+    name: TermCommandName;
+    term: Term;
+}
+
+export const TermCommand = {
+    $type: 'TermCommand',
+    attributes: 'attributes',
     name: 'name',
-    option: 'option',
-    options: 'options',
-    symbol: 'symbol',
     term: 'term'
 } as const;
 
-export function isUnknownCommand(item: unknown): item is UnknownCommand {
-    return reflection.isInstance(item, UnknownCommand.$type);
+export function isTermCommand(item: unknown): item is TermCommand {
+    return reflection.isInstance(item, TermCommand.$type);
+}
+
+export type TermCommandName = 'assert-soft' | 'display' | 'eval' | 'query' | 'simplify';
+
+export function isTermCommandName(item: unknown): item is TermCommandName {
+    return item === 'eval' || item === 'simplify' || item === 'assert-soft' || item === 'display' || item === 'query';
 }
 
 export interface VarBinding extends langium.AstNode {
-    readonly $container: Term;
+    readonly $container: LetTerm;
     readonly $type: 'VarBinding';
-    symbol: SmtSymbol;
-    term: Term;
+    name: SmtSymbol;
+    value: Term;
 }
 
 export const VarBinding = {
     $type: 'VarBinding',
-    symbol: 'symbol',
-    term: 'term'
+    name: 'name',
+    value: 'value'
 } as const;
 
 export function isVarBinding(item: unknown): item is VarBinding {
@@ -1231,546 +1631,189 @@ export function isVarBinding(item: unknown): item is VarBinding {
 }
 
 export type SmtAstType = {
+    AnnotatedTerm: AnnotatedTerm
+    Application: Application
+    Assert: Assert
     Attribute: Attribute
     AttributeValue: AttributeValue
-    CmdAssert: CmdAssert
-    CmdCheckSat: CmdCheckSat
-    CmdConstDecl: CmdConstDecl
-    CmdDecDataType: CmdDecDataType
-    CmdDecDataTypes: CmdDecDataTypes
-    CmdDefFun: CmdDefFun
-    CmdDefFunsRec: CmdDefFunsRec
-    CmdDefSort: CmdDefSort
-    CmdFunDecl: CmdFunDecl
-    CmdSortDeclZ3: CmdSortDeclZ3
+    BinaryConstant: BinaryConstant
+    BitVectorIndex: BitVectorIndex
+    CheckSat: CheckSat
+    CheckSatAssuming: CheckSatAssuming
     Command: Command
-    CommonDataTypeDec: CommonDataTypeDec
-    ConditionalTerm: ConditionalTerm
-    ConstDecVar: ConstDecVar
     ConstructorDec: ConstructorDec
-    ConstructorDecZ3: ConstructorDecZ3
-    DataTypeDec: DataTypeDec
-    DataTypeDecZ3: DataTypeDecZ3
+    ConstructorPattern: ConstructorPattern
+    DatatypeDec: DatatypeDec
+    DecimalConstant: DecimalConstant
+    DeclareConst: DeclareConst
+    DeclareDatatype: DeclareDatatype
+    DeclareDatatypes: DeclareDatatypes
+    DeclareFun: DeclareFun
+    DeclareRel: DeclareRel
+    DeclareSort: DeclareSort
+    DeclareSortParameter: DeclareSortParameter
+    DeclareTypeVar: DeclareTypeVar
+    DeclareVar: DeclareVar
+    DefineConst: DefineConst
+    DefineFun: DefineFun
+    DefineFunsRec: DefineFunsRec
+    DefineSort: DefineSort
+    Echo: Echo
+    FixedpointRule: FixedpointRule
     FunctionDec: FunctionDec
     FunctionDef: FunctionDef
-    FunctionDefRec: FunctionDefRec
+    FunctionSymbol: FunctionSymbol
+    GenericCommand: GenericCommand
+    GetConsequences: GetConsequences
+    GetInfo: GetInfo
+    GetOption: GetOption
+    GetValue: GetValue
+    HexadecimalConstant: HexadecimalConstant
+    Identifier: Identifier
     Index: Index
-    InfoFlag: InfoFlag
-    Keyword: Keyword
-    Model: Model
+    IndexedIdentifier: IndexedIdentifier
+    IndexedSort: IndexedSort
+    LambdaTerm: LambdaTerm
+    LegacyDatatypeDec: LegacyDatatypeDec
+    LetTerm: LetTerm
+    ListIndex: ListIndex
+    MatchCase: MatchCase
+    MatchTerm: MatchTerm
     NamedAttribute: NamedAttribute
-    NamedDataTypeDec: NamedDataTypeDec
-    NamedElement: NamedElement
-    NamedSort: NamedSort
-    Option: Option
-    OptionKeyword: OptionKeyword
+    NumeralConstant: NumeralConstant
+    NumeralIndex: NumeralIndex
+    Objective: Objective
+    ParametricSort: ParametricSort
     Pattern: Pattern
     PatternAttribute: PatternAttribute
-    PatternedTerm: PatternedTerm
-    PreDefinedSort: PreDefinedSort
+    PatternVariable: PatternVariable
+    Pop: Pop
+    Push: Push
     QualIdentifier: QualIdentifier
+    QualifiedIdentifier: QualifiedIdentifier
     QuantifiedTerm: QuantifiedTerm
     SExpr: SExpr
+    SExprConstant: SExprConstant
+    SExprKeyword: SExprKeyword
+    SExprList: SExprList
+    SExprSymbol: SExprSymbol
+    Script: Script
     SelectorDec: SelectorDec
-    SelectorDecZ3: SelectorDecZ3
-    SimpleConstructor: SimpleConstructor
+    SetInfo: SetInfo
+    SetInitialValue: SetInitialValue
+    SetLogic: SetLogic
+    SetOption: SetOption
+    SimpleCommand: SimpleCommand
+    SimpleIdentifier: SimpleIdentifier
+    SimpleSort: SimpleSort
     Sort: Sort
     SortDec: SortDec
-    SortDecZ3: SortDecZ3
     SortIdentifier: SortIdentifier
-    SortedParameter: SortedParameter
+    SortParameter: SortParameter
+    SortSymbol: SortSymbol
     SortedVar: SortedVar
+    SpecConstant: SpecConstant
+    StringConstant: StringConstant
+    SymbolIndex: SymbolIndex
+    TacticCommand: TacticCommand
     Term: Term
-    UnknownCommand: UnknownCommand
+    TermAttribute: TermAttribute
+    TermCommand: TermCommand
     VarBinding: VarBinding
 }
 
 export class SmtAstReflection extends langium.AbstractAstReflection {
     override readonly types = {
+        AnnotatedTerm: {
+            name: AnnotatedTerm.$type,
+            properties: {
+                attributes: {
+                    name: AnnotatedTerm.attributes,
+                    defaultValue: []
+                },
+                term: {
+                    name: AnnotatedTerm.term
+                }
+            },
+            superTypes: [Term.$type]
+        },
+        Application: {
+            name: Application.$type,
+            properties: {
+                arguments: {
+                    name: Application.arguments,
+                    defaultValue: []
+                },
+                function: {
+                    name: Application.function
+                }
+            },
+            superTypes: [Term.$type]
+        },
+        Assert: {
+            name: Assert.$type,
+            properties: {
+                term: {
+                    name: Assert.term
+                }
+            },
+            superTypes: [Command.$type]
+        },
         Attribute: {
             name: Attribute.$type,
             properties: {
-                keyWord: {
-                    name: Attribute.keyWord
+                keyword: {
+                    name: Attribute.keyword
                 },
                 value: {
                     name: Attribute.value
                 }
             },
-            superTypes: [Option.$type]
+            superTypes: [TermAttribute.$type]
         },
         AttributeValue: {
             name: AttributeValue.$type,
             properties: {
-                const: {
-                    name: AttributeValue.const
-                },
-                exprs: {
-                    name: AttributeValue.exprs,
-                    defaultValue: []
-                },
-                string: {
-                    name: AttributeValue.string,
-                    defaultValue: []
-                },
-                symbol: {
-                    name: AttributeValue.symbol
-                }
             },
             superTypes: []
         },
-        CmdAssert: {
-            name: CmdAssert.$type,
+        BinaryConstant: {
+            name: BinaryConstant.$type,
             properties: {
-                arity: {
-                    name: CmdAssert.arity
-                },
-                attribute: {
-                    name: CmdAssert.attribute
-                },
-                basicCommand: {
-                    name: CmdAssert.basicCommand
-                },
-                infoFlag: {
-                    name: CmdAssert.infoFlag
-                },
-                name: {
-                    name: CmdAssert.name
-                },
-                option: {
-                    name: CmdAssert.option
-                },
-                options: {
-                    name: CmdAssert.options
-                },
-                symbol: {
-                    name: CmdAssert.symbol
-                },
-                term: {
-                    name: CmdAssert.term
+                value: {
+                    name: BinaryConstant.value
                 }
+            },
+            superTypes: [SpecConstant.$type, Term.$type]
+        },
+        BitVectorIndex: {
+            name: BitVectorIndex.$type,
+            properties: {
+                value: {
+                    name: BitVectorIndex.value
+                }
+            },
+            superTypes: [Index.$type]
+        },
+        CheckSat: {
+            name: CheckSat.$type,
+            properties: {
             },
             superTypes: [Command.$type]
         },
-        CmdCheckSat: {
-            name: CmdCheckSat.$type,
+        CheckSatAssuming: {
+            name: CheckSatAssuming.$type,
             properties: {
-                arity: {
-                    name: CmdCheckSat.arity
-                },
-                attribute: {
-                    name: CmdCheckSat.attribute
-                },
-                basicCommand: {
-                    name: CmdCheckSat.basicCommand
-                },
-                infoFlag: {
-                    name: CmdCheckSat.infoFlag
-                },
-                name: {
-                    name: CmdCheckSat.name
-                },
-                option: {
-                    name: CmdCheckSat.option
-                },
-                options: {
-                    name: CmdCheckSat.options
-                },
-                propLiteral: {
-                    name: CmdCheckSat.propLiteral,
-                    defaultValue: [],
-                    referenceType: NamedElement.$type
-                },
-                symbol: {
-                    name: CmdCheckSat.symbol
-                },
-                term: {
-                    name: CmdCheckSat.term
-                }
-            },
-            superTypes: [Command.$type]
-        },
-        CmdConstDecl: {
-            name: CmdConstDecl.$type,
-            properties: {
-                arity: {
-                    name: CmdConstDecl.arity
-                },
-                attribute: {
-                    name: CmdConstDecl.attribute
-                },
-                basicCommand: {
-                    name: CmdConstDecl.basicCommand
-                },
-                commandType: {
-                    name: CmdConstDecl.commandType
-                },
-                infoFlag: {
-                    name: CmdConstDecl.infoFlag
-                },
-                name: {
-                    name: CmdConstDecl.name
-                },
-                option: {
-                    name: CmdConstDecl.option
-                },
-                options: {
-                    name: CmdConstDecl.options
-                },
-                sorts: {
-                    name: CmdConstDecl.sorts,
-                    defaultValue: []
-                },
-                symbol: {
-                    name: CmdConstDecl.symbol
-                },
-                term: {
-                    name: CmdConstDecl.term
-                }
-            },
-            superTypes: [Command.$type, NamedElement.$type]
-        },
-        CmdDecDataType: {
-            name: CmdDecDataType.$type,
-            properties: {
-                arity: {
-                    name: CmdDecDataType.arity
-                },
-                attribute: {
-                    name: CmdDecDataType.attribute
-                },
-                basicCommand: {
-                    name: CmdDecDataType.basicCommand
-                },
-                commandType: {
-                    name: CmdDecDataType.commandType
-                },
-                dataTypeDec: {
-                    name: CmdDecDataType.dataTypeDec
-                },
-                infoFlag: {
-                    name: CmdDecDataType.infoFlag
-                },
-                name: {
-                    name: CmdDecDataType.name
-                },
-                option: {
-                    name: CmdDecDataType.option
-                },
-                options: {
-                    name: CmdDecDataType.options
-                },
-                symbol: {
-                    name: CmdDecDataType.symbol
-                },
-                term: {
-                    name: CmdDecDataType.term
-                }
-            },
-            superTypes: [Command.$type, NamedSort.$type]
-        },
-        CmdDecDataTypes: {
-            name: CmdDecDataTypes.$type,
-            properties: {
-                arity: {
-                    name: CmdDecDataTypes.arity
-                },
-                attribute: {
-                    name: CmdDecDataTypes.attribute
-                },
-                basicCommand: {
-                    name: CmdDecDataTypes.basicCommand
-                },
-                commandType: {
-                    name: CmdDecDataTypes.commandType
-                },
-                dataTypeDecs: {
-                    name: CmdDecDataTypes.dataTypeDecs,
-                    defaultValue: []
-                },
-                infoFlag: {
-                    name: CmdDecDataTypes.infoFlag
-                },
-                name: {
-                    name: CmdDecDataTypes.name
-                },
-                option: {
-                    name: CmdDecDataTypes.option
-                },
-                options: {
-                    name: CmdDecDataTypes.options
-                },
-                sortDec: {
-                    name: CmdDecDataTypes.sortDec,
-                    defaultValue: []
-                },
-                symbol: {
-                    name: CmdDecDataTypes.symbol
-                },
-                term: {
-                    name: CmdDecDataTypes.term
-                }
-            },
-            superTypes: [Command.$type]
-        },
-        CmdDefFun: {
-            name: CmdDefFun.$type,
-            properties: {
-                arity: {
-                    name: CmdDefFun.arity
-                },
-                attribute: {
-                    name: CmdDefFun.attribute
-                },
-                basicCommand: {
-                    name: CmdDefFun.basicCommand
-                },
-                commandType: {
-                    name: CmdDefFun.commandType
-                },
-                infoFlag: {
-                    name: CmdDefFun.infoFlag
-                },
-                name: {
-                    name: CmdDefFun.name
-                },
-                option: {
-                    name: CmdDefFun.option
-                },
-                options: {
-                    name: CmdDefFun.options
-                },
-                symbol: {
-                    name: CmdDefFun.symbol
-                },
-                term: {
-                    name: CmdDefFun.term
-                }
-            },
-            superTypes: [Command.$type]
-        },
-        CmdDefFunsRec: {
-            name: CmdDefFunsRec.$type,
-            properties: {
-                arity: {
-                    name: CmdDefFunsRec.arity
-                },
-                attribute: {
-                    name: CmdDefFunsRec.attribute
-                },
-                basicCommand: {
-                    name: CmdDefFunsRec.basicCommand
-                },
-                commandType: {
-                    name: CmdDefFunsRec.commandType
-                },
-                functionDec: {
-                    name: CmdDefFunsRec.functionDec,
-                    defaultValue: []
-                },
-                infoFlag: {
-                    name: CmdDefFunsRec.infoFlag
-                },
-                name: {
-                    name: CmdDefFunsRec.name
-                },
-                option: {
-                    name: CmdDefFunsRec.option
-                },
-                options: {
-                    name: CmdDefFunsRec.options
-                },
-                symbol: {
-                    name: CmdDefFunsRec.symbol
-                },
-                term: {
-                    name: CmdDefFunsRec.term,
+                assumptions: {
+                    name: CheckSatAssuming.assumptions,
                     defaultValue: []
                 }
             },
             superTypes: [Command.$type]
-        },
-        CmdDefSort: {
-            name: CmdDefSort.$type,
-            properties: {
-                arity: {
-                    name: CmdDefSort.arity
-                },
-                attribute: {
-                    name: CmdDefSort.attribute
-                },
-                basicCommand: {
-                    name: CmdDefSort.basicCommand
-                },
-                commandType: {
-                    name: CmdDefSort.commandType
-                },
-                infoFlag: {
-                    name: CmdDefSort.infoFlag
-                },
-                name: {
-                    name: CmdDefSort.name
-                },
-                option: {
-                    name: CmdDefSort.option
-                },
-                options: {
-                    name: CmdDefSort.options
-                },
-                parameters: {
-                    name: CmdDefSort.parameters,
-                    defaultValue: []
-                },
-                resultSort: {
-                    name: CmdDefSort.resultSort
-                },
-                symbol: {
-                    name: CmdDefSort.symbol
-                },
-                term: {
-                    name: CmdDefSort.term
-                }
-            },
-            superTypes: [Command.$type, NamedSort.$type]
-        },
-        CmdFunDecl: {
-            name: CmdFunDecl.$type,
-            properties: {
-                arity: {
-                    name: CmdFunDecl.arity
-                },
-                attribute: {
-                    name: CmdFunDecl.attribute
-                },
-                basicCommand: {
-                    name: CmdFunDecl.basicCommand
-                },
-                commandType: {
-                    name: CmdFunDecl.commandType
-                },
-                infoFlag: {
-                    name: CmdFunDecl.infoFlag
-                },
-                name: {
-                    name: CmdFunDecl.name
-                },
-                option: {
-                    name: CmdFunDecl.option
-                },
-                options: {
-                    name: CmdFunDecl.options
-                },
-                paramSorts: {
-                    name: CmdFunDecl.paramSorts,
-                    defaultValue: []
-                },
-                returnSort: {
-                    name: CmdFunDecl.returnSort
-                },
-                symbol: {
-                    name: CmdFunDecl.symbol
-                },
-                term: {
-                    name: CmdFunDecl.term
-                }
-            },
-            superTypes: [Command.$type, NamedElement.$type]
-        },
-        CmdSortDeclZ3: {
-            name: CmdSortDeclZ3.$type,
-            properties: {
-                arity: {
-                    name: CmdSortDeclZ3.arity
-                },
-                attribute: {
-                    name: CmdSortDeclZ3.attribute
-                },
-                basicCommand: {
-                    name: CmdSortDeclZ3.basicCommand
-                },
-                commandType: {
-                    name: CmdSortDeclZ3.commandType
-                },
-                infoFlag: {
-                    name: CmdSortDeclZ3.infoFlag
-                },
-                name: {
-                    name: CmdSortDeclZ3.name
-                },
-                number: {
-                    name: CmdSortDeclZ3.number,
-                    defaultValue: []
-                },
-                option: {
-                    name: CmdSortDeclZ3.option
-                },
-                options: {
-                    name: CmdSortDeclZ3.options
-                },
-                symbol: {
-                    name: CmdSortDeclZ3.symbol
-                },
-                term: {
-                    name: CmdSortDeclZ3.term
-                }
-            },
-            superTypes: [Command.$type, NamedSort.$type]
         },
         Command: {
             name: Command.$type,
             properties: {
-                arity: {
-                    name: Command.arity
-                },
-                attribute: {
-                    name: Command.attribute
-                },
-                basicCommand: {
-                    name: Command.basicCommand
-                },
-                infoFlag: {
-                    name: Command.infoFlag
-                },
-                name: {
-                    name: Command.name
-                },
-                option: {
-                    name: Command.option
-                },
-                options: {
-                    name: Command.options
-                },
-                symbol: {
-                    name: Command.symbol
-                },
-                term: {
-                    name: Command.term
-                }
-            },
-            superTypes: []
-        },
-        CommonDataTypeDec: {
-            name: CommonDataTypeDec.$type,
-            properties: {
-            },
-            superTypes: []
-        },
-        ConditionalTerm: {
-            name: ConditionalTerm.$type,
-            properties: {
-                term: {
-                    name: ConditionalTerm.term,
-                    defaultValue: []
-                }
-            },
-            superTypes: []
-        },
-        ConstDecVar: {
-            name: ConstDecVar.$type,
-            properties: {
-                name: {
-                    name: ConstDecVar.name
-                }
             },
             superTypes: []
         },
@@ -1780,59 +1823,255 @@ export class SmtAstReflection extends langium.AbstractAstReflection {
                 name: {
                     name: ConstructorDec.name
                 },
-                selectorDec: {
-                    name: ConstructorDec.selectorDec,
+                selectors: {
+                    name: ConstructorDec.selectors,
                     defaultValue: []
                 }
             },
-            superTypes: [NamedElement.$type]
+            superTypes: [FunctionSymbol.$type]
         },
-        ConstructorDecZ3: {
-            name: ConstructorDecZ3.$type,
+        ConstructorPattern: {
+            name: ConstructorPattern.$type,
             properties: {
-                name: {
-                    name: ConstructorDecZ3.name
-                },
-                right: {
-                    name: ConstructorDecZ3.right,
+                arguments: {
+                    name: ConstructorPattern.arguments,
                     defaultValue: []
                 },
-                selector: {
-                    name: ConstructorDecZ3.selector,
+                constructorSymbol: {
+                    name: ConstructorPattern.constructorSymbol,
+                    referenceType: FunctionSymbol.$type
+                }
+            },
+            superTypes: [Pattern.$type]
+        },
+        DatatypeDec: {
+            name: DatatypeDec.$type,
+            properties: {
+                constructors: {
+                    name: DatatypeDec.constructors,
+                    defaultValue: []
+                },
+                parameters: {
+                    name: DatatypeDec.parameters,
                     defaultValue: []
                 }
             },
             superTypes: []
         },
-        DataTypeDec: {
-            name: DataTypeDec.$type,
+        DecimalConstant: {
+            name: DecimalConstant.$type,
             properties: {
-                constructorDecs: {
-                    name: DataTypeDec.constructorDecs,
+                value: {
+                    name: DecimalConstant.value
+                }
+            },
+            superTypes: [SpecConstant.$type, Term.$type]
+        },
+        DeclareConst: {
+            name: DeclareConst.$type,
+            properties: {
+                name: {
+                    name: DeclareConst.name
+                },
+                sort: {
+                    name: DeclareConst.sort
+                }
+            },
+            superTypes: [Command.$type, FunctionSymbol.$type]
+        },
+        DeclareDatatype: {
+            name: DeclareDatatype.$type,
+            properties: {
+                datatype: {
+                    name: DeclareDatatype.datatype
+                },
+                name: {
+                    name: DeclareDatatype.name
+                },
+                subterm: {
+                    name: DeclareDatatype.subterm
+                }
+            },
+            superTypes: [Command.$type, SortSymbol.$type]
+        },
+        DeclareDatatypes: {
+            name: DeclareDatatypes.$type,
+            properties: {
+                datatypes: {
+                    name: DeclareDatatypes.datatypes,
+                    defaultValue: []
+                },
+                legacy: {
+                    name: DeclareDatatypes.legacy,
+                    defaultValue: false
+                },
+                legacyDatatypes: {
+                    name: DeclareDatatypes.legacyDatatypes,
                     defaultValue: []
                 },
                 parameters: {
-                    name: DataTypeDec.parameters,
+                    name: DeclareDatatypes.parameters,
                     defaultValue: []
                 },
-                simpleConstructors: {
-                    name: DataTypeDec.simpleConstructors,
+                sorts: {
+                    name: DeclareDatatypes.sorts,
                     defaultValue: []
                 }
             },
-            superTypes: [CommonDataTypeDec.$type, NamedSort.$type]
+            superTypes: [Command.$type]
         },
-        DataTypeDecZ3: {
-            name: DataTypeDecZ3.$type,
+        DeclareFun: {
+            name: DeclareFun.$type,
             properties: {
-                constructorDecs: {
-                    name: DataTypeDecZ3.constructorDecs
+                name: {
+                    name: DeclareFun.name
+                },
+                parameters: {
+                    name: DeclareFun.parameters,
+                    defaultValue: []
+                },
+                sort: {
+                    name: DeclareFun.sort
+                }
+            },
+            superTypes: [Command.$type, FunctionSymbol.$type]
+        },
+        DeclareRel: {
+            name: DeclareRel.$type,
+            properties: {
+                attributes: {
+                    name: DeclareRel.attributes,
+                    defaultValue: []
                 },
                 name: {
-                    name: DataTypeDecZ3.name
+                    name: DeclareRel.name
+                },
+                parameters: {
+                    name: DeclareRel.parameters,
+                    defaultValue: []
                 }
             },
-            superTypes: [CommonDataTypeDec.$type, NamedSort.$type]
+            superTypes: [Command.$type, FunctionSymbol.$type]
+        },
+        DeclareSort: {
+            name: DeclareSort.$type,
+            properties: {
+                arity: {
+                    name: DeclareSort.arity
+                },
+                name: {
+                    name: DeclareSort.name
+                }
+            },
+            superTypes: [Command.$type, SortSymbol.$type]
+        },
+        DeclareSortParameter: {
+            name: DeclareSortParameter.$type,
+            properties: {
+                name: {
+                    name: DeclareSortParameter.name
+                }
+            },
+            superTypes: [Command.$type, SortSymbol.$type]
+        },
+        DeclareTypeVar: {
+            name: DeclareTypeVar.$type,
+            properties: {
+                name: {
+                    name: DeclareTypeVar.name
+                }
+            },
+            superTypes: [Command.$type, SortSymbol.$type]
+        },
+        DeclareVar: {
+            name: DeclareVar.$type,
+            properties: {
+                name: {
+                    name: DeclareVar.name
+                },
+                sort: {
+                    name: DeclareVar.sort
+                }
+            },
+            superTypes: [Command.$type, FunctionSymbol.$type]
+        },
+        DefineConst: {
+            name: DefineConst.$type,
+            properties: {
+                name: {
+                    name: DefineConst.name
+                },
+                sort: {
+                    name: DefineConst.sort
+                },
+                value: {
+                    name: DefineConst.value
+                }
+            },
+            superTypes: [Command.$type, FunctionSymbol.$type]
+        },
+        DefineFun: {
+            name: DefineFun.$type,
+            properties: {
+                definition: {
+                    name: DefineFun.definition
+                },
+                kind: {
+                    name: DefineFun.kind
+                }
+            },
+            superTypes: [Command.$type]
+        },
+        DefineFunsRec: {
+            name: DefineFunsRec.$type,
+            properties: {
+                bodies: {
+                    name: DefineFunsRec.bodies,
+                    defaultValue: []
+                },
+                declarations: {
+                    name: DefineFunsRec.declarations,
+                    defaultValue: []
+                }
+            },
+            superTypes: [Command.$type]
+        },
+        DefineSort: {
+            name: DefineSort.$type,
+            properties: {
+                name: {
+                    name: DefineSort.name
+                },
+                parameters: {
+                    name: DefineSort.parameters,
+                    defaultValue: []
+                },
+                sort: {
+                    name: DefineSort.sort
+                }
+            },
+            superTypes: [Command.$type, SortSymbol.$type]
+        },
+        Echo: {
+            name: Echo.$type,
+            properties: {
+                text: {
+                    name: Echo.text
+                }
+            },
+            superTypes: [Command.$type]
+        },
+        FixedpointRule: {
+            name: FixedpointRule.$type,
+            properties: {
+                ruleName: {
+                    name: FixedpointRule.ruleName
+                },
+                term: {
+                    name: FixedpointRule.term
+                }
+            },
+            superTypes: [Command.$type]
         },
         FunctionDec: {
             name: FunctionDec.$type,
@@ -1840,351 +2079,350 @@ export class SmtAstReflection extends langium.AbstractAstReflection {
                 name: {
                     name: FunctionDec.name
                 },
-                returnSort: {
-                    name: FunctionDec.returnSort
-                },
-                vars: {
-                    name: FunctionDec.vars,
+                parameters: {
+                    name: FunctionDec.parameters,
                     defaultValue: []
+                },
+                sort: {
+                    name: FunctionDec.sort
                 }
             },
-            superTypes: [NamedElement.$type]
+            superTypes: [FunctionSymbol.$type]
         },
         FunctionDef: {
             name: FunctionDef.$type,
             properties: {
-                arity: {
-                    name: FunctionDef.arity
-                },
-                attribute: {
-                    name: FunctionDef.attribute
-                },
-                basicCommand: {
-                    name: FunctionDef.basicCommand
-                },
                 body: {
                     name: FunctionDef.body
-                },
-                commandType: {
-                    name: FunctionDef.commandType
-                },
-                infoFlag: {
-                    name: FunctionDef.infoFlag
                 },
                 name: {
                     name: FunctionDef.name
                 },
-                option: {
-                    name: FunctionDef.option
-                },
-                options: {
-                    name: FunctionDef.options
-                },
-                returnSort: {
-                    name: FunctionDef.returnSort
-                },
-                sortedVars: {
-                    name: FunctionDef.sortedVars,
+                parameters: {
+                    name: FunctionDef.parameters,
                     defaultValue: []
                 },
-                symbol: {
-                    name: FunctionDef.symbol
-                },
-                term: {
-                    name: FunctionDef.term
+                sort: {
+                    name: FunctionDef.sort
                 }
             },
-            superTypes: [CmdDefFun.$type, NamedElement.$type]
+            superTypes: [FunctionSymbol.$type]
         },
-        FunctionDefRec: {
-            name: FunctionDefRec.$type,
+        FunctionSymbol: {
+            name: FunctionSymbol.$type,
             properties: {
-                body: {
-                    name: FunctionDefRec.body
-                },
-                name: {
-                    name: FunctionDefRec.name
-                },
-                returnSort: {
-                    name: FunctionDefRec.returnSort
-                },
-                sortedVars: {
-                    name: FunctionDefRec.sortedVars,
-                    defaultValue: []
-                }
             },
             superTypes: []
+        },
+        GenericCommand: {
+            name: GenericCommand.$type,
+            properties: {
+                arguments: {
+                    name: GenericCommand.arguments,
+                    defaultValue: []
+                },
+                name: {
+                    name: GenericCommand.name
+                }
+            },
+            superTypes: [Command.$type]
+        },
+        GetConsequences: {
+            name: GetConsequences.$type,
+            properties: {
+                assumptions: {
+                    name: GetConsequences.assumptions,
+                    defaultValue: []
+                },
+                variables: {
+                    name: GetConsequences.variables,
+                    defaultValue: []
+                }
+            },
+            superTypes: [Command.$type]
+        },
+        GetInfo: {
+            name: GetInfo.$type,
+            properties: {
+                flag: {
+                    name: GetInfo.flag
+                }
+            },
+            superTypes: [Command.$type]
+        },
+        GetOption: {
+            name: GetOption.$type,
+            properties: {
+                option: {
+                    name: GetOption.option
+                }
+            },
+            superTypes: [Command.$type]
+        },
+        GetValue: {
+            name: GetValue.$type,
+            properties: {
+                terms: {
+                    name: GetValue.terms,
+                    defaultValue: []
+                }
+            },
+            superTypes: [Command.$type]
+        },
+        HexadecimalConstant: {
+            name: HexadecimalConstant.$type,
+            properties: {
+                value: {
+                    name: HexadecimalConstant.value
+                }
+            },
+            superTypes: [SpecConstant.$type, Term.$type]
+        },
+        Identifier: {
+            name: Identifier.$type,
+            properties: {
+            },
+            superTypes: [QualIdentifier.$type]
         },
         Index: {
             name: Index.$type,
             properties: {
-                num: {
-                    name: Index.num
+            },
+            superTypes: []
+        },
+        IndexedIdentifier: {
+            name: IndexedIdentifier.$type,
+            properties: {
+                indices: {
+                    name: IndexedIdentifier.indices,
+                    defaultValue: []
                 },
                 symbol: {
-                    name: Index.symbol
+                    name: IndexedIdentifier.symbol,
+                    referenceType: FunctionSymbol.$type
                 }
             },
-            superTypes: []
+            superTypes: [Identifier.$type, Term.$type]
         },
-        InfoFlag: {
-            name: InfoFlag.$type,
+        IndexedSort: {
+            name: IndexedSort.$type,
             properties: {
-            },
-            superTypes: []
-        },
-        Keyword: {
-            name: Keyword.$type,
-            properties: {
+                indices: {
+                    name: IndexedSort.indices,
+                    defaultValue: []
+                },
                 symbol: {
-                    name: Keyword.symbol
+                    name: IndexedSort.symbol,
+                    referenceType: SortSymbol.$type
                 }
             },
-            superTypes: [InfoFlag.$type]
+            superTypes: [SortIdentifier.$type]
         },
-        Model: {
-            name: Model.$type,
+        LambdaTerm: {
+            name: LambdaTerm.$type,
             properties: {
-                commands: {
-                    name: Model.commands,
+                body: {
+                    name: LambdaTerm.body
+                },
+                variables: {
+                    name: LambdaTerm.variables,
                     defaultValue: []
                 }
             },
+            superTypes: [Term.$type]
+        },
+        LegacyDatatypeDec: {
+            name: LegacyDatatypeDec.$type,
+            properties: {
+                constructors: {
+                    name: LegacyDatatypeDec.constructors,
+                    defaultValue: []
+                },
+                name: {
+                    name: LegacyDatatypeDec.name
+                }
+            },
+            superTypes: [SortSymbol.$type]
+        },
+        LetTerm: {
+            name: LetTerm.$type,
+            properties: {
+                bindings: {
+                    name: LetTerm.bindings,
+                    defaultValue: []
+                },
+                body: {
+                    name: LetTerm.body
+                }
+            },
+            superTypes: [Term.$type]
+        },
+        ListIndex: {
+            name: ListIndex.$type,
+            properties: {
+                items: {
+                    name: ListIndex.items,
+                    defaultValue: []
+                }
+            },
+            superTypes: [Index.$type]
+        },
+        MatchCase: {
+            name: MatchCase.$type,
+            properties: {
+                body: {
+                    name: MatchCase.body
+                },
+                pattern: {
+                    name: MatchCase.pattern
+                }
+            },
             superTypes: []
+        },
+        MatchTerm: {
+            name: MatchTerm.$type,
+            properties: {
+                cases: {
+                    name: MatchTerm.cases,
+                    defaultValue: []
+                },
+                term: {
+                    name: MatchTerm.term
+                }
+            },
+            superTypes: [Term.$type]
         },
         NamedAttribute: {
             name: NamedAttribute.$type,
             properties: {
-                keyWord: {
-                    name: NamedAttribute.keyWord
-                },
                 name: {
                     name: NamedAttribute.name
-                },
-                value: {
-                    name: NamedAttribute.value
                 }
             },
-            superTypes: [Attribute.$type, NamedElement.$type]
+            superTypes: [FunctionSymbol.$type, TermAttribute.$type]
         },
-        NamedDataTypeDec: {
-            name: NamedDataTypeDec.$type,
+        NumeralConstant: {
+            name: NumeralConstant.$type,
             properties: {
-                name: {
-                    name: NamedDataTypeDec.name
-                },
-                simpleConstructors: {
-                    name: NamedDataTypeDec.simpleConstructors,
+                value: {
+                    name: NumeralConstant.value
+                }
+            },
+            superTypes: [SpecConstant.$type, Term.$type]
+        },
+        NumeralIndex: {
+            name: NumeralIndex.$type,
+            properties: {
+                value: {
+                    name: NumeralIndex.value
+                }
+            },
+            superTypes: [Index.$type]
+        },
+        Objective: {
+            name: Objective.$type,
+            properties: {
+                attributes: {
+                    name: Objective.attributes,
                     defaultValue: []
-                }
-            },
-            superTypes: [CommonDataTypeDec.$type, NamedSort.$type]
-        },
-        NamedElement: {
-            name: NamedElement.$type,
-            properties: {
-            },
-            superTypes: []
-        },
-        NamedSort: {
-            name: NamedSort.$type,
-            properties: {
-            },
-            superTypes: []
-        },
-        Option: {
-            name: Option.$type,
-            properties: {
-            },
-            superTypes: []
-        },
-        OptionKeyword: {
-            name: OptionKeyword.$type,
-            properties: {
-                option: {
-                    name: OptionKeyword.option
                 },
-                value: {
-                    name: OptionKeyword.value
+                direction: {
+                    name: Objective.direction
+                },
+                term: {
+                    name: Objective.term
                 }
             },
-            superTypes: [Option.$type]
+            superTypes: [Command.$type]
+        },
+        ParametricSort: {
+            name: ParametricSort.$type,
+            properties: {
+                arguments: {
+                    name: ParametricSort.arguments,
+                    defaultValue: []
+                },
+                identifier: {
+                    name: ParametricSort.identifier
+                }
+            },
+            superTypes: [Sort.$type]
         },
         Pattern: {
             name: Pattern.$type,
             properties: {
-                symbol: {
-                    name: Pattern.symbol
-                },
-                symbols: {
-                    name: Pattern.symbols,
-                    defaultValue: []
-                }
             },
             superTypes: []
         },
         PatternAttribute: {
             name: PatternAttribute.$type,
             properties: {
-                term: {
-                    name: PatternAttribute.term,
-                    defaultValue: []
-                }
-            },
-            superTypes: []
-        },
-        PatternedTerm: {
-            name: PatternedTerm.$type,
-            properties: {
-                bodyterm: {
-                    name: PatternedTerm.bodyterm
+                key: {
+                    name: PatternAttribute.key
                 },
-                patternAttribute: {
-                    name: PatternedTerm.patternAttribute,
+                terms: {
+                    name: PatternAttribute.terms,
                     defaultValue: []
                 }
             },
-            superTypes: []
+            superTypes: [TermAttribute.$type]
         },
-        PreDefinedSort: {
-            name: PreDefinedSort.$type,
+        PatternVariable: {
+            name: PatternVariable.$type,
             properties: {
-                ID: {
-                    name: PreDefinedSort.ID
+                name: {
+                    name: PatternVariable.name
                 }
             },
-            superTypes: []
+            superTypes: [FunctionSymbol.$type, Pattern.$type]
+        },
+        Pop: {
+            name: Pop.$type,
+            properties: {
+                levels: {
+                    name: Pop.levels
+                }
+            },
+            superTypes: [Command.$type]
+        },
+        Push: {
+            name: Push.$type,
+            properties: {
+                levels: {
+                    name: Push.levels
+                }
+            },
+            superTypes: [Command.$type]
         },
         QualIdentifier: {
             name: QualIdentifier.$type,
             properties: {
-                args: {
-                    name: QualIdentifier.args,
-                    defaultValue: []
-                },
-                array: {
-                    name: QualIdentifier.array
-                },
-                attribute: {
-                    name: QualIdentifier.attribute,
-                    defaultValue: []
-                },
-                body: {
-                    name: QualIdentifier.body,
-                    defaultValue: []
-                },
-                boolean: {
-                    name: QualIdentifier.boolean
-                },
-                condition: {
-                    name: QualIdentifier.condition,
-                    defaultValue: []
-                },
-                ID: {
-                    name: QualIdentifier.ID,
-                    referenceType: NamedElement.$type
-                },
-                index: {
-                    name: QualIdentifier.index
-                },
-                listKey: {
-                    name: QualIdentifier.listKey
-                },
-                operands: {
-                    name: QualIdentifier.operands,
-                    defaultValue: []
-                },
-                qualId: {
-                    name: QualIdentifier.qualId
+            },
+            superTypes: []
+        },
+        QualifiedIdentifier: {
+            name: QualifiedIdentifier.$type,
+            properties: {
+                identifier: {
+                    name: QualifiedIdentifier.identifier
                 },
                 sort: {
-                    name: QualIdentifier.sort
-                },
-                statement: {
-                    name: QualIdentifier.statement,
-                    defaultValue: []
-                },
-                term: {
-                    name: QualIdentifier.term
-                },
-                terms: {
-                    name: QualIdentifier.terms,
-                    defaultValue: []
-                },
-                value: {
-                    name: QualIdentifier.value
-                },
-                varBinding: {
-                    name: QualIdentifier.varBinding,
-                    defaultValue: []
+                    name: QualifiedIdentifier.sort
                 }
             },
-            superTypes: [Term.$type]
+            superTypes: [QualIdentifier.$type, Term.$type]
         },
         QuantifiedTerm: {
             name: QuantifiedTerm.$type,
             properties: {
-                args: {
-                    name: QuantifiedTerm.args,
-                    defaultValue: []
-                },
-                array: {
-                    name: QuantifiedTerm.array
-                },
-                attribute: {
-                    name: QuantifiedTerm.attribute,
-                    defaultValue: []
-                },
                 body: {
-                    name: QuantifiedTerm.body,
-                    defaultValue: []
+                    name: QuantifiedTerm.body
                 },
-                boolean: {
-                    name: QuantifiedTerm.boolean
+                quantifier: {
+                    name: QuantifiedTerm.quantifier
                 },
-                condition: {
-                    name: QuantifiedTerm.condition,
-                    defaultValue: []
-                },
-                index: {
-                    name: QuantifiedTerm.index
-                },
-                innerTerm: {
-                    name: QuantifiedTerm.innerTerm
-                },
-                listKey: {
-                    name: QuantifiedTerm.listKey
-                },
-                operands: {
-                    name: QuantifiedTerm.operands,
-                    defaultValue: []
-                },
-                qualId: {
-                    name: QuantifiedTerm.qualId
-                },
-                sort: {
-                    name: QuantifiedTerm.sort
-                },
-                sortedVar: {
-                    name: QuantifiedTerm.sortedVar,
-                    defaultValue: []
-                },
-                statement: {
-                    name: QuantifiedTerm.statement,
-                    defaultValue: []
-                },
-                term: {
-                    name: QuantifiedTerm.term
-                },
-                terms: {
-                    name: QuantifiedTerm.terms,
-                    defaultValue: []
-                },
-                value: {
-                    name: QuantifiedTerm.value
-                },
-                varBinding: {
-                    name: QuantifiedTerm.varBinding,
+                variables: {
+                    name: QuantifiedTerm.variables,
                     defaultValue: []
                 }
             },
@@ -2193,18 +2431,52 @@ export class SmtAstReflection extends langium.AbstractAstReflection {
         SExpr: {
             name: SExpr.$type,
             properties: {
-                const: {
-                    name: SExpr.const
-                },
-                exprs: {
-                    name: SExpr.exprs,
+            },
+            superTypes: []
+        },
+        SExprConstant: {
+            name: SExprConstant.$type,
+            properties: {
+                value: {
+                    name: SExprConstant.value
+                }
+            },
+            superTypes: [AttributeValue.$type, SExpr.$type]
+        },
+        SExprKeyword: {
+            name: SExprKeyword.$type,
+            properties: {
+                value: {
+                    name: SExprKeyword.value
+                }
+            },
+            superTypes: [SExpr.$type]
+        },
+        SExprList: {
+            name: SExprList.$type,
+            properties: {
+                items: {
+                    name: SExprList.items,
                     defaultValue: []
-                },
-                keyWord: {
-                    name: SExpr.keyWord
-                },
-                symbol: {
-                    name: SExpr.symbol
+                }
+            },
+            superTypes: [AttributeValue.$type, SExpr.$type]
+        },
+        SExprSymbol: {
+            name: SExprSymbol.$type,
+            properties: {
+                value: {
+                    name: SExprSymbol.value
+                }
+            },
+            superTypes: [AttributeValue.$type, SExpr.$type]
+        },
+        Script: {
+            name: Script.$type,
+            properties: {
+                commands: {
+                    name: Script.commands,
+                    defaultValue: []
                 }
             },
             superTypes: []
@@ -2212,9 +2484,6 @@ export class SmtAstReflection extends langium.AbstractAstReflection {
         SelectorDec: {
             name: SelectorDec.$type,
             properties: {
-                listKey: {
-                    name: SelectorDec.listKey
-                },
                 name: {
                     name: SelectorDec.name
                 },
@@ -2222,96 +2491,114 @@ export class SmtAstReflection extends langium.AbstractAstReflection {
                     name: SelectorDec.sort
                 }
             },
-            superTypes: []
+            superTypes: [FunctionSymbol.$type]
         },
-        SelectorDecZ3: {
-            name: SelectorDecZ3.$type,
+        SetInfo: {
+            name: SetInfo.$type,
             properties: {
-                name: {
-                    name: SelectorDecZ3.name
+                attribute: {
+                    name: SetInfo.attribute
+                }
+            },
+            superTypes: [Command.$type]
+        },
+        SetInitialValue: {
+            name: SetInitialValue.$type,
+            properties: {
+                value: {
+                    name: SetInitialValue.value
                 },
-                sort: {
-                    name: SelectorDecZ3.sort,
-                    defaultValue: []
+                variable: {
+                    name: SetInitialValue.variable
                 }
             },
-            superTypes: []
+            superTypes: [Command.$type]
         },
-        SimpleConstructor: {
-            name: SimpleConstructor.$type,
+        SetLogic: {
+            name: SetLogic.$type,
+            properties: {
+                logic: {
+                    name: SetLogic.logic
+                }
+            },
+            superTypes: [Command.$type]
+        },
+        SetOption: {
+            name: SetOption.$type,
+            properties: {
+                attribute: {
+                    name: SetOption.attribute
+                }
+            },
+            superTypes: [Command.$type]
+        },
+        SimpleCommand: {
+            name: SimpleCommand.$type,
             properties: {
                 name: {
-                    name: SimpleConstructor.name
+                    name: SimpleCommand.name
                 }
             },
-            superTypes: [NamedElement.$type]
+            superTypes: [Command.$type]
+        },
+        SimpleIdentifier: {
+            name: SimpleIdentifier.$type,
+            properties: {
+                symbol: {
+                    name: SimpleIdentifier.symbol,
+                    referenceType: FunctionSymbol.$type
+                }
+            },
+            superTypes: [Identifier.$type, Term.$type]
+        },
+        SimpleSort: {
+            name: SimpleSort.$type,
+            properties: {
+                symbol: {
+                    name: SimpleSort.symbol,
+                    referenceType: SortSymbol.$type
+                }
+            },
+            superTypes: [SortIdentifier.$type]
         },
         Sort: {
             name: Sort.$type,
             properties: {
-                identifier: {
-                    name: Sort.identifier
-                },
-                sorts: {
-                    name: Sort.sorts,
-                    defaultValue: []
-                }
             },
             superTypes: []
         },
         SortDec: {
             name: SortDec.$type,
             properties: {
+                arity: {
+                    name: SortDec.arity
+                },
                 name: {
                     name: SortDec.name
-                },
-                num: {
-                    name: SortDec.num
                 }
             },
-            superTypes: [NamedSort.$type]
-        },
-        SortDecZ3: {
-            name: SortDecZ3.$type,
-            properties: {
-                symbols: {
-                    name: SortDecZ3.symbols,
-                    defaultValue: []
-                }
-            },
-            superTypes: [NamedSort.$type]
+            superTypes: [SortSymbol.$type]
         },
         SortIdentifier: {
             name: SortIdentifier.$type,
             properties: {
-                ID: {
-                    name: SortIdentifier.ID,
-                    referenceType: NamedSort.$type
-                },
-                indices: {
-                    name: SortIdentifier.indices,
-                    defaultValue: []
-                },
-                name: {
-                    name: SortIdentifier.name
-                },
-                size: {
-                    name: SortIdentifier.size
-                },
-                sort: {
-                    name: SortIdentifier.sort
-                }
             },
-            superTypes: []
+            superTypes: [Sort.$type]
         },
-        SortedParameter: {
-            name: SortedParameter.$type,
+        SortParameter: {
+            name: SortParameter.$type,
             properties: {
                 name: {
-                    name: SortedParameter.name
+                    name: SortParameter.name
                 }
             },
-            superTypes: [NamedSort.$type]
+            superTypes: [SortSymbol.$type]
+        },
+        SortSymbol: {
+            name: SortSymbol.$type,
+            properties: {
+            },
+            superTypes: []
         },
         SortedVar: {
             name: SortedVar.$type,
@@ -2323,103 +2610,72 @@ export class SmtAstReflection extends langium.AbstractAstReflection {
                     name: SortedVar.sort
                 }
             },
-            superTypes: [NamedElement.$type]
+            superTypes: [FunctionSymbol.$type]
+        },
+        SpecConstant: {
+            name: SpecConstant.$type,
+            properties: {
+            },
+            superTypes: []
+        },
+        StringConstant: {
+            name: StringConstant.$type,
+            properties: {
+                value: {
+                    name: StringConstant.value
+                }
+            },
+            superTypes: [SpecConstant.$type, Term.$type]
+        },
+        SymbolIndex: {
+            name: SymbolIndex.$type,
+            properties: {
+                value: {
+                    name: SymbolIndex.value
+                }
+            },
+            superTypes: [Index.$type]
+        },
+        TacticCommand: {
+            name: TacticCommand.$type,
+            properties: {
+                attributes: {
+                    name: TacticCommand.attributes,
+                    defaultValue: []
+                },
+                name: {
+                    name: TacticCommand.name
+                },
+                tactic: {
+                    name: TacticCommand.tactic
+                }
+            },
+            superTypes: [Command.$type]
         },
         Term: {
             name: Term.$type,
             properties: {
-                args: {
-                    name: Term.args,
-                    defaultValue: []
-                },
-                array: {
-                    name: Term.array
-                },
-                attribute: {
-                    name: Term.attribute,
-                    defaultValue: []
-                },
-                body: {
-                    name: Term.body,
-                    defaultValue: []
-                },
-                boolean: {
-                    name: Term.boolean
-                },
-                condition: {
-                    name: Term.condition,
-                    defaultValue: []
-                },
-                index: {
-                    name: Term.index
-                },
-                listKey: {
-                    name: Term.listKey
-                },
-                operands: {
-                    name: Term.operands,
-                    defaultValue: []
-                },
-                qualId: {
-                    name: Term.qualId
-                },
-                sort: {
-                    name: Term.sort
-                },
-                statement: {
-                    name: Term.statement,
-                    defaultValue: []
-                },
-                term: {
-                    name: Term.term
-                },
-                terms: {
-                    name: Term.terms,
-                    defaultValue: []
-                },
-                value: {
-                    name: Term.value
-                },
-                varBinding: {
-                    name: Term.varBinding,
-                    defaultValue: []
-                }
             },
             superTypes: []
         },
-        UnknownCommand: {
-            name: UnknownCommand.$type,
+        TermAttribute: {
+            name: TermAttribute.$type,
             properties: {
-                arity: {
-                    name: UnknownCommand.arity
-                },
-                attribute: {
-                    name: UnknownCommand.attribute
-                },
-                basicCommand: {
-                    name: UnknownCommand.basicCommand
-                },
-                elements: {
-                    name: UnknownCommand.elements,
+            },
+            superTypes: []
+        },
+        TermCommand: {
+            name: TermCommand.$type,
+            properties: {
+                attributes: {
+                    name: TermCommand.attributes,
                     defaultValue: []
                 },
-                infoFlag: {
-                    name: UnknownCommand.infoFlag
-                },
                 name: {
-                    name: UnknownCommand.name
-                },
-                option: {
-                    name: UnknownCommand.option
-                },
-                options: {
-                    name: UnknownCommand.options
-                },
-                symbol: {
-                    name: UnknownCommand.symbol
+                    name: TermCommand.name
                 },
                 term: {
-                    name: UnknownCommand.term
+                    name: TermCommand.term
                 }
             },
             superTypes: [Command.$type]
@@ -2427,14 +2683,14 @@ export class SmtAstReflection extends langium.AbstractAstReflection {
         VarBinding: {
             name: VarBinding.$type,
             properties: {
-                symbol: {
-                    name: VarBinding.symbol
+                name: {
+                    name: VarBinding.name
                 },
-                term: {
-                    name: VarBinding.term
+                value: {
+                    name: VarBinding.value
                 }
             },
-            superTypes: []
+            superTypes: [FunctionSymbol.$type]
         }
     } as const satisfies langium.AstMetaData
 }

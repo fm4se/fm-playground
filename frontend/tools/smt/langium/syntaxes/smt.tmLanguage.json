@@ -1,196 +1,143 @@
 {
-    "name": "smt",
-    "scopeName": "source.smt",
-    "fileTypes": ["smt2"],
-    "patterns": [
-        {
-            "include": "#command"
-        },
-        {
-            "include": "#reserved"
-        },
-        {
-            "include": "#keyword"
-        },
-        {
-            "include": "#sort"
-        },
-        {
-            "include": "#spec_constant"
-        },
-        {
-            "include": "#symbol"
-        },
-        {
-            "include": "#comment"
-        }
-    ],
-    "repository": {
-        "command": {
-            "patterns": [
-                {
-                    "match": "\\b(apply|assert-not|assert-soft|check-sat-using|dbg-[a-z\\-]+|declare-map|declare-rel|declare-tactic|declare-var|display-dimacs|display|euf-project|eufi|eval|get-consequences|get-interpolant|get-objectives|get-proof-graph|get-user-tactics|help-tactic|help|include|labels|maximize|mbi|mbp|minimize|query|rule|simplify|define-const|model-add|model-del)\\b",
-                    "captures": {
-                        "1": {
-                            "name": "entity.name.tag.smt"
-                        }
-                    }
-                },
-                {
-                    "match": "\\b(block-model-values|block-model|declare-codatatypes|declare-codatatype|declare-heap|declare-pool|get-abduct-next|get-abduct|get-difficulty|get-interpol-next|get-interpol|get-learned-literals|get-qe-disjunct|get-qe)\\b",
-                    "captures": {
-                        "1": {
-                            "name": "entity.name.tag.smt"
-                        }
-                    }
-                },
-                {
-                    "match": "\\b(assume|constraint|check-synth-next|check-synth|declare-var|inv-constraint|set-feature|synth-fun|synth-inv)\\b",
-                    "captures": {
-                        "1": {
-                            "name": "entity.name.tag.smt"
-                        }
-                    }
-                },
-                {
-                    "match": "\\b(assert|check-sat-assuming|check-sat|declare-const|declare-datatypes|declare-datatype|declare-fun|declare-sort|define-fun-rec|define-fun|define-funs-rec|define-sort|echo|exit|get-assertions|get-assignment|get-info|get-model|get-option|get-proof|get-unsat-assumptions|get-unsat-core|get-value|pop|push|reset-assertions|reset|set-info|set-logic|set-option)\\b",
-                    "captures": {
-                        "1": {
-                            "name": "keyword.other.smt"
-                        }
-                    }
-                }
-            ]
-        },
-        "reserved": {
-            "match": "\\b(_|!|as|exists|forall|let|match|par)\\b",
-            "captures": {
-                "1": {
-                    "name": "keyword.control.smt"
-                }
-            }
-        },
-        "keyword": {
-            "match": ":\\b([a-zA-Z~!@$%^&*_\\-+=<>.?/]|[a-zA-Z~!@$%^&*_\\-+=<>.?/][a-zA-Z0-9~!@$%^&*_\\-+=<>.?/]+)\\b",
-            "captures": {
-                "1": {
-                    "name": "keyword.control.smt"
-                }
-            }
-        },
-        "sort": {
-            "patterns": [
-                {
-                    "match": "\\b([A-Z][a-zA-Z~!@$%^&*_\\-+=<>.?/]|[A-Z][a-zA-Z0-9~!@$%^&*_\\-+=<>.?/]*)\\b",
-                    "captures": {
-                        "1": {
-                            "name": "support.type.smt"
-                        }
-                    }
-                },
-                {
-                    "match": "\\|\\b([A-Z][a-zA-Z~!@$%^&*_\\-+=<>.?/]|[A-Z][a-zA-Z0-9~!@$%^&*_\\-+=<>.?/]*)\\b\\|",
-                    "captures": {
-                        "1": {
-                            "name": "support.type.smt"
-                        }
-                    }
-                }
-            ]
-        },
-        "spec_constant": {
-            "patterns": [
-                {
-                    "include": "#decimal"
-                },
-                {
-                    "include": "#numeral"
-                },
-                {
-                    "include": "#hexadecimal"
-                },
-                {
-                    "include": "#binary"
-                },
-                {
-                    "include": "#string"
-                },
-                {
-                    "include": "#b_value"
-                }
-            ]
-        },
-        "symbol": {
-            "patterns": [
-                {
-                    "match": "\\b([a-zA-Z~!@$%^&*_\\-+=<>.?/]|[a-zA-Z~!@$%^&*_\\-+=<>.?/][a-zA-Z0-9~!@$%^&*_\\-+=<>.?/]+)\\b",
-                    "captures": {
-                        "1": {
-                            "name": "variable.other.smt"
-                        }
-                    }
-                },
-                {
-                    "begin": "\\|",
-                    "end": "\\|",
-                    "contentName": "variable.other.smt"
-                }
-            ]
-        },
-        "comment": {
-            "match": ";.*",
-            "name": "comment.smt"
-        },
-        "decimal": {
-            "match": "\\b(\\d+\\.\\d+)\\b",
-            "captures": {
-                "1": {
-                    "name": "constant.numeric.smt"
-                }
-            }
-        },
-        "numeral": {
-            "match": "\\b(\\d+)\\b",
-            "captures": {
-                "1": {
-                    "name": "constant.numeric.smt"
-                }
-            }
-        },
-        "hexadecimal": {
-            "match": "\\s(#x\\h+)\\b",
-            "captures": {
-                "1": {
-                    "name": "constant.numeric.smt"
-                }
-            }
-        },
-        "binary": {
-            "match": "\\s(#b[01]+)\\b",
-            "captures": {
-                "1": {
-                    "name": "constant.numeric.smt"
-                }
-            }
-        },
-        "string": {
-            "begin": "\"",
-            "end": "\"",
-            "name": "string.quoted.double.smt",
-            "patterns": [
-                {
-                    "match": "\"\"",
-                    "name": "constant.character.escape.smt"
-                }
-            ]
-        },
-        "b_value": {
-            "match": "\\b(true|false)\\b",
-            "captures": {
-                "1": {
-                    "name": "constant.language.smt"
-                }
-            }
-        }
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "SMT-LIB",
+  "scopeName": "source.smt",
+  "fileTypes": [
+    "smt2"
+  ],
+  "comment": "Hand-written TextMate grammar for SMT-LIB 2.7 with Z3 extensions. Semantic highlighting from the language server refines symbols (functions, variables, sorts).",
+  "patterns": [
+    {
+      "include": "#expression"
     }
+  ],
+  "repository": {
+    "expression": {
+      "patterns": [
+        {
+          "include": "#comments"
+        },
+        {
+          "include": "#strings"
+        },
+        {
+          "include": "#quoted-symbols"
+        },
+        {
+          "include": "#numbers"
+        },
+        {
+          "include": "#commands"
+        },
+        {
+          "include": "#binders"
+        },
+        {
+          "include": "#attributes"
+        },
+        {
+          "include": "#sorts"
+        },
+        {
+          "include": "#constants"
+        },
+        {
+          "include": "#parens"
+        }
+      ]
+    },
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.semicolon.smt",
+          "match": ";.*$"
+        },
+        {
+          "name": "comment.block.smt",
+          "begin": "#\\|",
+          "end": "\\|#"
+        }
+      ]
+    },
+    "strings": {
+      "name": "string.quoted.double.smt",
+      "begin": "\"",
+      "end": "\"(?!\")",
+      "patterns": [
+        {
+          "name": "constant.character.escape.smt",
+          "match": "\"\"|\\\\u\\{[0-9a-fA-F]{1,5}\\}|\\\\u[0-9a-fA-F]{4}"
+        }
+      ]
+    },
+    "quoted-symbols": {
+      "name": "variable.other.quoted.smt",
+      "begin": "\\|",
+      "end": "\\|"
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.hex.smt",
+          "match": "#x[0-9a-fA-F]+"
+        },
+        {
+          "name": "constant.numeric.binary.smt",
+          "match": "#b[01]+"
+        },
+        {
+          "name": "constant.numeric.decimal.smt",
+          "match": "(?<![\\w~!@$%^&*_\\-+=<>.?/,])-?[0-9]+\\.[0-9]*(?=[\\s()\\\";|]|$)"
+        },
+        {
+          "name": "constant.numeric.integer.smt",
+          "match": "(?<![\\w~!@$%^&*_\\-+=<>.?/,])-?[0-9]+(?=[\\s()\\\";|]|$)"
+        }
+      ]
+    },
+    "commands": {
+      "patterns": [
+        {
+          "match": "(?<=\\()\\s*(assert|check-sat|check-sat-assuming|declare-const|declare-datatype|declare-datatypes|declare-fun|declare-sort|declare-sort-parameter|define-const|define-fun|define-fun-rec|define-funs-rec|define-sort|echo|exit|get-assertions|get-assignment|get-info|get-model|get-option|get-proof|get-unsat-assumptions|get-unsat-core|get-value|pop|push|reset|reset-assertions|set-info|set-logic|set-option)(?=[\\s()\\\";|]|$)",
+          "captures": {
+            "1": {
+              "name": "keyword.control.command.smt"
+            }
+          }
+        },
+        {
+          "match": "(?<=\\()\\s*(assert-soft|maximize|minimize|get-objectives|eval|simplify|display|check-sat-using|apply|declare-rel|declare-var|rule|query|get-consequences|set-initial-value|declare-type-var|help|include|labels|get-proof-graph|reset-preferences|declare-tactic|declare-map)(?=[\\s()\\\";|]|$)",
+          "captures": {
+            "1": {
+              "name": "keyword.control.command.z3.smt"
+            }
+          }
+        }
+      ]
+    },
+    "binders": {
+      "match": "(?<=\\()\\s*(let|forall|exists|lambda|match|par|as|_|!)(?=[\\s()\\\";|]|$)",
+      "captures": {
+        "1": {
+          "name": "keyword.other.binder.smt"
+        }
+      }
+    },
+    "attributes": {
+      "name": "entity.other.attribute-name.smt",
+      "match": ":[a-zA-Z0-9~!@$%^&*_\\-+=<>.?/,]+"
+    },
+    "sorts": {
+      "name": "support.type.smt",
+      "match": "(?<![\\w~!@$%^&*_\\-+=<>.?/,])(Bool|Int|Real|String|RegLan|Array|BitVec|FloatingPoint|Float16|Float32|Float64|Float128|RoundingMode|Seq|Set|Unicode)(?=[\\s()\\\";|]|$)"
+    },
+    "constants": {
+      "name": "constant.language.smt",
+      "match": "(?<![\\w~!@$%^&*_\\-+=<>.?/,])(true|false|sat|unsat|unknown|RNE|RNA|RTP|RTN|RTZ)(?=[\\s()\\\";|]|$)"
+    },
+    "parens": {
+      "name": "punctuation.section.parens.smt",
+      "match": "[()]"
+    }
+  }
 }
