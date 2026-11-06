@@ -7,7 +7,7 @@
 - Added type checking for Alloy LSP 
 - Many fixes for SMT-LIB LSP and added type checking, Z3 extensions
 - Added LSP telemetry for Alloy and SMT-LIB 
-
+- Updated Z3 version to 5.3.3
 
 ## v2.19.0[2026-10-28]
 
