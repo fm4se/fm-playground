@@ -17,7 +17,7 @@ uvicorn = "^0.30.5"
 python-dotenv = "^1.0.1"
 redis = "^5.0.8"
 python-redis-cache = "^4.0.1"
-z3-solver = "^4.15.3.0"
+z3-solver = "^5.3.3.0"
 
 
 [build-system]

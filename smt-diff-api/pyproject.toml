@@ -13,7 +13,7 @@ httpx = "^0.28.1"
 requests = "^2.32.5"
 uvicorn = "^0.37.0"
 python-dotenv = "^1.0.1"
-z3-solver = "^4.15.3.0"
+z3-solver = "^5.3.3.0"
 sexpdata = "^1.0.2"
 
 [tool.poetry.group.dev.dependencies]
