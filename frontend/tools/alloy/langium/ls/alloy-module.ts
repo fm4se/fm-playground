@@ -9,14 +9,28 @@ import { AlloyScopeProvider } from './alloy-scope-provider.js';
 import { AlloyWorkspaceManager } from './alloy-workspace-manager.js';
 import { AlloyScopeComputation } from './alloy-scope-computation.js';
 import { AlloyValueConverter } from './alloy-value-converter.js';
+import { AlloyTypeValidator } from './validation/alloy-type-validator.js';
+import { AlloySigModel } from './typing/sig-model.js';
+import { AlloyTypeChecker } from './typing/type-checker.js';
+import { AlloyHoverProvider } from './lsp/alloy-hover-provider.js';
+import { AlloyDocumentSymbolProvider } from './lsp/alloy-document-symbols.js';
+import { AlloySemanticTokenProvider } from './lsp/alloy-semantic-tokens.js';
+import { AlloySignatureHelpProvider } from './lsp/alloy-signature-help.js';
+import { AlloyNodeKindProvider } from './lsp/alloy-node-kind-provider.js';
+import { AlloyCodeActionProvider } from './lsp/alloy-code-actions.js';
 
 /**
  * Declaration of custom services - add your own service classes here.
  */
 export type AlloyAddedServices = {
+    typing: {
+        SigModel: AlloySigModel,
+        TypeChecker: AlloyTypeChecker
+    },
     validation: {
         AlloyUsageValidator: AlloyUsageValidator,
-        AlloyNameValidator: AlloyNameValidator
+        AlloyNameValidator: AlloyNameValidator,
+        AlloyTypeValidator: AlloyTypeValidator
     }
 }
 
@@ -32,9 +46,14 @@ export type AlloyServices = LangiumServices & AlloyAddedServices
  * selected services, while the custom services must be fully specified.
  */
 export const AlloyLanguageModule: Module<AlloyServices, PartialLangiumServices & AlloyAddedServices> = {
+    typing: {
+        SigModel: (services) => new AlloySigModel(services),
+        TypeChecker: (services) => new AlloyTypeChecker(services)
+    },
     validation: {
         AlloyUsageValidator: (services) => new AlloyUsageValidator(services),
-        AlloyNameValidator: (services) => new AlloyNameValidator(services)
+        AlloyNameValidator: (services) => new AlloyNameValidator(services),
+        AlloyTypeValidator: (services) => new AlloyTypeValidator(services)
     },
     parser: {
         ValueConverter: () => new AlloyValueConverter()
@@ -44,7 +63,12 @@ export const AlloyLanguageModule: Module<AlloyServices, PartialLangiumServices &
         ScopeComputation: (services) => new AlloyScopeComputation(services)
     },
     lsp: {
-        CompletionProvider: (services) => new AlloyCompletionProvider(services)
+        CompletionProvider: (services) => new AlloyCompletionProvider(services),
+        HoverProvider: (services) => new AlloyHoverProvider(services),
+        DocumentSymbolProvider: (services) => new AlloyDocumentSymbolProvider(services),
+        SemanticTokenProvider: (services) => new AlloySemanticTokenProvider(services),
+        SignatureHelp: (services) => new AlloySignatureHelpProvider(services),
+        CodeActionProvider: (services) => new AlloyCodeActionProvider(services)
     }
 };
 
@@ -55,6 +79,9 @@ export const AlloyLanguageModule: Module<AlloyServices, PartialLangiumServices &
 export const AlloySharedModule: Module<LangiumSharedServices, PartialLangiumSharedServices> = {
     workspace: {
         WorkspaceManager: (services) => new AlloyWorkspaceManager(services)
+    },
+    lsp: {
+        NodeKindProvider: () => new AlloyNodeKindProvider()
     }
 };
 

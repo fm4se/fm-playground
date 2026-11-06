@@ -67,21 +67,14 @@ export class AlloyScopeProvider extends DefaultScopeProvider {
         if (!model) return EMPTY_SCOPE;
 
         const elements: AstNodeDescription[] = [];
+        const builtins = this.builtinDescriptions(context);
 
-        // Add built-in Alloy 6 keywords and standard library functions that act as types/names
-        const document = AstUtils.getDocument(context.container);
-        if (document) {
-            const builtins = ['steps', 'Int', 'int', 'String', 'totalOrder', 'seq', 'none', 'univ', 'iden', 'disj', 'abs', 'plus', 'minus', 'mul', 'div', 'rem', 'add', 'sub', 'sum', 'max', 'min'];
-            for (const builtin of builtins) {
-                elements.push({
-                    name: builtin,
-                    nameSegment: undefined,
-                    selectionSegment: undefined,
-                    type: 'NamedElement',
-                    documentUri: document.uri,
-                    path: ''
-                } as AstNodeDescription);
-            }
+        // A qualified name (e.g. "ord/next" or "seq/Int") refers to an imported module or a builtin.
+        const qualifier = this.getQualifierSegments(context);
+        if (qualifier && qualifier.length > 0) {
+            elements.push(...this.collectImportedNames(model, context));
+            elements.push(...builtins);
+            return this.createScope(elements);
         }
 
         // Priority 1: Local variables have highest priority and can shadow global names
@@ -91,12 +84,9 @@ export class AlloyScopeProvider extends DefaultScopeProvider {
         // Priority 2: Module parameters (e.g., module myModule[Elem])
         elements.push(...this.collectModuleParameters(model));
 
-    // Priority 3: Imported names from open statements (e.g., util/ordering)
-    elements.push(...this.collectImportedNames(model, context));
-
-        // Priority 4-6: Global declarations within the module
+        // Priority 3: Global declarations within the module; they shadow imported names
         elements.push(...this.collectSigNames(model));        // Signature names
-        elements.push(...this.collectFieldNames(model));      // Field names  
+        elements.push(...this.collectFieldNames(model));      // Field names
         elements.push(...this.collectEnumDeclarations(model)); // Enum type names
         elements.push(...this.collectEnumValues(model));      // Enum value names
         elements.push(...this.collectPredicates(model));      // Predicate names
@@ -104,7 +94,30 @@ export class AlloyScopeProvider extends DefaultScopeProvider {
         elements.push(...this.collectAssertions(model));      // Assertion names
         elements.push(...this.collectMacros(model));          // Macro names
 
+        // Priority 4: Imported names from open statements (e.g., util/ordering)
+        elements.push(...this.collectImportedNames(model, context));
+
+        // Priority 5: Builtin names, which user declarations such as "pred add" may shadow
+        elements.push(...builtins);
+
         return this.createScope(elements);
+    }
+
+    /**
+     * Built-in Alloy names and integer functions that act as types/names. They resolve to the
+     * module root; the type checker recognises them by name.
+     */
+    private builtinDescriptions(context: ReferenceInfo): AstNodeDescription[] {
+        const document = AstUtils.getDocument(context.container);
+        const builtins = ['steps', 'Int', 'int', 'String', 'totalOrder', 'seq', 'none', 'univ', 'iden', 'disj', 'abs', 'plus', 'minus', 'mul', 'div', 'rem', 'add', 'sub', 'sum', 'max', 'min'];
+        return builtins.map(builtin => ({
+            name: builtin,
+            nameSegment: undefined,
+            selectionSegment: undefined,
+            type: 'NamedElement',
+            documentUri: document.uri,
+            path: ''
+        }) as AstNodeDescription);
     }
 
     /**

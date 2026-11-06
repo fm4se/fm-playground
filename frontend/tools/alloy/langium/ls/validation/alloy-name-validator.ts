@@ -2,8 +2,6 @@ import type { ValidationAcceptor, AstNode } from 'langium';
 import type { AlloyModule, SigDecl, ParaDecls, DeclName } from '../generated/ast.js';
 import type { AlloyServices } from '../alloy-module.js';
 
-const SIG_MULTIPLICITIES = new Set(['lone', 'one', 'some']);
-
 export class AlloyNameValidator {
     constructor(services: AlloyServices) {}
 
@@ -95,8 +93,10 @@ export class AlloyNameValidator {
             }
             seen.add(qualifier);
         });
-        if (sig.qualifiers.filter(q => SIG_MULTIPLICITIES.has(q)).length > 1) {
-            accept('error', 'A sig can have at most one multiplicity (lone, one or some).', {
+        // Alloy's message names the first two conflicting multiplicities, in the order lone, one, some.
+        const multiplicities = (['lone', 'one', 'some'] as const).filter(m => sig.qualifiers.includes(m));
+        if (multiplicities.length > 1) {
+            accept('error', `You cannot declare a sig to be both ${multiplicities[0]} and ${multiplicities[1]}.`, {
                 node: sig,
                 property: 'qualifiers'
             });
