@@ -1,5 +1,10 @@
 # Change Log
 
+## v2.21.0[2026-11-16]
+
+- Updated SMT Diff with explanationF
+- Showing SemDiff in the history and clicking on SemDiff opens diff editor
+
 ## v2.20.0[2026-11-06]
 
 - Added language support for nuxmv based on [vscode-nusmv](https://github.com/LiamWalsh98/vscode-nusmv) (limited to nuxmv)
