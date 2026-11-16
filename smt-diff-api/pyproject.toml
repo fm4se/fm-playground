@@ -4,7 +4,15 @@ version = "2.17.0"
 description = "SMT Diff API for FM Playground"
 authors = ["Soaibuzzaman <soaibuzzaman@uni-weimar.de>"]
 license = "MIT"
-package-mode = false
+# The smt-diff library is vendored as bare sources in smt_diff/vendor/smt_diff (it has no
+# pyproject.toml of its own), so it is installed as a package of this project.  To fetch it
+# from its repository instead, drop its entry here, add e.g.
+# smt-diff = {git = "https://github.com/<org>/smt-diff.git", tag = "v0.1.0"}
+# to the dependencies and delete smt_diff/.
+packages = [
+    { include = "smt_diff", from = "smt_diff/vendor" },
+    { include = "smt_diff_api" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.13"
@@ -13,11 +21,7 @@ httpx = "^0.28.1"
 requests = "^2.32.5"
 uvicorn = "^0.37.0"
 python-dotenv = "^1.0.1"
-z3-solver = ">=5.1.0.0,<6.0.0.0"
-# The smt-diff library is vendored for now. To fetch it from its repository instead,
-# replace this line with e.g. {git = "https://github.com/<org>/smt-diff.git", tag = "v0.1.0"}
-# and delete vendor/smt-diff.
-smt-diff = {path = "vendor/smt-diff", develop = true}
+z3-solver = ">=5.1.0.0,<6.0.0.0"  # also the only dependency of the vendored smt_diff
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^9.0.3"

@@ -6,6 +6,7 @@ flask_session/
 **/data/db
 tmp/
 .DS_Store
+vscode-extension/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

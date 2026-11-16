@@ -1777,23 +1777,6 @@ files = [
 ]
 
 [[package]]
-name = "smt-diff"
-version = "0.1.0"
-description = "Semantic diff of SMT-LIB scripts: query-by-query comparison with witnesses, abductive explanations and counterfactuals"
-optional = false
-python-versions = ">=3.13"
-groups = ["main"]
-files = []
-develop = true
-
-[package.dependencies]
-z3-solver = ">=5.1.0.0,<6.0.0.0"
-
-[package.source]
-type = "directory"
-url = "vendor/smt-diff"
-
-[[package]]
 name = "starlette"
 version = "1.6.0"
 description = "The little ASGI library that shines."
@@ -2266,4 +2249,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "7c2f852c804880f9bde3b985871483b8fec22e62c8c25a644a051ac376f43db7"
+content-hash = "4f418aa503ad68bd54326d433137954d451ab2b5d86805a8d911842a50778940"
