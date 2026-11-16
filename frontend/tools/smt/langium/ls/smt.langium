@@ -1,315 +1,416 @@
+/******************************************************************************
+ * SMT-LIB 2.7 script grammar with Z3 extensions.
+ *
+ * Reference: The SMT-LIB Standard, Version 2.7, Appendix B (Concrete Syntax)
+ * and Z3's SMT2 front end (src/parsers/smt2/smt2parser.cpp, smt2scanner.cpp).
+ *
+ * Design notes
+ *  - Theory symbols (and, bvadd, str.++, select, Int, Array, ...) are NOT keywords.
+ *    They are ordinary symbols resolved against the builtin library (see builtins/),
+ *    exactly like user-declared symbols. This keeps the grammar small and lets the
+ *    same symbol be used freely in s-expressions, attributes and tactics.
+ *  - Keywords of this grammar are the reserved words of SMT-LIB (binders and command
+ *    names) plus a few Z3 command names. Z3 command names are not reserved in Z3,
+ *    so they are accepted as symbols as well (see rule SmtSymbol).
+ *  - Function-like and sort-like declarations live in separate namespaces, mirroring
+ *    SMT-LIB where a symbol can be both a sort and a function.
+ ******************************************************************************/
 grammar Smt
 
-type NamedElement = CmdConstDecl | CmdFunDecl | FunctionDef | FunctionDec | SortedVar | SimpleConstructor | ConstructorDec | NamedAttribute;
-type NamedSort = CmdSortDeclZ3 | SortDec | SortDecZ3 | CmdDecDataType | CmdDefSort | SortedParameter | DataTypeDecZ3 | DataTypeDec | NamedDataTypeDec;
+/** Everything a term-level identifier can refer to. */
+type FunctionSymbol =
+      DeclareConst | DeclareFun | DefineConst | FunctionDef | FunctionDec
+    | ConstructorDec | SelectorDec | SortedVar | VarBinding | PatternVariable
+    | NamedAttribute | DeclareRel | DeclareVar;
 
-entry Model:
-    commands+=Command+;
+/** Everything a sort identifier can refer to. */
+type SortSymbol =
+      DeclareSort | DefineSort | DeclareDatatype | SortDec | LegacyDatatypeDec
+    | SortParameter | DeclareSortParameter | DeclareTypeVar;
+
+entry Script:
+    commands+=Command*;
+
+/******************************************************************************
+ * Commands
+ ******************************************************************************/
 
 Command:
-    CmdAssert
-   | PAR_OPEN basicCommand=BasicCommand PAR_CLOSE
-   | CmdCheckSat
-   | CmdConstDecl
-   | CmdDecDataType
-   | CmdDecDataTypes
-   | CmdFunDecl
-   | CmdSortDeclZ3
-   | CmdDefSort
-   | CmdDefFun
-   | CmdDefFunsRec
-   | PAR_OPEN 'echo' STRING PAR_CLOSE
-   | PAR_OPEN 'get-info' infoFlag=InfoFlag PAR_CLOSE
-   | PAR_OPEN 'get-option' options=(OptionKeyword|Keyword) PAR_CLOSE
-   | PAR_OPEN 'get-value' PAR_OPEN term+=Term+ PAR_CLOSE PAR_CLOSE
-   | PAR_OPEN 'pop' NUMERAL* PAR_CLOSE // '*' for Z3
-   | PAR_OPEN 'push' NUMERAL* PAR_CLOSE // '*' for Z3
-   | PAR_OPEN 'set-info' attribute=Attribute PAR_CLOSE
-   | PAR_OPEN 'set-logic' symbol=SmtSymbol PAR_CLOSE
-   | PAR_OPEN 'set-option' option=Option PAR_CLOSE
-   | PAR_OPEN 'declare-sort' name=SmtSymbol arity=NUMERAL PAR_CLOSE
-   | PAR_OPEN 'get-unsat-assumptions' PAR_CLOSE
-    // Z3 Commands
-   | PAR_OPEN 'eval' term+=Term+ PAR_CLOSE 
-   | PAR_OPEN ('maximize' | 'minimize') term=Term PAR_CLOSE
-   | UnknownCommand
-;
+      Assert
+    | CheckSat
+    | CheckSatAssuming
+    | DeclareConst
+    | DeclareDatatype
+    | DeclareDatatypes
+    | DeclareFun
+    | DeclareSort
+    | DeclareSortParameter
+    | DefineConst
+    | DefineFun
+    | DefineFunsRec
+    | DefineSort
+    | Echo
+    | GetInfo
+    | GetOption
+    | GetValue
+    | Push
+    | Pop
+    | SetInfo
+    | SetLogic
+    | SetOption
+    | SimpleCommand
+    // Z3 extensions
+    | TermCommand
+    | FixedpointRule
+    | Objective
+    | TacticCommand
+    | DeclareRel
+    | DeclareVar
+    | GetConsequences
+    | SetInitialValue
+    | DeclareTypeVar
+    | GenericCommand;
 
-UnknownCommand:
-    PAR_OPEN name=SmtSymbol elements+=SExpr* PAR_CLOSE;
+Assert:
+    '(' 'assert' term=Term ')';
 
-CmdCheckSat:
-    PAR_OPEN 'check-sat' PAR_CLOSE
-    | PAR_OPEN 'check-sat-assuming' PAR_OPEN propLiteral+=[NamedElement:SmtSymbol]* PAR_CLOSE PAR_CLOSE //Support Z3, SMT-LIB: PropLiteral
-;
+CheckSat:
+    {infer CheckSat} '(' 'check-sat' ')';
 
-CmdAssert:
-    PAR_OPEN 'assert' term=Term PAR_CLOSE;
+/** SMT-LIB 2.7 accepts arbitrary Boolean terms as assumptions. */
+CheckSatAssuming:
+    '(' 'check-sat-assuming' '(' assumptions+=Term* ')' ')';
 
-BasicCommand returns string:
-    'check-sat' | 'reset' | 'reset-assertions' | 'get-model' | 'exit'
-    | 'get-assertions' | 'get-assignment' | 'get-proof' | 'get-unsat-assumptions'
-    | 'get-unsat-core';
+DeclareConst:
+    '(' 'declare-const' name=SmtSymbol sort=Sort ')';
 
-CmdDefSort:
-    PAR_OPEN commandType='define-sort' name=SmtSymbol PAR_OPEN parameters+=SortedParameter* PAR_CLOSE resultSort=Sort PAR_CLOSE;
+DeclareFun:
+    '(' 'declare-fun' name=SmtSymbol '(' parameters+=Sort* ')' sort=Sort ')';
 
-SortedParameter:
-    name=(SmtSymbol|PreDefinedSort);
+/** `(declare-sort s n)`; Z3 allows omitting the arity (defaults to 0). */
+DeclareSort:
+    '(' 'declare-sort' name=SmtSymbol arity=NUMERAL? ')';
 
-CmdSortDeclZ3:
-    PAR_OPEN commandType='declare-sort' name=SmtSymbol number+=NUMERAL* PAR_CLOSE; // SMT-LIB: '*' for z3
+/** SMT-LIB 2.7 global sort parameter for prenex polymorphism. */
+DeclareSortParameter:
+    '(' 'declare-sort-parameter' name=SmtSymbol ')';
 
-CmdConstDecl:
-    PAR_OPEN commandType='declare-const' name=SmtSymbol sorts+=Sort+ PAR_CLOSE;
+/** SMT-LIB 2.7 / Z3. */
+DefineConst:
+    '(' 'define-const' name=SmtSymbol sort=Sort value=Term ')';
 
-CmdFunDecl:
-    PAR_OPEN commandType='declare-fun' name=SmtSymbol PAR_OPEN paramSorts+=Sort* PAR_CLOSE returnSort=Sort PAR_CLOSE;
-
-CmdDefFun:
-    PAR_OPEN commandType=DefFunCommandName FunctionDef PAR_CLOSE;
-
-DefFunCommandName returns string:
-    'define-fun-rec'|'define-fun';
-
-CmdDefFunsRec:
-    PAR_OPEN commandType='define-funs-rec' PAR_OPEN functionDec+=FunctionDec+ PAR_CLOSE PAR_OPEN term+=Term+ PAR_CLOSE PAR_CLOSE;
-
-CmdDecDataType:
-    PAR_OPEN commandType='declare-datatype' name=SmtSymbol (dataTypeDec=DataTypeDec | dataTypeDec=DataTypeDecZ3) PAR_CLOSE; //Z3 variant
-
-// sortDec is not exposed to other commands
-// We only have access to it, if we stay inside the command, like an inner function
-CmdDecDataTypes:
-    PAR_OPEN commandType='declare-datatypes' 
-    PAR_OPEN  sortDec+=SortDec* PAR_CLOSE 
-    PAR_OPEN dataTypeDecs+=CommonDataTypeDec+ PAR_CLOSE 
-    PAR_CLOSE;
-
-CommonDataTypeDec:
-    NamedDataTypeDec | DataTypeDec | DataTypeDecZ3;
-
-DataTypeDec:
-    PAR_OPEN constructorDecs+=ConstructorDec+ PAR_CLOSE
-    | PAR_OPEN simpleConstructors+=SimpleConstructor+ PAR_CLOSE  // Simple constructor names without selectors
-    | PAR_OPEN 'par' PAR_OPEN parameters+=SmtSymbol+ PAR_CLOSE PAR_OPEN constructorDecs+=ConstructorDec+ PAR_CLOSE PAR_CLOSE;
-
-// For declare-datatypes with inline datatype name
-NamedDataTypeDec:
-    PAR_OPEN name=SmtSymbol simpleConstructors+=SimpleConstructor+ PAR_CLOSE;
-
-SimpleConstructor:
-    name=SmtSymbol;
-
-ConstructorDec:
-    PAR_OPEN name=SmtSymbol selectorDec+=SelectorDec* PAR_CLOSE;
-
-SelectorDec:
-    PAR_OPEN name=SmtSymbol sort=Sort PAR_CLOSE 
-    | PAR_OPEN listKey=('tail'|'head') sort=Sort PAR_CLOSE
-;
-
-SortDec:
-    PAR_OPEN name=SmtSymbol num=NUMERAL PAR_CLOSE 
-    | name=SmtSymbol;
+DefineFun:
+    '(' kind=('define-fun' | 'define-fun-rec') definition=FunctionDef ')';
 
 FunctionDef:
-    name=SmtSymbol PAR_OPEN sortedVars+=SortedVar* PAR_CLOSE returnSort=Sort body=Term;
+    name=SmtSymbol '(' parameters+=SortedVar* ')' sort=Sort body=Term;
 
-FunctionDefRec:
-    name=SmtSymbol PAR_OPEN sortedVars+=SortedVar* PAR_CLOSE returnSort=Sort body=Term;
+DefineFunsRec:
+    '(' 'define-funs-rec' '(' declarations+=FunctionDec+ ')' '(' bodies+=Term+ ')' ')';
 
 FunctionDec:
-    PAR_OPEN name=SmtSymbol PAR_OPEN vars+=SortedVar* PAR_CLOSE returnSort=Sort PAR_CLOSE;
+    '(' name=SmtSymbol '(' parameters+=SortedVar* ')' sort=Sort ')';
 
-SortedVar:
-    PAR_OPEN name=SmtSymbol sort=Sort PAR_CLOSE;
+DefineSort:
+    '(' 'define-sort' name=SmtSymbol '(' parameters+=SortParameter* ')' sort=Sort ')';
+
+/**
+ * `(declare-datatype d datatype_dec)`; Z3 additionally accepts `:subterm name`.
+ * The command itself declares the sort `d`.
+ */
+DeclareDatatype:
+    '(' 'declare-datatype' name=SmtSymbol datatype=DatatypeDec (':subterm' subterm=SmtSymbol)? ')';
+
+/**
+ * SMT-LIB 2.6+:  (declare-datatypes ((d1 k1) ... (dn kn)) (dt_dec1 ... dt_decn))
+ * Z3 legacy:     (declare-datatypes (T1 ... Tk) ((d1 ctor+) ... (dn ctor+)))
+ */
+DeclareDatatypes:
+      '(' 'declare-datatypes' '(' sorts+=SortDec+ ')' '(' datatypes+=DatatypeDec+ ')' ')'
+    | '(' 'declare-datatypes' legacy?='(' parameters+=SortParameter* ')' '(' legacyDatatypes+=LegacyDatatypeDec* ')' ')';
+
+SortDec:
+    '(' name=SmtSymbol arity=NUMERAL ')';
+
+DatatypeDec:
+      '(' 'par' '(' parameters+=SortParameter+ ')' '(' constructors+=ConstructorDec+ ')' ')'
+    | '(' constructors+=ConstructorDec+ ')';
+
+LegacyDatatypeDec:
+    '(' name=SmtSymbol constructors+=ConstructorDec+ ')';
+
+/** Z3 accepts a bare symbol for a constructor without selectors. */
+ConstructorDec:
+      '(' name=SmtSymbol selectors+=SelectorDec* ')'
+    | name=SmtSymbol;
+
+SelectorDec:
+    '(' name=SmtSymbol sort=Sort ')';
+
+SortParameter:
+    name=SmtSymbol;
+
+Echo:
+    '(' 'echo' text=STRING ')';
+
+GetInfo:
+    '(' 'get-info' flag=Keyword ')';
+
+GetOption:
+    '(' 'get-option' option=Keyword ')';
+
+GetValue:
+    '(' 'get-value' '(' terms+=Term+ ')' ')';
+
+/** The numeral is optional in Z3 (defaults to 1). */
+Push:
+    '(' 'push' levels=NUMERAL? ')';
+
+Pop:
+    '(' 'pop' levels=NUMERAL? ')';
+
+SetInfo:
+    '(' 'set-info' attribute=Attribute ')';
+
+SetLogic:
+    '(' 'set-logic' logic=SmtSymbol ')';
+
+SetOption:
+    '(' 'set-option' attribute=Attribute ')';
+
+SimpleCommand:
+    '(' name=SimpleCommandName ')';
+
+SimpleCommandName returns string:
+      'exit' | 'get-assertions' | 'get-assignment' | 'get-model' | 'get-proof'
+    | 'get-unsat-assumptions' | 'get-unsat-core' | 'reset' | 'reset-assertions'
+    // Z3
+    | 'get-objectives';
+
+/******************************************************************************
+ * Z3 commands that contain terms or declarations
+ ******************************************************************************/
+
+/** `(eval t :opt v ...)`, `(simplify t ...)`, `(assert-soft t :weight w :id g)`, `(display t)`, `(query r ...)`. */
+TermCommand:
+    '(' name=TermCommandName term=Term attributes+=Attribute* ')';
+
+TermCommandName returns string:
+    'eval' | 'simplify' | 'assert-soft' | 'display' | 'query';
+
+/** Z3 fixedpoint rule: `(rule t name?)`. */
+FixedpointRule:
+    '(' 'rule' term=Term ruleName=SmtSymbol? ')';
+
+/** `(maximize t)` / `(minimize t)` with optional attributes such as `:id`. */
+Objective:
+    '(' direction=('maximize' | 'minimize') term=Term attributes+=Attribute* ')';
+
+/** `(check-sat-using tactic ...)`, `(apply tactic ...)`. Tactics are s-expressions. */
+TacticCommand:
+    '(' name=('check-sat-using' | 'apply') tactic=SExpr attributes+=Attribute* ')';
+
+/** Z3 fixedpoint relation declaration: `(declare-rel r (Int Int))`. */
+DeclareRel:
+    '(' 'declare-rel' name=SmtSymbol '(' parameters+=Sort* ')' attributes+=Attribute* ')';
+
+/** Z3 fixedpoint variable declaration: `(declare-var x Int)`. */
+DeclareVar:
+    '(' 'declare-var' name=SmtSymbol sort=Sort ')';
+
+/** `(get-consequences (assumptions) (variables))`. */
+GetConsequences:
+    '(' 'get-consequences' '(' assumptions+=Term* ')' '(' variables+=Term* ')' ')';
+
+/** `(set-initial-value x v)` (Z3 phase/value hints). */
+SetInitialValue:
+    '(' 'set-initial-value' variable=Term value=Term ')';
+
+/** `(declare-type-var A)` (Z3 polymorphism). */
+DeclareTypeVar:
+    '(' 'declare-type-var' name=SmtSymbol ')';
+
+/**
+ * Any other command. Known Z3 commands (help, get-info-like queries, tactics, ...)
+ * are accepted by the validator; anything else is reported as unknown.
+ */
+GenericCommand:
+    '(' name=SIMPLE_SYMBOL arguments+=SExpr* ')';
+
+/******************************************************************************
+ * Sorts
+ ******************************************************************************/
 
 Sort:
-    identifier=SortIdentifier 
-    | PAR_OPEN identifier=SortIdentifier sorts+=Sort+ PAR_CLOSE
-;
-
-Index:
-    num=NUMERAL | symbol=SmtSymbol;
+    SortIdentifier | ParametricSort;
 
 SortIdentifier:
-    ID=[NamedSort:SmtSymbol] 
-    | (PAR_OPEN '_' ID=[NamedSort:SmtSymbol] indices+=Index+ PAR_CLOSE)
-    | sort=PreDefinedSort
-    | 'Array'
-    | PAR_OPEN '_' 'BitVec' size=NUMERAL PAR_CLOSE  // Bit-vector sorts
-    | PAR_OPEN '_' name=SmtSymbol indices+=Index+ PAR_CLOSE  // Indexed sorts
-;
+    SimpleSort | IndexedSort;
 
-PreDefinedSort:
-    //sort=PREDEF_SORT;
-    ID=('Int' | 'Bool' | 'Real' | 'List' | 'String' | 'RegLan' | 'RoundingMode');
+SimpleSort:
+    symbol=[SortSymbol:SmtSymbol];
 
+IndexedSort:
+    '(' '_' symbol=[SortSymbol:SmtSymbol] indices+=Index+ ')';
+
+/** Z3 also accepts a parenthesized nullary sort such as `(U)`. */
+ParametricSort:
+    '(' identifier=SortIdentifier arguments+=Sort* ')';
+
+/** Numerals, symbols and (Z3) hexadecimals/binaries or nested s-expressions, e.g. `(_ map (+ (Int Int) Int))`. */
+Index:
+      {infer NumeralIndex} value=NUMERAL
+    | {infer SymbolIndex} value=SmtSymbol
+    | {infer BitVectorIndex} value=(HEXADECIMAL | BINARY)
+    | {infer ListIndex} '(' items+=SExpr* ')';
+
+/******************************************************************************
+ * Terms
+ ******************************************************************************/
+
+/**
+ * All parenthesized term forms are inlined into this one rule so that every nesting
+ * level costs a single rule invocation. Machine-generated benchmarks nest terms
+ * hundreds of levels deep and the parser is recursive.
+ */
 Term:
-    SpecConstant
-    | QualIdentifier
-    | BValue
-    | PAR_OPEN Operator terms+=Term+ PAR_CLOSE 
-    | PAR_OPEN 'if' condition+=Term+ statement+=ConditionalTerm*  PAR_CLOSE
-    | PAR_OPEN qualId=QualIdentifier args+=Term+  boolean=BValue? PAR_CLOSE
-    | PAR_OPEN 'let' PAR_OPEN varBinding+=VarBinding+ PAR_CLOSE body+=Term PAR_CLOSE
-    | QuantifiedTerm
-    | PAR_OPEN '!' term=Term attribute+=Attribute+ PAR_CLOSE  // Annotated terms
-    | PAR_OPEN 'as' term=Term sort=Sort PAR_CLOSE  // Qualified terms
-    | PAR_OPEN PAR_OPEN '_' (PSEUDO_BOOL_KEYWORD | CARDINALITY_KEYWORD)  NUMERAL* PAR_CLOSE SmtSymbol* PAR_CLOSE
-    | PAR_OPEN PAR_OPEN '_' 'is' 'nil' PAR_CLOSE SmtSymbol* PAR_CLOSE // THIS IS TO REMOVE ERRORS
-    | PAR_OPEN listKey=('tail'| 'head') operands+=Term+ PAR_CLOSE
-    // Array theory
-    | PAR_OPEN 'select' array=Term index=Term PAR_CLOSE
-    | PAR_OPEN 'store' array=Term index=Term value=Term PAR_CLOSE
-;
+      {infer NumeralConstant} value=NUMERAL
+    | {infer DecimalConstant} value=DECIMAL
+    | {infer HexadecimalConstant} value=HEXADECIMAL
+    | {infer BinaryConstant} value=BINARY
+    | {infer StringConstant} value=STRING
+    | {infer SimpleIdentifier} symbol=[FunctionSymbol:SmtSymbol]
+    | '(' (
+          {infer IndexedIdentifier} '_' symbol=[FunctionSymbol:SmtSymbol] indices+=Index+
+        | {infer QualifiedIdentifier} 'as' identifier=Identifier sort=Sort
+        | {infer LetTerm} 'let' '(' bindings+=VarBinding+ ')' body=Term
+        | {infer QuantifiedTerm} quantifier=('forall' | 'exists') '(' variables+=SortedVar+ ')' body=Term
+        | {infer LambdaTerm} 'lambda' '(' variables+=SortedVar+ ')' body=Term
+        | {infer MatchTerm} 'match' term=Term '(' cases+=MatchCase+ ')'
+        | {infer AnnotatedTerm} '!' term=Term attributes+=TermAttribute+
+        | {infer Application} function=QualIdentifier arguments+=Term+
+      ) ')';
 
-QuantifiedTerm:
-    PAR_OPEN ('forall' | 'exists' ) PAR_OPEN sortedVar+=SortedVar+ PAR_CLOSE innerTerm=(Term|PatternedTerm) PAR_CLOSE;
+type SpecConstant = NumeralConstant | DecimalConstant | HexadecimalConstant | BinaryConstant | StringConstant;
 
-PatternedTerm:
-    PAR_OPEN '!' bodyterm=Term patternAttribute+=PatternAttribute+  PAR_CLOSE;
+/** Head of an application: `f`, `(_ extract 7 0)` or `(as const (Array Int Int))`. */
+QualIdentifier:
+    Identifier | QualifiedIdentifier;
 
-PatternAttribute:
-    ':pattern' PAR_OPEN term+=Term+ PAR_CLOSE;
+Identifier:
+    SimpleIdentifier | IndexedIdentifier;
 
-ConditionalTerm:
-    (SpecConstant|BValue) term+=Term+;
+SimpleIdentifier:
+    symbol=[FunctionSymbol:SmtSymbol];
 
-Pattern:
-    symbol=SmtSymbol | (PAR_OPEN symbol=SmtSymbol symbols+=SmtSymbol+ PAR_CLOSE);
+IndexedIdentifier:
+    '(' '_' symbol=[FunctionSymbol:SmtSymbol] indices+=Index+ ')';
+
+/** `(as nil (List Int))` */
+QualifiedIdentifier:
+    '(' 'as' identifier=Identifier sort=Sort ')';
 
 VarBinding:
-    PAR_OPEN symbol=SmtSymbol term=Term PAR_CLOSE;
+    '(' name=SmtSymbol value=Term ')';
 
-QualIdentifier:
-    ID=[NamedElement:SmtSymbol];
+SortedVar:
+    '(' name=SmtSymbol sort=Sort ')';
 
-SpecConstant returns string:
-    NUMERAL | DECIMAL | HEXADECIMAL | BINARY | STRING | BV_LITERAL;
+MatchCase:
+    '(' pattern=Pattern body=Term ')';
 
-SmtSymbol returns string:
-    SIMPLE_SYMBOL;
+/**
+ * A bare symbol pattern is either a nullary constructor or a variable binding;
+ * this is decided during scoping (see SmtScopeProvider). `_` is a wildcard (2.7).
+ */
+Pattern:
+      ConstructorPattern
+    | PatternVariable;
 
-Operator returns string:
-    ARITHMETIC_OPERATOR | BOOLEAN_OPERATOR | BvOperation | StringOperation | '+' | '-' | '*' | '/' | '=';
+ConstructorPattern:
+    '(' constructorSymbol=[FunctionSymbol:SmtSymbol] arguments+=PatternVariable+ ')';
 
-// Bit-vector theory operations
-BvOperation returns string:
-    'concat' | 'bvnot' | 'bvand' | 'bvor' | 'bvneg' | 'bvadd' | 'bvmul' | 'bvudiv' | 'bvurem' 
-    | 'bvshl' | 'bvlshr' | 'bvult' | 'bvnand' | 'bvnor' | 'bvxor' | 'bvxnor' | 'bvcomp'
-    | 'bvsub' | 'bvsdiv' | 'bvsrem' | 'bvsmod' | 'bvashr' | 'bvule' | 'bvugt' | 'bvuge'
-    | 'bvslt' | 'bvsle' | 'bvsgt' | 'bvsge'
-    // Bit-vector conversion functions
-    | 'bv2nat' | 'nat2bv';
+PatternVariable:
+    name=(SmtSymbol | '_');
 
-// String theory operations
-StringOperation returns string:
-    'str.len' | 'str.substr' | 'str.indexof' | 'str.replace' | 'str.++' | 'str.at'
-    | 'str.contains' | 'str.prefixof' | 'str.suffixof' | 'str.from_int' | 'str.to_int';
+TermAttribute:
+      NamedAttribute
+    | PatternAttribute
+    | {infer Attribute} keyword=(KEYWORD | ':subterm') value=AttributeValue?;
 
-InfoFlag:
-    ':' 'all-statistics' | ':' 'assertion-stack-levels' | ':' 'authors'
-    | ':' 'error-behavior' | ':' 'name' | ':' 'reason-unknown'
-    | ':' 'version' | ':' 'status' | ':' 'incremental' | Keyword;
-
-Keyword:
-    ':' symbol=SmtSymbol;
-
-Attribute:
-    NamedAttribute |
-    keyWord=Keyword |
-    keyWord=Keyword value=AttributeValue |
-    ':' 'status' value=AttributeValue |
-    ':' 'version' value=AttributeValue |
-    ':' 'incremental' value=AttributeValue |
-    ':' 'all-statistics' |
-    ':' 'assertion-stack-levels' |
-    ':' 'authors' |
-    ':' 'error-behavior' |
-    ':' 'name' |
-    ':' 'reason-unknown'
-;
-
+/** In-line definition `(! t :named n)`: declares `n` as a nullary function. */
 NamedAttribute:
     ':named' name=SmtSymbol;
 
+/** Quantifier instantiation patterns: `:pattern (t+)`, `:pattern ()` (2.7) and Z3's `:no-pattern t`. */
+PatternAttribute:
+      key=':pattern' '(' terms+=Term* ')'
+    | key=':no-pattern' terms+=Term;
+
+/******************************************************************************
+ * Attributes and s-expressions
+ ******************************************************************************/
+
+Attribute:
+    keyword=Keyword value=AttributeValue?;
+
 AttributeValue:
-    BValue |
-    const=SpecConstant 
-    | symbol=SmtSymbol string+=STRING*
-    | {infer AttributeValue} PAR_OPEN exprs+=SExpr* PAR_CLOSE;
+      {infer SExprConstant} value=SpecConstantValue
+    | {infer SExprSymbol} value=AnySymbol
+    | {infer SExprList} '(' items+=SExpr* ')';
 
-SExpr infers SExpr:
-    const=SpecConstant | symbol=SmtSymbol | keyWord=Keyword | PAR_OPEN exprs+=SExpr+ PAR_CLOSE;
+SExpr:
+      {infer SExprConstant} value=SpecConstantValue
+    | {infer SExprSymbol} value=AnySymbol
+    | {infer SExprKeyword} value=Keyword
+    | {infer SExprList} '(' items+=SExpr* ')';
 
-Option:
-    OptionKeyword | Attribute;
+SpecConstantValue returns string:
+    NUMERAL | DECIMAL | HEXADECIMAL | BINARY | STRING;
 
-OptionKeyword:
-    option=':diagnostic-output-channel' value=STRING?
-    | option=':global-declarations' value=BValue?
-    | option=':interactive-mode' value=BValue
-    | option=':print-success' value=BValue?
-    | option=':produce-assertions' value=BValue?
-    | option=':produce-assignments' value=BValue?
-    | option=':produce-models' value=BValue?
-    | option=':produce-proofs' value=BValue?
-    | option=':produce-unsat-assumptions' value=BValue?
-    | option=':produce-unsat-cores' value=BValue?
-    | option=':random-seed' value=NUMERAL?
-    | option=':regular-output-channel' value=STRING?
-    | option=':reproducible-resource-limit' value=NUMERAL
-    // Z3 
-    | option=':smt-auto-config' value=BValue?
-    | option=':smt.mbqi' value=BValue?
-    | option=':smt.macro-finder' value=BValue?
-    | option=':model.compact' value=BValue?
-    | option=':opt.priority' value=SIMPLE_SYMBOL? // Check
-    | option=':pp.bv-literals' value=BValue?
-    | option=':verbosity' value=NUMERAL?
-;
+Keyword returns string:
+    KEYWORD | ':named' | ':pattern' | ':no-pattern' | ':subterm';
 
-// Z3 Related
-SortDecZ3:
-    symbols+=SmtSymbol+;
+/**
+ * A user symbol. Includes Z3 command names, which Z3 does not reserve.
+ * Quoted symbols `|...|` are unquoted by the value converter, so `|x|` and `x` are equal.
+ */
+SmtSymbol returns string:
+      SIMPLE_SYMBOL | QUOTED_SYMBOL
+    | 'eval' | 'simplify' | 'assert-soft' | 'display' | 'query' | 'rule'
+    | 'maximize' | 'minimize' | 'check-sat-using' | 'apply'
+    | 'declare-rel' | 'declare-var' | 'get-consequences' | 'set-initial-value'
+    | 'declare-type-var' | 'get-objectives'
+    // `lambda` is reserved since SMT-LIB 2.7, but Z3 and older scripts use it as a name.
+    | 'lambda';
 
-ConstructorDecZ3:
-    name=ConstDecVar selector+=SelectorDecZ3* (SEPERATOR right+=ConstDecVar)*;
+/** Any symbol including SMT-LIB reserved words, as allowed inside s-expressions. */
+AnySymbol returns string:
+      SmtSymbol | '_' | '!' | 'as' | 'let' | 'forall' | 'exists' | 'lambda' | 'match'
+    | 'assert' | 'check-sat' | 'check-sat-assuming' | 'declare-const' | 'declare-datatype'
+    | 'declare-datatypes' | 'declare-fun' | 'declare-sort' | 'declare-sort-parameter'
+    | 'define-const' | 'define-fun' | 'define-fun-rec' | 'define-funs-rec' | 'define-sort'
+    | 'echo' | 'get-info' | 'get-option' | 'get-value' | 'push' | 'pop' | 'set-info'
+    | 'set-logic' | 'set-option' | 'par' | SimpleCommandName;
 
-DataTypeDecZ3:
-    PAR_OPEN name=SmtSymbol constructorDecs=ConstructorDecZ3 PAR_CLOSE;
+/******************************************************************************
+ * Lexical structure
+ ******************************************************************************/
 
-ConstDecVar:
-    name=SmtSymbol;
+hidden terminal WS: /\s+/;
+hidden terminal SL_COMMENT: /;[^\n\r]*/;
+/** Z3 extension: block comments `#| ... |#`. */
+hidden terminal ML_COMMENT: /#\|[\s\S]*?\|#/;
 
-SelectorDecZ3:
-    PAR_OPEN name=SmtSymbol sort+=Sort* PAR_CLOSE;
-
-// Lexer rules
-terminal PSEUDO_BOOL_KEYWORD: 'pbeq' | 'pbge' | 'pble';
-terminal CARDINALITY_KEYWORD: 'at-least' | 'at-most';
-terminal BV_LITERAL: /#b[01]+/ | /#x[0-9a-fA-F]+/;
-terminal PAR_OPEN: '(';
-terminal PAR_CLOSE: ')';
-terminal BValue: 'true' | 'false';
-terminal LETTER returns string: /[a-zA-Z]/;
-terminal DECIMAL: NUMERAL '.' NUMERAL;
-terminal NUMERAL returns number: /0|[0-9][0-9]*/;
-terminal DIGIT returns number: /[0-9]/;
+/** Z3 reads `-5` and `-1.5` as negative numbers; `1.` is a decimal. */
+terminal DECIMAL: /-?[0-9]+\.[0-9]*/;
+terminal NUMERAL: /-?[0-9]+/;
 terminal HEXADECIMAL: /#x[0-9a-fA-F]+/;
 terminal BINARY: /#b[01]+/;
-terminal STRING returns string: /"([^"\\]|\\.|(WS|PRINTABLE_CHAR))+"/;
-terminal SEPERATOR: ',';
-hidden terminal WS: /\s+/;
-
-// - + * / div mod abs <= < >= > to_real to_int is_int
-terminal ARITHMETIC_OPERATOR: 'div' | 'mod' | 'abs' | '<=' | '<' | '>=' | '>' | 'to_real' | 'to_int' | 'is_int'; 
-// not => and or xor = // distinct ite
-terminal BOOLEAN_OPERATOR: 'not' | '=>' | 'and' | 'or' | 'xor' | 'ite' | 'distinct';
-
-terminal SIMPLE_SYMBOL: 
-    (LETTER | '+' | '-' | '/' | '*' | ',' | '=' | '%' | '?' | '!' | '.' | '$' | '_' | '~' | '&' | '^' | '<' | '>' | '@')
-    (LETTER | DIGIT | '+' | '-' | '/' | '*' | '=' | '%' | '?' | '!' | '.' | '$' | '_' | '~' | '&' | '^' | '<' | '>' | '@')*;
-hidden terminal SL_COMMENT: /;[^\n\r]*/;
+/** The only escape sequence is `""` (SMT-LIB 2.5+). Strings may span lines. */
+terminal STRING: /"(?:[^"]|"")*"/;
+/** `|...|` may contain anything but `|` and `\`, including line breaks. */
+terminal QUOTED_SYMBOL: /\|[^|\\]*\|/;
+/** Z3 also allows `,` in simple symbols and keywords (`smt2scanner.cpp`). */
+terminal KEYWORD: /:[a-zA-Z0-9~!@$%^&*_\-+=<>.?\/,]+/;
+terminal SIMPLE_SYMBOL: /[a-zA-Z~!@$%^&*_\-+=<>.?\/,][a-zA-Z0-9~!@$%^&*_\-+=<>.?\/,]*/;

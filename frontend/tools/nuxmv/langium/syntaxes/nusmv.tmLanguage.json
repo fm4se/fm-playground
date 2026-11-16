@@ -1,0 +1,301 @@
+{
+  "name": "NuSMV",
+  "scopeName": "source.nusmv",
+  "fileTypes": [
+    "smv",
+    "xmv"
+  ],
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#module-declarations"
+    },
+    {
+      "include": "#module-instantiations"
+    },
+    {
+      "include": "#specifications"
+    },
+    {
+      "include": "#define-declarations"
+    },
+    {
+      "include": "#variable-declarations"
+    },
+    {
+      "include": "#enum-blocks"
+    },
+    {
+      "include": "#word-literals"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#language-constants"
+    },
+    {
+      "include": "#section-keywords"
+    },
+    {
+      "include": "#type-keywords"
+    },
+    {
+      "include": "#builtins"
+    },
+    {
+      "include": "#temporal-operators"
+    },
+    {
+      "include": "#word-operators"
+    },
+    {
+      "include": "#symbol-operators"
+    },
+    {
+      "include": "#punctuation"
+    }
+  ],
+  "repository": {
+    "builtins": {
+      "patterns": [
+        {
+          "match": "\\b(init|next|word1|bool|toint)\\b",
+          "name": "support.function.builtin.nusmv"
+        }
+      ]
+    },
+    "comments": {
+      "patterns": [
+        {
+          "begin": "--",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.nusmv"
+            }
+          },
+          "end": "$",
+          "name": "comment.line.double-dash.nusmv"
+        }
+      ]
+    },
+    "define-declarations": {
+      "patterns": [
+        {
+          "match": "^\\s*([A-Za-z_][A-Za-z0-9_$#-]*)\\s*(:=)",
+          "captures": {
+            "1": {
+              "name": "entity.name.function.define.nusmv"
+            },
+            "2": {
+              "name": "keyword.operator.assignment.nusmv"
+            }
+          }
+        }
+      ]
+    },
+    "enum-blocks": {
+      "patterns": [
+        {
+          "begin": "\\{",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.enumeration.begin.nusmv"
+            }
+          },
+          "end": "\\}",
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.enumeration.end.nusmv"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#comments"
+            },
+            {
+              "include": "#word-literals"
+            },
+            {
+              "include": "#numbers"
+            },
+            {
+              "match": "\\b(TRUE|FALSE)\\b",
+              "name": "constant.language.boolean.nusmv"
+            },
+            {
+              "match": "\\b[A-Za-z_][A-Za-z0-9_$#-]*\\b",
+              "name": "constant.other.enum.nusmv"
+            },
+            {
+              "match": ",",
+              "name": "punctuation.separator.comma.nusmv"
+            }
+          ]
+        }
+      ]
+    },
+    "language-constants": {
+      "patterns": [
+        {
+          "match": "\\b(TRUE|FALSE)\\b",
+          "name": "constant.language.boolean.nusmv"
+        },
+        {
+          "match": "\\bself\\b",
+          "name": "variable.language.self.nusmv"
+        }
+      ]
+    },
+    "module-declarations": {
+      "patterns": [
+        {
+          "match": "\\b(MODULE)\\s+([A-Za-z_][A-Za-z0-9_$#-]*)",
+          "captures": {
+            "1": {
+              "name": "keyword.control.section.module.nusmv"
+            },
+            "2": {
+              "name": "entity.name.type.module.nusmv"
+            }
+          }
+        }
+      ]
+    },
+    "module-instantiations": {
+      "patterns": [
+        {
+          "match": "\\b(process)\\s+([A-Za-z_][A-Za-z0-9_$#-]*)",
+          "captures": {
+            "1": {
+              "name": "storage.type.nusmv"
+            },
+            "2": {
+              "name": "entity.name.type.module.reference.nusmv"
+            }
+          }
+        },
+        {
+          "match": "(:)\\s*([A-Za-z_][A-Za-z0-9_$#-]*)(?=\\s*\\()",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.nusmv"
+            },
+            "2": {
+              "name": "entity.name.type.module.reference.nusmv"
+            }
+          }
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "match": "\\b[0-9]+\\b",
+          "name": "constant.numeric.integer.nusmv"
+        }
+      ]
+    },
+    "punctuation": {
+      "patterns": [
+        {
+          "match": "[()\\[\\],.;]",
+          "name": "punctuation.separator.nusmv"
+        },
+        {
+          "match": "[:{}]",
+          "name": "punctuation.definition.nusmv"
+        }
+      ]
+    },
+    "section-keywords": {
+      "patterns": [
+        {
+          "match": "\\b(ASSIGN|COMPASSION|COMPUTE|CONSTANTS|DEFINE|FAIRNESS|FROZENVAR|INIT|INVAR|ISA|IVAR|JUSTICE|MODULE|TRANS|VAR)\\b",
+          "name": "keyword.control.section.nusmv"
+        }
+      ]
+    },
+    "specifications": {
+      "patterns": [
+        {
+          "match": "\\b(CTLSPEC|INVARSPEC|LTLSPEC|PSLSPEC|SPEC)\\b",
+          "name": "keyword.control.specification.nusmv"
+        },
+        {
+          "match": "\\b(NAME)\\s+([A-Za-z_][A-Za-z0-9_$#-]*)",
+          "captures": {
+            "1": {
+              "name": "keyword.other.name.nusmv"
+            },
+            "2": {
+              "name": "entity.name.section.specification.nusmv"
+            }
+          }
+        },
+        {
+          "match": "\\b(MIN|MAX)\\b",
+          "name": "keyword.operator.compute.nusmv"
+        }
+      ]
+    },
+    "symbol-operators": {
+      "patterns": [
+        {
+          "match": ":=|<->|->|!=|<=|>=|<<|>>|::|[!&|=<>+\\-*/]",
+          "name": "keyword.operator.symbol.nusmv"
+        }
+      ]
+    },
+    "temporal-operators": {
+      "patterns": [
+        {
+          "match": "\\b(ABF|ABG|AF|AG|AX|EBF|EBG|EF|EG|EX|A|E|F|G|H|O|S|T|U|V|X|Y|Z)\\b",
+          "name": "keyword.operator.temporal.nusmv"
+        }
+      ]
+    },
+    "type-keywords": {
+      "patterns": [
+        {
+          "match": "\\b(array|boolean|of|process|signed|unsigned|word)\\b",
+          "name": "storage.type.nusmv"
+        }
+      ]
+    },
+    "variable-declarations": {
+      "patterns": [
+        {
+          "match": "^\\s*(?!(?:TRUE|FALSE)\\b)([A-Za-z_][A-Za-z0-9_$#-]*)\\s*:(?!=)",
+          "captures": {
+            "1": {
+              "name": "entity.name.variable.declaration.nusmv"
+            }
+          }
+        }
+      ]
+    },
+    "word-literals": {
+      "patterns": [
+        {
+          "match": "\\b0(?:u|s)?(?:b|B|o|O|_|d|D|h|H)[0-9]*_[A-Fa-f0-9]+\\b",
+          "name": "constant.numeric.word.nusmv"
+        }
+      ]
+    },
+    "word-operators": {
+      "patterns": [
+        {
+          "match": "\\b(in|mod|union|xnor|xor)\\b",
+          "name": "keyword.operator.word.nusmv"
+        },
+        {
+          "match": "\\b(case|esac)\\b",
+          "name": "keyword.control.case.nusmv"
+        }
+      ]
+    }
+  }
+}

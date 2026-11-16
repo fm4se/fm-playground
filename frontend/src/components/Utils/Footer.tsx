@@ -6,9 +6,9 @@ const Footer = () => {
         <div aria-hidden='true'>
             <MDBFooter className='text-center text-lg-left mt-5'>
                 <div className='text-center p-3 footer-text'>
-                    Privacy Policy: This website logs the specifications and options, which may be analyzed and made
-                    public for research purposes. Do not share confidential information.
-                    <br />
+                    Privacy Policy: This website logs the specifications, options, and anonymous editor interaction
+                    statistics, which may be analyzed and made public for research purposes. Do not share confidential
+                    information.
                     Unless you login, it does not collect any personally identifiable information. Deleting your profile
                     will remove all records of your profile from our servers. The specifications will be unlinked from
                     your profile, but remain on the servers (see first bullet).

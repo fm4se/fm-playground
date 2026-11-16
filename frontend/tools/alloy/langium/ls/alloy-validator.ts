@@ -22,8 +22,17 @@ export function registerValidationChecks(services: AlloyServices) {
     // Register naming checks
     const nameChecks: ValidationChecks<AlloyAstType> = {
         AlloyModule: nameValidator.checkDuplicateNames,
-        SigDecl: nameValidator.checkDuplicateFields,
+        SigDecl: [nameValidator.checkDuplicateFields, nameValidator.checkSigQualifiers],
         ParaDecls: nameValidator.checkDuplicateParameters
     };
     registry.register(nameChecks, nameValidator);
+
+    // Register type checks
+    const typeValidator = services.validation.AlloyTypeValidator;
+    const typeChecks: ValidationChecks<AlloyAstType> = {
+        AlloyModule: [typeValidator.checkTypes, typeValidator.checkUnusedVariables],
+        CmdDecl: typeValidator.checkCommand,
+        TypeScope: typeValidator.checkTypeScope
+    };
+    registry.register(typeChecks, typeValidator);
 }

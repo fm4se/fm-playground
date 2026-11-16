@@ -271,3 +271,19 @@ export async function logToDb(permalink: string, result: Record<string, any>) {
         // pass
     }
 }
+
+export function beaconToDb(permalink: string, result: Record<string, any>) {
+    const url = `${API_URL}/analysis/log`;
+    try {
+        const payload = JSON.stringify({
+            permalink,
+            result: JSON.stringify(result),
+        });
+        if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
+            const blob = new Blob([payload], { type: 'application/json' });
+            navigator.sendBeacon(url, blob);
+        }
+    } catch {
+        // pass
+    }
+}

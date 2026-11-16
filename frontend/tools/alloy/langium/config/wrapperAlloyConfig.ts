@@ -8,6 +8,7 @@ import responseAlloyTm from '../syntaxes/alloy.tmLanguage.json?raw';
 import { configureMonacoWorkers } from '../utils';
 import workerPortUrlAlloy from '../worker/alloy-server-port?worker&url';
 import type { LspConfig } from '@/../tools/common/lspTypes';
+import { alloyLspTelemetry } from './alloyLspTelemetry';
 
 const loadLangiumWorkerPort = () => {
     return new Worker(workerPortUrlAlloy, {
@@ -17,6 +18,7 @@ const loadLangiumWorkerPort = () => {
 };
 
 export const createLangiumAlloyConfig = async (): Promise<LspConfig> => {
+    alloyLspTelemetry.resetEpisodeCounters();
     const extensionFilesOrContents = new Map<string, string | URL>();
     extensionFilesOrContents.set(`/alloy-configuration.json`, alloyLanguageConfig);
     extensionFilesOrContents.set(`/alloy-grammar.json`, responseAlloyTm);
@@ -112,6 +114,7 @@ export const createLangiumAlloyConfig = async (): Promise<LspConfig> => {
             },
             clientOptions: {
                 documentSelector: ['alloy'],
+                middleware: alloyLspTelemetry.createMiddleware(),
             },
         },
     };

@@ -1,5 +1,5 @@
 import type { ValidationAcceptor, AstNode } from 'langium';
-import type { AlloyModule, SigDecl, ParaDecls, QualDeclName } from '../generated/ast.js';
+import type { AlloyModule, SigDecl, ParaDecls, DeclName } from '../generated/ast.js';
 import type { AlloyServices } from '../alloy-module.js';
 
 export class AlloyNameValidator {
@@ -28,8 +28,7 @@ export class AlloyNameValidator {
             let arity = 0;
             if (paraDecls?.decls) {
                 for (const decl of paraDecls.decls) {
-                    arity += 1; // Primary name
-                    arity += (decl as any).additionalNames?.length || 0;
+                    arity += decl.names.length;
                 }
             }
             return arity;
@@ -47,9 +46,11 @@ export class AlloyNameValidator {
                     addTypeName(p.name, p, 'name');
                     break;
                 case 'MacroDecl':
+                    addCallableName(p.name, p.params.length, p, 'name');
+                    break;
                 case 'PredDecl':
                 case 'FunDecl':
-                    addCallableName(p.name, getArity((p as any).paraDecls), p, 'name');
+                    addCallableName(p.name, getArity(p.paraDecls), p, 'name');
                     break;
                 // Facts, asserts, and commands are just labels and can overlap with other names.
             }
@@ -79,23 +80,41 @@ export class AlloyNameValidator {
         }
     }
 
+    // Alloy accepts sig qualifiers in any order, but each only once and at most one multiplicity.
+    checkSigQualifiers(sig: SigDecl, accept: ValidationAcceptor): void {
+        const seen = new Set<string>();
+        sig.qualifiers.forEach((qualifier, index) => {
+            if (seen.has(qualifier)) {
+                accept('error', 'The same qualifier cannot be specified more than once for the same sig.', {
+                    node: sig,
+                    property: 'qualifiers',
+                    index
+                });
+            }
+            seen.add(qualifier);
+        });
+        // Alloy's message names the first two conflicting multiplicities, in the order lone, one, some.
+        const multiplicities = (['lone', 'one', 'some'] as const).filter(m => sig.qualifiers.includes(m));
+        if (multiplicities.length > 1) {
+            accept('error', `You cannot declare a sig to be both ${multiplicities[0]} and ${multiplicities[1]}.`, {
+                node: sig,
+                property: 'qualifiers'
+            });
+        }
+    }
+
     checkDuplicateFields(sig: SigDecl, accept: ValidationAcceptor): void {
         const seenNames = new Map<string, AstNode[]>();
 
-        const addName = (qualDecl: QualDeclName | undefined) => {
-            if (!qualDecl || !qualDecl.name) return;
-            const name = qualDecl.name;
+        const addName = (declName: DeclName) => {
+            if (!declName.name) return;
+            const name = declName.name;
             if (!seenNames.has(name)) seenNames.set(name, []);
-            seenNames.get(name)!.push(qualDecl);
+            seenNames.get(name)!.push(declName);
         };
 
         for (const field of sig.fields || []) {
-            if (field.decl) {
-                addName(field.decl.name);
-                for (const add of field.decl.additionalNames || []) {
-                    addName(add);
-                }
-            }
+            field.decl?.names.forEach(addName);
         }
 
         for (const [name, nodes] of seenNames.entries()) {
@@ -113,18 +132,15 @@ export class AlloyNameValidator {
     checkDuplicateParameters(paraDecls: ParaDecls, accept: ValidationAcceptor): void {
         const seenNames = new Map<string, AstNode[]>();
 
-        const addName = (qualDecl: QualDeclName | undefined) => {
-            if (!qualDecl || !qualDecl.name) return;
-            const name = qualDecl.name;
+        const addName = (declName: DeclName) => {
+            if (!declName.name) return;
+            const name = declName.name;
             if (!seenNames.has(name)) seenNames.set(name, []);
-            seenNames.get(name)!.push(qualDecl);
+            seenNames.get(name)!.push(declName);
         };
 
         for (const decl of paraDecls.decls || []) {
-            addName(decl.name);
-            for (const add of decl.additionalNames || []) {
-                addName(add);
-            }
+            decl.names.forEach(addName);
         }
 
         for (const [name, nodes] of seenNames.entries()) {

@@ -10,7 +10,7 @@
     },
     {
       "name": "keyword.control.alloy",
-      "match": "\\b(Int|String|abstract|after|all|always|and|as|assert|before|but|check|disj|else|enum|eventually|exactly|expect|extends|fact|for|fun|historically|iden|iff|implies|in|int|let|lone|module|no|none|not|once|one|open|or|pred|private|releases|run|set|sig|since|some|sum|this|triggered|univ|until|var)\\b|\\b(this/)\\B"
+      "match": "\\b(Int|String|abstract|after|all|always|and|as|assert|before|but|check|disj|else|enum|eventually|exactly|expect|extends|fact|for|fun|historically|iden|iff|implies|in|int|let|lone|module|no|none|not|once|one|open|or|pred|private|releases|run|seq|set|sig|since|some|steps|sum|this|triggered|univ|until|var)\\b"
     },
     {
       "name": "string.quoted.double.alloy",

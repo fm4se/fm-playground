@@ -27,7 +27,8 @@ import {
 } from '@/atoms';
 import axios from 'axios';
 import { Permalink } from '@/types';
-import { logToDb } from '@/api/playgroundApi';
+import { logToDb, beaconToDb } from '@/api/playgroundApi';
+import { smtLspTelemetry } from './langium/config/smtLspTelemetry';
 import {
     smtRedundantAssertionsAtom,
     smtRedundancySummaryAtom,
@@ -37,6 +38,44 @@ import {
     triggerSmtCodeLensUpdate,
     clearSmtRedundancyLenses,
 } from '@/../tools/smt/features';
+
+let smtExitBeaconRegistered = false;
+
+function ensureSmtLspExitBeacon() {
+    if (smtExitBeaconRegistered || typeof window === 'undefined') return;
+    smtExitBeaconRegistered = true;
+
+    window.addEventListener('pagehide', () => {
+        const enableLsp = jotaiStore.get(enableLspAtom);
+        const language = jotaiStore.get(languageAtom);
+        const permalink = jotaiStore.get(permalinkAtom);
+
+        if (
+            enableLsp &&
+            language?.short === 'SMT' &&
+            permalink?.permalink &&
+            smtLspTelemetry.hasUnflushedActivity()
+        ) {
+            beaconToDb(permalink.permalink, {
+                analysis: 'smt-lsp-exit-flush',
+                lsp: smtLspTelemetry.flushEpisodeStats(),
+            });
+        }
+    });
+}
+
+function buildSmtExecutionMetadata(enableLsp: boolean, command: string) {
+    ensureSmtLspExitBeacon();
+    const lspStats = enableLsp ? smtLspTelemetry.flushEpisodeStats() : null;
+    if (!enableLsp) {
+        smtLspTelemetry.resetEpisodeCounters();
+    }
+    return {
+        ls: enableLsp,
+        command,
+        ...(lspStats ? { lsp: lspStats } : {}),
+    };
+}
 
 // Show CodeLens actions (comment out / remove / explain) above the given assertions
 function showRedundancyLenses(assertions: ReturnType<typeof buildSmtRedundantAssertions>) {
@@ -106,7 +145,7 @@ async function executeExplainRedundancy() {
 
     let response: any = null;
     // Can be triggered from the CodeLens while another option is selected, so don't read smtCliOptionsAtom
-    const metadata = { ls: enableLsp, command: 'explain-redundancy' };
+    const metadata = buildSmtExecutionMetadata(enableLsp, 'explain-redundancy');
 
     try {
         response = await saveCodeAndRefreshHistory(editorValue, language.short, permalink.permalink || null, metadata);
@@ -232,7 +271,7 @@ async function executeCheckRedundancy() {
     const smtCmdOption = jotaiStore.get(smtCliOptionsAtom);
 
     let response: any = null;
-    const metadata = { ls: enableLsp, command: smtCmdOption.value };
+    const metadata = buildSmtExecutionMetadata(enableLsp, smtCmdOption.value);
     try {
         response = await saveCodeAndRefreshHistory(editorValue, language.short, permalink.permalink || null, metadata);
         if (response) {
@@ -297,7 +336,7 @@ async function executeZ3() {
     const smtCmdOption = jotaiStore.get(smtCliOptionsAtom);
 
     let response: any = null;
-    const metadata = { ls: enableLsp, command: smtCmdOption.value };
+    const metadata = buildSmtExecutionMetadata(enableLsp, smtCmdOption.value);
     try {
         response = await saveCodeAndRefreshHistory(editorValue, language.short, permalink.permalink || null, metadata);
         if (response) {
@@ -361,7 +400,7 @@ async function executeIterateModels() {
     const smtCmdOption = jotaiStore.get(smtCliOptionsAtom);
 
     let response: any = null;
-    const metadata = { ls: enableLsp, command: smtCmdOption.value };
+    const metadata = buildSmtExecutionMetadata(enableLsp, smtCmdOption.value);
     try {
         response = await saveCodeAndRefreshHistory(editorValue, language.short, permalink.permalink || null, metadata);
         if (response) {

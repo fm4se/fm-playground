@@ -1,10 +1,28 @@
 # Change Log
 
+## v2.20.0[2026-11-06]
+
+- Added language support for nuxmv based on [vscode-nusmv](https://github.com/LiamWalsh98/vscode-nusmv) (limited to nuxmv)
+- Improved Alloy language support
+- Added type checking for Alloy LSP 
+- Many fixes for SMT-LIB LSP and added type checking, Z3 extensions
+- Added LSP telemetry for Alloy and SMT-LIB 
+- Updated Z3 version to 5.3.3
+
+## v2.19.0[2026-10-28]
+
+- Fixed bug on Alloy language support and [updated to upstream](https://github.com/soaibsafi/alloy-langium/commit/df15a241cf39622debcf03f6a06781eb2726edc4)
+- Added language support for nuxmv based on [vscode-nusmv](https://github.com/LiamWalsh98/vscode-nusmv) (limited to nuxmv)
+
+## v2.18.0[2026-10-13]
+
+- Integrated SMT code lens and summary to the editor
+
 ## v2.17.0[2026-09-07]
 
 - Integrated Alloy Diff
 
-## v2.16.0[2026-08-04]
+## v2.16.0[2026-08-04]F
 
 - Upgraded Langium grammar to 4
 - Fixed Alloy parsing issues

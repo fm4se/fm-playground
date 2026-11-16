@@ -1,5 +1,16 @@
 export * from './smt-module.js';
-export * from './smt-validator.js';
+export * from './smt-parser.js';
+export * from './smt-value-converter.js';
+export * from './builtins/library.js';
+export * from './builtins/types.js';
+export * from './builtins/commands.js';
+export * from './builtins/options.js';
+export * from './scoping/smt-scope-provider.js';
+export * from './scoping/symbol-table.js';
+export * as SmtSorts from './typing/sorts.js';
+export * from './typing/sort-checker.js';
+export * from './validation/smt-validator.js';
+export * from './lsp/describe.js';
 export * from './generated/ast.js';
 export * from './generated/grammar.js';
 export * from './generated/module.js';
