@@ -12,6 +12,7 @@ import {
     languageAtom,
     isFullScreenAtom,
     isExecutingAtom,
+    isDiffAnalyzeModeAtom,
     diffComparisonCodeAtom,
     diffComparisonHistoryIdAtom,
     smtDiffWitnessAtom,
@@ -54,7 +55,7 @@ const DiffViewArea: React.FC<DiffViewAreaProps> = ({ editorTheme, onBackToEditin
     const [isLoadingFromPermalink, setIsLoadingFromPermalink] = useState(false);
     const [permalinkError, setPermalinkError] = useState('');
 
-    const [isAnalyzeMode, setIsAnalyzeMode] = useState(false);
+    const [isAnalyzeMode, setIsAnalyzeMode] = useAtom(isDiffAnalyzeModeAtom);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [isErrorMessageModalOpen, setIsErrorMessageModalOpen] = useState(false);
 
@@ -114,7 +115,7 @@ const DiffViewArea: React.FC<DiffViewAreaProps> = ({ editorTheme, onBackToEditin
         const res = await getCodeByParmalink(loadedCheck, loadedPermalink);
         try {
             const metadata = {
-                leftSideCodeId: res.code_id,
+                leftSideCodeId: res.data_id,
             };
 
             await saveCode(editorValue, language.short + 'SynDiff', permalink.permalink ?? null, metadata);

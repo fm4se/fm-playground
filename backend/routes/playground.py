@@ -1,3 +1,4 @@
+import json
 import sys
 
 sys.path.append("..")  # Adds higher directory to python modules path.
@@ -169,14 +170,14 @@ def get_history():
             data, has_more_data = get_user_history_by_session(
                 user_session_id, page=page, per_page=per_page, check_type=check_type
             )
-            data = [d for d in data if not d.get("check", "").endswith("Diff")]
+            data = [d for d in data if not d.get("check", "").endswith("SynDiff")] # We don't want to show Syntactic Diff entries in the history
             return jsonify({"history": data, "has_more_data": has_more_data})
         return jsonify({"result": "fail", "message": ERROR_LOGGEDIN_MESSAGE}, 401)
 
     data, has_more_data = get_user_history(
         user_id, page=page, per_page=per_page, check_type=check_type
     )
-    data = [d for d in data if not d.get("check", "").endswith("Diff")]
+    data = [d for d in data if not d.get("check", "").endswith("SynDiff")]
     return jsonify({"history": data, "has_more_data": has_more_data})
 
 
@@ -190,12 +191,12 @@ def get_pinned_items():
     if user_id is None:
         if user_session_id:
             data = get_pinned_history_by_session(user_session_id, check_type=check_type)
-            data = [d for d in data if not d.get("check", "").endswith("Diff")]
+            data = [d for d in data if not d.get("check", "").endswith("SynDiff")]
             return jsonify({"history": data})
         return jsonify({"result": "fail", "message": ERROR_LOGGEDIN_MESSAGE}, 401)
 
     data = get_pinned_history(user_id, check_type=check_type)
-    data = [d for d in data if not d.get("check", "").endswith("Diff")]
+    data = [d for d in data if not d.get("check", "").endswith("SynDiff")]
     return jsonify({"history": data})
 
 
@@ -215,14 +216,25 @@ def unlink_history_by_id():
 def get_code_by_id(data_id: int):
     data = get_code_by_data_id(data_id)
     if data and Data.query.filter_by(id=data_id).first():
-        return jsonify(
-            {
-                "result": "success",
-                "code": data.code,
-                "check": data.check_type,
-                "permalink": data.permalink,
-            }
-        )
+        payload = {
+            "result": "success",
+            "code": data.code,
+            "check": data.check_type,
+            "permalink": data.permalink,
+        }
+        if data.meta:
+            try:
+                meta_dict = json.loads(data.meta)
+            except (TypeError, ValueError):
+                meta_dict = None
+            if isinstance(meta_dict, dict):
+                left_side_code_id = meta_dict.get("leftSideCodeId")
+                if left_side_code_id is not None:
+                    left_data = get_code_by_data_id(left_side_code_id)
+                    payload["meta"] = meta_dict
+                    payload["leftSideCodeId"] = left_side_code_id
+                    payload["leftCode"] = left_data.code if left_data else ""
+        return jsonify(payload)
     return jsonify({"result": "fail", "message": TRY_AGAIN_MESSAGE}, 500)
 
 

@@ -16,9 +16,13 @@ import {
     isFullScreenAtom,
     isLoadingPermalinkAtom,
     isDiffViewModeAtom,
+    isDiffAnalyzeModeAtom,
     originalCodeAtom,
     diffComparisonCodeAtom,
     diffComparisonHistoryIdAtom,
+    smtDiffOptionsAtom,
+    limbooleDiffOptionsAtom,
+    alloyDiffOptionsAtom,
 } from '@/atoms';
 import InputArea from '@/components/Playground/InputArea';
 import OutputArea from '@/components/Playground//OutputArea';
@@ -44,9 +48,13 @@ const Playground: React.FC<PlaygroundProps> = ({ editorTheme }) => {
     const [, setIsFullScreen] = useAtom(isFullScreenAtom); // contains the state of the full screen mode.
     const [, setIsLoadingPermalink] = useAtom(isLoadingPermalinkAtom); // contains the state of loading permalink.
     const [isDiffViewMode, setIsDiffViewMode] = useAtom(isDiffViewModeAtom); // contains the state of diff view mode.
+    const [, setIsDiffAnalyzeMode] = useAtom(isDiffAnalyzeModeAtom);
     const [originalCode] = useAtom(originalCodeAtom); // contains the original code for diff view.
     const [, setDiffComparisonCode] = useAtom(diffComparisonCodeAtom); // contains the comparison code for diff view.
     const [, setDiffComparisonHistoryId] = useAtom(diffComparisonHistoryIdAtom); // contains the history ID of the comparison code.
+    const [, setSmtDiffOption] = useAtom(smtDiffOptionsAtom);
+    const [, setLimbooleDiffOption] = useAtom(limbooleDiffOptionsAtom);
+    const [, setAlloyDiffOption] = useAtom(alloyDiffOptionsAtom);
     const [errorMessage, setErrorMessage] = useState<string | null>(null); // contains the error messages from the API.
     const [isErrorMessageModalOpen, setIsErrorMessageModalOpen] = useState(false); // contains the state of the message modal.
 
@@ -128,13 +136,25 @@ const Playground: React.FC<PlaygroundProps> = ({ editorTheme }) => {
                     const parsed =
                         typeof metadataResponse === 'string' ? JSON.parse(metadataResponse) : metadataResponse;
 
-                    const leftSideCodeId = parsed.meta.leftSideCodeId;
-                    const originalRes = await getCodeById(leftSideCodeId);
-                    if (originalRes?.code) {
-                        setDiffComparisonCode(originalRes.code);
-                        setDiffComparisonHistoryId(leftSideCodeId); // Set the history ID for the comparison code
+                    const baseCheck = check.replace(/(SemDiff|SynDiff|Diff)$/, '');
+                    const diffOption = parsed?.meta?.diff_option;
+                    if (diffOption) {
+                        if (baseCheck === 'SMT') setSmtDiffOption(diffOption);
+                        else if (baseCheck === 'SAT') setLimbooleDiffOption(diffOption);
+                        else if (baseCheck === 'ALS') setAlloyDiffOption(diffOption);
+                    }
+
+                    const leftSideCodeId = parsed?.meta?.leftSideCodeId;
+                    if (leftSideCodeId !== undefined && leftSideCodeId !== null) {
+                        const originalRes = await getCodeById(leftSideCodeId);
+                        if (originalRes?.code) {
+                            setDiffComparisonCode(originalRes.code);
+                            setDiffComparisonHistoryId(leftSideCodeId); // Set the history ID for the comparison code
+                        } else {
+                            console.warn('Could not load left side code by code_id.');
+                        }
                     } else {
-                        console.warn('Could not load left side code by code_id.');
+                        console.warn('No leftSideCodeId found in metadata.');
                     }
                 } catch (err) {
                     console.error('Failed to load comparison code:', err);
@@ -226,6 +246,7 @@ const Playground: React.FC<PlaygroundProps> = ({ editorTheme }) => {
 
     const handleBackToEditing = () => {
         setIsDiffViewMode(false);
+        setIsDiffAnalyzeMode(false);
         // Clear comparison code when exiting diff mode
         setDiffComparisonCode('');
     };

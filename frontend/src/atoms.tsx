@@ -54,7 +54,10 @@ export const isFullScreenAtom = atom(false);
 export const enableLspAtom = atom(true);
 export const outputPreviewHeightAtom = atom<string | number>((get) => (get(isFullScreenAtom) ? '80vh' : '60vh'));
 export const isLoadingPermalinkAtom = atom(false);
-export const isDiffViewModeAtom = atom(false);
+export const isDiffViewModeAtom = atom(
+    typeof window !== 'undefined' && Boolean(new URLSearchParams(window.location.search).get('check')?.endsWith('Diff'))
+);
+export const isDiffAnalyzeModeAtom = atom(false);
 export const originalCodeAtom = atomWithStorage('originalCode', '', rawStringStorage);
 export const diffComparisonCodeAtom = atom('');
 export const diffComparisonHistoryIdAtom = atom<number | null>(null);

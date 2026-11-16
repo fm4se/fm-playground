@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import Select, { SingleValue } from 'react-select';
 import { useAtom } from 'jotai';
 import { smtDiffOptionsAtom, smtDiffFilterAtom, isDarkThemeAtom } from '@/atoms';
@@ -12,13 +11,12 @@ const SmtDiffOptions = () => {
         { value: 'not-previous-but-current', label: 'Not Previous But Current' },
         { value: 'semantic-relation', label: 'Semantic Relation' },
     ];
-    const [selectedOption, setSelectedOption] = useState(options[0].value);
-    const [, setSmtDiffOption] = useAtom(smtDiffOptionsAtom);
+    // The selection lives in the atom so it survives remounts (e.g. when entering analyze mode).
+    const [selectedOption, setSmtDiffOption] = useAtom(smtDiffOptionsAtom);
     const [filterExpression, setFilterExpression] = useAtom(smtDiffFilterAtom);
 
     const handleOptionChange = (selectedOption: SingleValue<{ value: string; label: string }>) => {
         if (selectedOption) {
-            setSelectedOption(selectedOption.value);
             setSmtDiffOption(selectedOption.value);
         }
     };
@@ -38,7 +36,7 @@ const SmtDiffOptions = () => {
                     <Select
                         className='basic-single react-select-container'
                         classNamePrefix='select'
-                        defaultValue={options[0] || null}
+                        value={options.find((o) => o.value === selectedOption) ?? options[0]}
                         isDisabled={false}
                         isLoading={false}
                         isClearable={false}

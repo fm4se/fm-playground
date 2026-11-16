@@ -14,7 +14,13 @@ import AuthContext from '@/contexts/AuthContext';
 import DrawerComponent from '@/components/Utils/DrawerComponent';
 import CustomSnackbar from '@/components/Utils/Modals/CustomSnackbar';
 import ConfirmModal from '@/components/Utils/Modals/ConfirmModal';
-import { downloadUserData, deleteProfile, saveCode } from '@/api/playgroundApi';
+import {
+    downloadUserData,
+    deleteProfile,
+    saveCode,
+    getMetadataByPermalink,
+    getCodeById,
+} from '@/api/playgroundApi';
 import axiosAuth from '@/api/axiosAuth';
 import SessionExpiredModal from '@/components/Utils/Modals//SessionExpiredModal';
 import Toggle from '@/components/Utils/Toggle';
@@ -22,9 +28,16 @@ import {
     editorValueAtom,
     languageAtom,
     isDiffViewModeAtom,
+    isDiffAnalyzeModeAtom,
     diffComparisonCodeAtom,
     diffComparisonHistoryIdAtom,
     permalinkAtom,
+    smtDiffOptionsAtom,
+    limbooleDiffOptionsAtom,
+    alloyDiffOptionsAtom,
+    smtDiffWitnessAtom,
+    limbooleDiffWitnessAtom,
+    alloyDiffWitnessAtom,
 } from '@/atoms';
 import { fmpConfig } from '@/ToolMaps';
 import '@/assets/style/Nav.css';
@@ -37,10 +50,17 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ isDarkTheme, setIsDarkTheme }) => {
     const [editorValue, setEditorValue] = useAtom(editorValueAtom);
     const [language, setLanguage] = useAtom(languageAtom);
-    const [isDiffViewMode] = useAtom(isDiffViewModeAtom);
+    const [isDiffViewMode, setIsDiffViewMode] = useAtom(isDiffViewModeAtom);
+    const [, setIsDiffAnalyzeMode] = useAtom(isDiffAnalyzeModeAtom);
     const [, setDiffComparisonCode] = useAtom(diffComparisonCodeAtom);
     const [, setDiffComparisonHistoryId] = useAtom(diffComparisonHistoryIdAtom);
-    const [permalink] = useAtom(permalinkAtom);
+    const [permalink, setPermalink] = useAtom(permalinkAtom);
+    const [, setSmtDiffOption] = useAtom(smtDiffOptionsAtom);
+    const [, setLimbooleDiffOption] = useAtom(limbooleDiffOptionsAtom);
+    const [, setAlloyDiffOption] = useAtom(alloyDiffOptionsAtom);
+    const [, setSmtDiffWitness] = useAtom(smtDiffWitnessAtom);
+    const [, setLimbooleDiffWitness] = useAtom(limbooleDiffWitnessAtom);
+    const [, setAlloyDiffWitness] = useAtom(alloyDiffWitnessAtom);
     const authContext = useContext(AuthContext);
     const isLoggedIn = authContext?.isLoggedIn ?? false;
     const setIsLoggedIn = authContext?.setIsLoggedIn ?? (() => {});
@@ -122,6 +142,11 @@ const Navbar: React.FC<NavbarProps> = ({ isDarkTheme, setIsDarkTheme }) => {
      * @param {*} itemId - The history item ID (optional).
      */
     const handleDrawerItemClick = async (check: string, permalinkParam: string, code: string, itemId?: number) => {
+        // A diff run (e.g. ``SMTSemDiff``) reopens the diff editor with both of its scripts.
+        if (/SemDiff$/.test(check)) {
+            await openDiffHistoryItem(check, permalinkParam, code);
+            return;
+        }
         if (isDiffViewMode) {
             // In diff mode, load code into comparison side
             setDiffComparisonCode(code);
@@ -159,6 +184,53 @@ const Navbar: React.FC<NavbarProps> = ({ isDarkTheme, setIsDarkTheme }) => {
                 info.innerText = '';
             }
         }
+    };
+
+    /**
+     * Open a saved diff run in the diff editor: the run's own code is the current (right)
+     * script, and meta.leftSideCodeId points to the previous (left) script.
+     */
+    const openDiffHistoryItem = async (check: string, permalinkParam: string, code: string) => {
+        const baseCheck = check.replace(/SemDiff$/, '');
+        const tool = Object.entries(fmpConfig.tools).find(([, t]) => t.shortName === baseCheck);
+        if (tool) {
+            const [key, t] = tool;
+            setLanguage({ id: key, value: t.extension, label: t.name, short: t.shortName });
+        }
+
+        let previousCode = '';
+        let previousId: number | null = null;
+        let diffOption: string | undefined;
+        try {
+            const metadataResponse = await getMetadataByPermalink(check, permalinkParam);
+            const parsed = typeof metadataResponse === 'string' ? JSON.parse(metadataResponse) : metadataResponse;
+            diffOption = parsed?.meta?.diff_option;
+            const leftSideCodeId = parsed?.meta?.leftSideCodeId;
+            if (leftSideCodeId !== undefined && leftSideCodeId !== null) {
+                const originalRes = await getCodeById(leftSideCodeId);
+                previousCode = originalRes?.code ?? '';
+                previousId = leftSideCodeId;
+            }
+        } catch (error) {
+            console.error('Failed to load the previous script of the diff history item:', error);
+        }
+
+        if (diffOption) {
+            if (baseCheck === 'SMT') setSmtDiffOption(diffOption);
+            else if (baseCheck === 'SAT') setLimbooleDiffOption(diffOption);
+            else if (baseCheck === 'ALS') setAlloyDiffOption(diffOption);
+        }
+
+        setIsDiffAnalyzeMode(false);
+        setSmtDiffWitness(null);
+        setLimbooleDiffWitness(null);
+        setAlloyDiffWitness(null);
+        setEditorValue(code);
+        setDiffComparisonCode(previousCode);
+        setDiffComparisonHistoryId(previousId);
+        setPermalink({ check, permalink: permalinkParam });
+        setIsDiffViewMode(true);
+        window.history.pushState(null, '', `/?check=${check}&p=${permalinkParam}`);
     };
 
     const openModal = () => setIsModalOpen(true);

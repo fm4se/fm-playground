@@ -23,6 +23,8 @@ const CodeDiffEditor: React.FC<DiffCodeEditorProps> = (props: DiffCodeEditorProp
     const [lineToHighlight, setLineToHighlight] = useAtom(lineToHighlightAtom);
     const [decorationIds, setDecorationIds] = useState<string[]>([]);
     const [isMobile, setIsMobile] = useState(false);
+    const isSettingValueRef = useRef(false);
+    const contentListenerRef = useRef<monacoEditor.IDisposable | null>(null);
 
     // Check screen size on mount and resize for mobile detection
     useEffect(() => {
@@ -38,12 +40,37 @@ const CodeDiffEditor: React.FC<DiffCodeEditorProps> = (props: DiffCodeEditorProp
         };
     }, []);
 
+    const syncEditorValue = (editor: monacoEditor.editor.ICodeEditor | undefined, value: string) => {
+        if (editor && editor.getModel() && editor.getValue() !== value) {
+            isSettingValueRef.current = true;
+            try {
+                editor.setValue(value);
+            } finally {
+                isSettingValueRef.current = false;
+            }
+        }
+    };
+
     /**
-     * Sets the editor value when the editorValue prop changes.
+     * Sync the original (left) Monaco model when props.originalValue changes.
      */
     useEffect(() => {
-        setEditorValue(editorValue);
-    }, [editorValue]);
+        syncEditorValue(diffEditorRef.current?.getOriginalEditor(), props.originalValue ?? '');
+    }, [props.originalValue]);
+
+    /**
+     * Sync the modified (right) Monaco model when props.modifiedValue or editorValue changes.
+     */
+    useEffect(() => {
+        syncEditorValue(diffEditorRef.current?.getModifiedEditor(), props.modifiedValue ?? editorValue ?? '');
+    }, [props.modifiedValue, editorValue]);
+
+    useEffect(() => {
+        return () => {
+            contentListenerRef.current?.dispose();
+            contentListenerRef.current = null;
+        };
+    }, []);
 
     /**
      * Sets the language when the language prop changes.
@@ -87,14 +114,18 @@ const CodeDiffEditor: React.FC<DiffCodeEditorProps> = (props: DiffCodeEditorProp
         // Configure editors with standard roles
         if (originalEditor) {
             originalEditor.updateOptions({ readOnly: true }); // Keep left side read-only
+            syncEditorValue(originalEditor, props.originalValue ?? '');
         }
 
         if (modifiedEditor) {
             modifiedEditor.updateOptions({ readOnly: props.readOnly || false }); // Make right side editable
+            syncEditorValue(modifiedEditor, props.modifiedValue ?? editorValue ?? '');
             modifiedEditor.focus();
 
             // Listen for changes on the modified editor (right side)
-            modifiedEditor.onDidChangeModelContent(() => {
+            contentListenerRef.current?.dispose();
+            contentListenerRef.current = modifiedEditor.onDidChangeModelContent(() => {
+                if (isSettingValueRef.current) return;
                 const newCode = modifiedEditor.getValue();
                 handleCodeChange(newCode);
             });
@@ -148,8 +179,8 @@ const CodeDiffEditor: React.FC<DiffCodeEditorProps> = (props: DiffCodeEditorProp
                 height={props.height}
                 width='100%'
                 language={language.id}
-                original={props.originalValue || ''}
-                modified={props.modifiedValue || editorValue}
+                original={props.originalValue ?? ''}
+                modified={props.modifiedValue ?? editorValue ?? ''}
                 theme={props.editorTheme}
                 options={{
                     minimap: {

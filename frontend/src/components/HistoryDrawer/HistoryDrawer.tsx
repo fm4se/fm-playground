@@ -157,7 +157,8 @@ const HistoryDrawer: React.FC<DrawerComponentProps> = ({
                 onItemSelect(item.check, item.permalink, cached, item.id);
             } else {
                 const res = await getCodeById(item.id);
-                if (res?.code) {
+                // An empty script is still a valid entry (e.g. a diff run whose current side was empty).
+                if (res && typeof res.code === 'string') {
                     onItemSelect(res.check, res.permalink, res.code, item.id);
                     setFullCodeCache((prev) => ({ ...prev, [item.id]: res.code }));
                 }

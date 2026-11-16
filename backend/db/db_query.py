@@ -6,6 +6,17 @@ from .models import Code, Data, DataDetails, ResultLogs, User, db
 
 DATE_FORMAT = "%d %b %y %I:%M %p"
 
+# Suffixes of the diff-editor check types listed with their tool in the history SMTSemDiff. 
+# SynDiff entries are auto-saved helpers and stay hidden.
+DIFF_CHECK_SUFFIXES = ("SemDiff",)
+
+
+def check_type_filter(check_type: str):
+    """Match a tool's own check type and the check types of its diff runs."""
+    return Data.check_type.in_(
+        [check_type, *(check_type + suffix for suffix in DIFF_CHECK_SUFFIXES)]
+    )
+
 
 def code_exists_in_db(code: str):
     return db.session.query(Code).filter_by(code=code).first()
@@ -65,7 +76,7 @@ def get_user_history(
 
     # Add check_type filter if provided
     if check_type:
-        query = query.filter(Data.check_type == check_type)
+        query = query.filter(check_type_filter(check_type))
 
     # Apply pagination
     query_result = query.slice(start_index, end_index).all()
@@ -143,7 +154,7 @@ def get_user_history_by_session(
 
     # Add check_type filter if provided
     if check_type:
-        query = query.filter(Data.check_type == check_type)
+        query = query.filter(check_type_filter(check_type))
 
     # Apply pagination
     query_result = query.slice(start_index, end_index).all()
@@ -213,7 +224,7 @@ def get_pinned_history(user_id: int, check_type: str = None):
 
     # Add check_type filter if provided
     if check_type:
-        query = query.filter(Data.check_type == check_type)
+        query = query.filter(check_type_filter(check_type))
 
     # Get all pinned items
     query_result = query.all()
@@ -280,7 +291,7 @@ def get_pinned_history_by_session(user_session_id: str, check_type: str = None):
 
     # Add check_type filter if provided
     if check_type:
-        query = query.filter(Data.check_type == check_type)
+        query = query.filter(check_type_filter(check_type))
 
     # Get all pinned items
     query_result = query.all()
@@ -343,7 +354,7 @@ def get_code_by_data_id(data_id: int):
       Code: The code object
     """
     return (
-        db.session.query(Data.check_type, Data.permalink, Code.code)
+        db.session.query(Data.check_type, Data.permalink, Code.code, Data.meta)
         .join(Data, Data.code_id == Code.id)
         .filter(Data.id == data_id)
         .first()
@@ -403,7 +414,7 @@ def search_by_query(
 
     # Add check_type filter if provided
     if check_type:
-        search_query = search_query.filter(Data.check_type == check_type)
+        search_query = search_query.filter(check_type_filter(check_type))
 
     search_result = search_query.all()
 
@@ -489,7 +500,7 @@ def search_by_query_and_session(
 
     # Add check_type filter if provided
     if check_type:
-        search_query = search_query.filter(Data.check_type == check_type)
+        search_query = search_query.filter(check_type_filter(check_type))
 
     search_result = search_query.all()
 
