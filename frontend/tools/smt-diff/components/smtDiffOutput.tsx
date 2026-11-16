@@ -1,11 +1,34 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useAtom } from 'jotai';
-import { MDBBtn } from 'mdb-react-ui-kit';
-import { isFullScreenAtom, smtDiffWitnessAtom } from '@/atoms';
-import { getNextSmtDiffWitness } from '../smtDiffExecutor';
+import { MDBBtn, MDBTabs, MDBTabsItem, MDBTabsLink } from 'mdb-react-ui-kit';
+import { TbListDetails, TbBulb, TbArrowsExchange } from 'react-icons/tb';
+import { smtDiffWitnessAtom } from '@/atoms';
+import { errorMessage, explainSmtDiffWitness, getNextSmtDiffWitness } from '../smtDiffExecutor';
 import { jotaiStore, permalinkAtom } from '@/atoms';
 import { logToDb } from '@/api/playgroundApi';
+import { SmtDiffBanner, SmtDiffRun, SmtDirection, SmtExplanationEntry, SmtWitnessStep } from '../smtDiffTypes';
+import SmtModelView, { LogicNote } from './SmtModelView';
+import { AbductivePane, CounterfactualPane } from './SmtExplanationPanes';
+import './SMTDiff.css';
+
+type Tab = 'output' | 'abductive' | 'counterfactual';
+
+const explanationKey = (direction: SmtDirection, witnessIndex: number) => `${direction}:${witnessIndex}`;
+
+/** The relation or region of the analysis, as a coloured collapsible banner (as in alloy-diff). */
+const Banner = ({ banner }: { banner: SmtDiffBanner }) => (
+    <div className={`smt-diff-banner smt-diff-banner-${banner.kind}`}>
+        {banner.detail ? (
+            <details>
+                <summary>{banner.summary}</summary>
+                {banner.detail}
+            </details>
+        ) : (
+            <span>{banner.summary}</span>
+        )}
+    </div>
+);
 
 const SmtDiffOutput = () => {
     const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
@@ -21,97 +44,79 @@ const SmtDiffOutput = () => {
         return () => clearInterval(interval);
     }, []);
 
-    const [isFullScreen] = useAtom(isFullScreenAtom);
-    const [smtDiffWitness, setSmtDiffWitness] = useAtom(smtDiffWitnessAtom);
+    const [run] = useAtom(smtDiffWitnessAtom) as [SmtDiffRun | null, unknown];
     const permalink = jotaiStore.get(permalinkAtom);
-    const [witnesses, setWitnesses] = useState<any[]>([]);
+    const [witnesses, setWitnesses] = useState<SmtWitnessStep[]>([]);
     const [currentWitnessIndex, setCurrentWitnessIndex] = useState(0);
-    const [specId, setSpecId] = useState<string | null>(null);
     const [isNextWitnessExecuting, setIsNextWitnessExecuting] = useState(false);
     const [isLastWitness, setIsLastWitness] = useState(false);
-    const [witnessMessage, setWitnessMessage] = useState('');
-    const [hasWitness, setHasWitness] = useState(false);
+    const [navigationMessage, setNavigationMessage] = useState('');
+    const [activeTab, setActiveTab] = useState<Tab>('output');
+    const [explanations, setExplanations] = useState<Record<string, SmtExplanationEntry>>({});
+    const [isExplaining, setIsExplaining] = useState(false);
 
-    /**
-     * Update the witness in the state when the API response is received
-     */
+    // A new analysis run (or a reset to null) starts from scratch.
     useEffect(() => {
-        if (smtDiffWitness) {
-            // Reset witnesses array when we get a completely new witness (e.g., new specification run)
-            const isNavigationUpdate = witnesses.some((witness) => witness === smtDiffWitness);
-            if (!isNavigationUpdate) {
-                setWitnesses([smtDiffWitness]);
-                setCurrentWitnessIndex(0);
-                setIsLastWitness(false); // Reset the last witness flag for new analysis
-            }
+        setWitnesses(run?.firstWitness ? [run.firstWitness] : []);
+        setCurrentWitnessIndex(0);
+        setIsNextWitnessExecuting(false);
+        setIsLastWitness(false);
+        setNavigationMessage('');
+        setActiveTab('output');
+        setExplanations({});
+        setIsExplaining(false);
+    }, [run]);
 
-            if (smtDiffWitness.specId) {
-                setSpecId(smtDiffWitness.specId);
-                setHasWitness(true);
-                setWitnessMessage('');
-            } else if (smtDiffWitness.error) {
-                setHasWitness(false);
-                setWitnessMessage(smtDiffWitness.error);
-            }
-        } else {
-            // Clear all state when witness is set to null
-            setWitnesses([]);
-            setCurrentWitnessIndex(0);
-            setSpecId(null);
-            setIsNextWitnessExecuting(false);
-            setIsLastWitness(false);
-            setWitnessMessage('');
-            setHasWitness(false);
-        }
-    }, [smtDiffWitness]);
+    const specId = run?.firstWitness?.specId ?? null;
+    const hasWitness = witnesses.length > 0;
+    const canExplain = !!run && hasWitness && run.explainable.length > 0;
+
+    /** The region and witness each Explain section is about: the displayed one, else the region's first witness. */
+    const explanationTargets = (): [SmtDirection, number][] =>
+        (run?.explainable ?? []).map((direction) => [
+            direction,
+            direction === run?.direction ? currentWitnessIndex : 0,
+        ]);
+
+    const currentEntries = explanationTargets()
+        .map(([direction, index]) => explanations[explanationKey(direction, index)])
+        .filter((entry): entry is SmtExplanationEntry => entry !== undefined);
 
     const handleNextWitness = () => {
-        // Check if we already have a next witness cached
         if (currentWitnessIndex < witnesses.length - 1) {
-            // Move to next cached witness
-            const nextIndex = currentWitnessIndex + 1;
-            setCurrentWitnessIndex(nextIndex);
-            setSmtDiffWitness(witnesses[nextIndex]);
+            setCurrentWitnessIndex(currentWitnessIndex + 1);
             return;
         }
-
-        // Fetch new witness from API
         if (!specId) return;
 
         setIsNextWitnessExecuting(true);
         getNextSmtDiffWitness(specId, permalink.permalink || '')
-            .then((data) => {
-                if (data.error) {
+            .then((step) => {
+                if (step.status === 'sat' && step.witness) {
+                    setWitnesses([...witnesses, step]);
+                    setCurrentWitnessIndex(witnesses.length);
+                } else {
                     setIsLastWitness(true);
-                    setWitnessMessage('No more witnesses');
-                    setIsNextWitnessExecuting(false);
-                    return;
+                    setNavigationMessage(
+                        step.status === 'incomplete'
+                            ? 'No more witnesses found (the solver could not decide whether more exist).'
+                            : 'No more witnesses.'
+                    );
                 }
-
-                // Add new witness to the array
-                const updatedWitnesses = [...witnesses, data];
-                const newIndex = updatedWitnesses.length - 1;
-                setWitnesses(updatedWitnesses);
-                setCurrentWitnessIndex(newIndex);
-                setSmtDiffWitness(data);
-                setIsNextWitnessExecuting(false);
             })
             .catch((error) => {
-                console.error('Error fetching next witness:', error);
-                if (error.response?.status === 404) {
-                    setIsLastWitness(true);
-                    setWitnessMessage('No more witnesses');
-                }
-                setIsNextWitnessExecuting(false);
-            });
+                setIsLastWitness(true);
+                setNavigationMessage(error.response?.status === 404 ? 'No more witnesses.' : errorMessage(error));
+            })
+            .finally(() => setIsNextWitnessExecuting(false));
     };
 
     const handlePreviousWitness = () => {
         if (currentWitnessIndex > 0) {
             const prevIndex = currentWitnessIndex - 1;
             setCurrentWitnessIndex(prevIndex);
-            setSmtDiffWitness(witnesses[prevIndex]);
             setIsLastWitness(false);
+            setNavigationMessage('');
             logToDb(permalink.permalink || '', {
                 tool: 'SMTSemDiff-Previous',
                 witness: witnesses[prevIndex],
@@ -120,89 +125,130 @@ const SmtDiffOutput = () => {
         }
     };
 
-    const getCurrentWitness = () => {
-        if (witnesses.length > 0 && witnesses[currentWitnessIndex]) {
-            return witnesses[currentWitnessIndex].witness || '';
-        }
-        return '';
+    const handleExplain = async () => {
+        if (!run || !canExplain) return;
+        const missing = explanationTargets().filter(
+            ([direction, index]) => !explanations[explanationKey(direction, index)]?.explanation
+        );
+        if (activeTab === 'output') setActiveTab('abductive');
+        if (missing.length === 0) return;
+
+        setIsExplaining(true);
+        const pending: Record<string, SmtExplanationEntry> = {};
+        missing.forEach(([direction, witnessIndex]) => {
+            pending[explanationKey(direction, witnessIndex)] = { direction, witnessIndex };
+        });
+        setExplanations((previous) => ({ ...previous, ...pending }));
+
+        const results = await Promise.all(
+            missing.map(async ([direction, witnessIndex]): Promise<SmtExplanationEntry> => {
+                try {
+                    const explanation = await explainSmtDiffWitness(run.permalink, direction, witnessIndex, run.filter);
+                    return { direction, witnessIndex, explanation };
+                } catch (error) {
+                    return { direction, witnessIndex, error: errorMessage(error) };
+                }
+            })
+        );
+        const done: Record<string, SmtExplanationEntry> = {};
+        results.forEach((entry) => {
+            done[explanationKey(entry.direction, entry.witnessIndex)] = entry;
+        });
+        setExplanations((previous) => ({ ...previous, ...done }));
+        setIsExplaining(false);
     };
 
+    const currentStep = witnesses[currentWitnessIndex];
+    const currentExplained = explanationTargets().every(
+        ([direction, index]) => explanations[explanationKey(direction, index)]?.explanation
+    );
+
+    const navigation = hasWitness && (
+        <div className='smt-diff-navigation'>
+            <div style={{ display: 'flex', gap: '8px' }}>
+                <MDBBtn color='warning' onClick={handlePreviousWitness} disabled={currentWitnessIndex === 0}>
+                    Previous
+                </MDBBtn>
+                <MDBBtn color='success' onClick={handleNextWitness} disabled={isNextWitnessExecuting || isLastWitness}>
+                    {isNextWitnessExecuting ? 'Computing...' : 'Next'}
+                </MDBBtn>
+                {canExplain && (
+                    <MDBBtn color='info' onClick={handleExplain} disabled={isExplaining}>
+                        {isExplaining ? 'Explaining...' : currentExplained ? 'Show Explanation' : 'Explain'}
+                    </MDBBtn>
+                )}
+            </div>
+            {navigationMessage && <span className='smt-diff-muted'>{navigationMessage}</span>}
+        </div>
+    );
+
+    if (!run) {
+        return null;
+    }
+
     return (
-        <div>
+        <div className='smt-diff'>
+            <Banner banner={run.banner} />
             {hasWitness ? (
-                <div>
-                    <pre
-                        className='plain-output-box'
-                        contentEditable={false}
-                        style={{
-                            borderRadius: '8px',
-                            height: isFullScreen ? '70vh' : '45vh',
-                            whiteSpace: 'pre-wrap',
-                            marginBottom: '10px',
-                        }}
-                        dangerouslySetInnerHTML={{ __html: getCurrentWitness() }}
-                    />
-
-                    {specId !== 'semantic-relation' &&
-                        (portalTarget
-                            ? createPortal(
-                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px', paddingRight: '8px' }}>
-                                      <div style={{ display: 'flex', gap: '8px' }}>
-                                          <MDBBtn
-                                              color='warning'
-                                              onClick={handlePreviousWitness}
-                                              disabled={currentWitnessIndex === 0}
-                                          >
-                                              Previous
-                                          </MDBBtn>
-
-                                          <MDBBtn
-                                              color='success'
-                                              onClick={handleNextWitness}
-                                              disabled={isNextWitnessExecuting || isLastWitness}
-                                          >
-                                              {isNextWitnessExecuting ? 'Computing...' : 'Next'}
-                                          </MDBBtn>
-                                      </div>
-                                  </div>,
-                                  portalTarget
-                              )
-                            : (
-                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                      <div style={{ display: 'flex', gap: '8px' }}>
-                                          <MDBBtn
-                                              color='warning'
-                                              onClick={handlePreviousWitness}
-                                              disabled={currentWitnessIndex === 0}
-                                          >
-                                              Previous
-                                          </MDBBtn>
-
-                                          <MDBBtn
-                                              color='success'
-                                              onClick={handleNextWitness}
-                                              disabled={isNextWitnessExecuting || isLastWitness}
-                                          >
-                                              {isNextWitnessExecuting ? 'Computing...' : 'Next'}
-                                          </MDBBtn>
-                                      </div>
-                                  </div>
-                              ))}
-                    {witnessMessage && <div style={{ textAlign: 'center', color: '#ff0000ff' }}>{witnessMessage}</div>}
-                </div>
-            ) : (
-                <div
-                    className='plain-output-box'
-                    style={{
-                        borderRadius: '8px',
-                        height: isFullScreen ? '80vh' : '45vh',
-                        whiteSpace: 'pre-wrap',
-                        padding: '15px',
-                        overflowY: 'auto',
-                    }}
-                    dangerouslySetInnerHTML={{ __html: witnessMessage }}
-                />
-            )}
+                <>
+                    <MDBTabs justify>
+                        <MDBTabsItem>
+                            <MDBTabsLink onClick={() => setActiveTab('output')} active={activeTab === 'output'}>
+                                <TbListDetails /> Output
+                            </MDBTabsLink>
+                        </MDBTabsItem>
+                        {canExplain && (
+                            <>
+                                <MDBTabsItem>
+                                    <MDBTabsLink
+                                        onClick={() => setActiveTab('abductive')}
+                                        active={activeTab === 'abductive'}
+                                    >
+                                        <TbBulb /> Abductive Explanation
+                                    </MDBTabsLink>
+                                </MDBTabsItem>
+                                <MDBTabsItem>
+                                    <MDBTabsLink
+                                        onClick={() => setActiveTab('counterfactual')}
+                                        active={activeTab === 'counterfactual'}
+                                    >
+                                        <TbArrowsExchange /> Counterfactual Explanation
+                                    </MDBTabsLink>
+                                </MDBTabsItem>
+                            </>
+                        )}
+                    </MDBTabs>
+                    {/* The only scrolling area: it fills the rest of the output column. */}
+                    <div className='smt-diff-pane'>
+                        {activeTab === 'output' && (
+                            <>
+                                <div className='smt-diff-pane-toolbar'>
+                                    <strong>Witness #{currentWitnessIndex + 1}</strong>
+                                    <LogicNote logic={currentStep?.logic ?? null} />
+                                </div>
+                                {currentStep?.witness && <SmtModelView model={currentStep.witness} />}
+                            </>
+                        )}
+                        {activeTab === 'abductive' && (
+                            <AbductivePane
+                                entries={currentEntries}
+                                displayedDirection={run.direction}
+                                isExplaining={isExplaining}
+                                canExplain={canExplain}
+                            />
+                        )}
+                        {activeTab === 'counterfactual' && (
+                            <CounterfactualPane
+                                entries={currentEntries}
+                                displayedDirection={run.direction}
+                                isExplaining={isExplaining}
+                                canExplain={canExplain}
+                            />
+                        )}
+                    </div>
+                    {portalTarget ? createPortal(navigation, portalTarget) : navigation}
+                </>
+            ) : null}
         </div>
     );
 };

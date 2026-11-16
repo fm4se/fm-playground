@@ -28,8 +28,10 @@ const DiffOutput: React.FC<DiffOutputProps> = ({ editorTheme }) => {
                 height: '100%',
             }}
         >
-            <div className='col-md-12'>
-                <div>{AdditionalUi && <AdditionalUi />}</div>
+            <div className='col-md-12' style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+                <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+                    {AdditionalUi && <AdditionalUi />}
+                </div>
             </div>
         </div>
     );

@@ -354,76 +354,99 @@ const DiffViewArea: React.FC<DiffViewAreaProps> = ({ editorTheme, onBackToEditin
                 )}
                 {diffComparisonCode && !permalinkError && (
                     <div role='alert' style={{ marginTop: '8px', color: 'green' }}>
-                        <small>
-                            ✓ Code loaded successfully for comparison
-                        </small>
+                        <small>✓ Code loaded successfully for comparison</small>
                     </div>
                 )}
             </div>
 
-            {!isAnalyzeMode ? (
-                <CodeDiffEditor
-                    height={getEditorHeight()}
-                    editorTheme={editorTheme}
-                    originalValue={diffComparisonCode}
-                    modifiedValue={editorValue}
-                    readOnly={false}
-                    showDiffActions={!!diffComparisonCode}
-                    isAnalyzeMode={isAnalyzeMode}
-                />
-            ) : (
-                <div
-                    className='analyze-mode-layout'
-                    style={{
-                        display: 'flex',
-                        flexDirection: isMobile ? 'column' : 'row',
-                        gap: '10px',
-                        height: isMobile ? 'auto' : getEditorHeight(),
-                    }}
-                >
-                    <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
-                        <CodeDiffEditor
-                            height={getEditorHeight()}
-                            editorTheme={editorTheme}
-                            originalValue={diffComparisonCode}
-                            modifiedValue={editorValue}
-                            readOnly={false}
-                            showDiffActions={!!diffComparisonCode}
-                            isAnalyzeMode={isAnalyzeMode}
-                        />
+            {(() => {
+                // Analysis options and the Semantic Analysis button of the current language.
+                const AdditionalUi = diffToolInputUIMap[language.short];
+                const analysisControls = (
+                    <div style={{ paddingRight: '8px' }}>
+                        <div className='additional-input-ui'>{AdditionalUi && <AdditionalUi />}</div>
+                        <MDBBtn
+                            className={`mt-3 ${isMobile ? 'mobile-run-button' : ''}`}
+                            style={{ width: '100%' }}
+                            color='primary'
+                            onClick={handleAnalyzeClick}
+                            disabled={isExecuting}
+                        >
+                            {isExecuting ? 'Analyzing...' : 'Semantic Analysis'}
+                        </MDBBtn>
                     </div>
-                    <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
-                        <DiffOutput editorTheme={editorTheme} onFullScreenButtonClick={onFullScreenButtonClick} />
-                    </div>
-                </div>
-            )}
-            {/* Show only if language.short is SAT, SMT, or ALS */}
-            {(language.short === 'SAT' || language.short === 'SMT' || language.short === 'ALS') && (
-                <div className='row'>
-                    <div className='col-md-6'>
-                        <div style={{ paddingRight: '8px' }}>
-                            {/* Additional input UI for the current language (if any) */}
-                            {(() => {
-                                const AdditionalUi = diffToolInputUIMap[language.short];
-                                return <div className='additional-input-ui'>{AdditionalUi && <AdditionalUi />}</div>;
-                            })()}
+                );
+                const editor = (
+                    <CodeDiffEditor
+                        height={getEditorHeight()}
+                        editorTheme={editorTheme}
+                        originalValue={diffComparisonCode}
+                        modifiedValue={editorValue}
+                        readOnly={false}
+                        showDiffActions={!!diffComparisonCode}
+                        isAnalyzeMode={isAnalyzeMode}
+                    />
+                );
+                const hasControls = language.short === 'SAT' || language.short === 'SMT' || language.short === 'ALS';
 
-                            <MDBBtn
-                                className={`mt-3 ${isMobile ? 'mobile-run-button' : ''}`}
-                                style={{ width: '100%' }}
-                                color='primary'
-                                onClick={handleAnalyzeClick}
-                                disabled={isExecuting}
-                            >
-                                {isExecuting ? 'Analyzing...' : 'Semantic Analysis'}
-                            </MDBBtn>
+                // SMT: the output column spans the editor and the controls, with its buttons at the bottom.
+                if (isAnalyzeMode && !isMobile && language.short === 'SMT') {
+                    return (
+                        <div className='analyze-mode-layout' style={{ display: 'flex', gap: '10px' }}>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ overflow: 'hidden' }}>{editor}</div>
+                                {analysisControls}
+                            </div>
+                            <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+                                {/* Absolutely positioned so the output never makes the column taller. */}
+                                <div style={{ flex: 1, minHeight: 0, position: 'relative' }}>
+                                    <div style={{ position: 'absolute', inset: 0 }}>
+                                        <DiffOutput
+                                            editorTheme={editorTheme}
+                                            onFullScreenButtonClick={onFullScreenButtonClick}
+                                        />
+                                    </div>
+                                </div>
+                                <div id='diff-navigation-portal-target' />
+                            </div>
                         </div>
-                    </div>
-                    <div className='col-md-6' id='diff-navigation-portal-target'>
-                        {/* Right half intentionally left for auxiliary controls or output previews */}
-                    </div>
-                </div>
-            )}
+                    );
+                }
+
+                return (
+                    <>
+                        {!isAnalyzeMode ? (
+                            editor
+                        ) : (
+                            <div
+                                className='analyze-mode-layout'
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: isMobile ? 'column' : 'row',
+                                    gap: '10px',
+                                    height: isMobile ? 'auto' : getEditorHeight(),
+                                }}
+                            >
+                                <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>{editor}</div>
+                                <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+                                    <DiffOutput
+                                        editorTheme={editorTheme}
+                                        onFullScreenButtonClick={onFullScreenButtonClick}
+                                    />
+                                </div>
+                            </div>
+                        )}
+                        {hasControls && (
+                            <div className='row'>
+                                <div className='col-md-6'>{analysisControls}</div>
+                                <div className='col-md-6' id='diff-navigation-portal-target'>
+                                    {/* Right half intentionally left for auxiliary controls or output previews */}
+                                </div>
+                            </div>
+                        )}
+                    </>
+                );
+            })()}
             {errorMessage && (
                 <MessageModal
                     isErrorMessageModalOpen={isErrorMessageModalOpen}
