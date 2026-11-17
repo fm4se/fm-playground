@@ -1,14 +1,16 @@
 import json
 import os
-from typing import Any, Dict, Union
+from typing import Any, Dict, Literal, Union
 
 import requests
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from limboole_diff import limboole_diff
+from limboole_diff.explainer import DEFAULT_MAX_GENERALIZATIONS, explain_witness
+from limboole_diff.runner import COVERAGE_BUDGET_S, EXPLAIN_TIMEOUT_S, AnalysisError, AnalysisTimeout, run_with_timeout
 from limboole_diff.logging_config import init_logging
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 init_logging()
 
@@ -88,6 +90,18 @@ class SATDiffResponse(BaseModel):
 
     specId: str
     witness: str
+    # The witness as {variable: value}; None for messages such as the semantic relation.
+    assignment: Dict[str, bool] | None = None
+
+
+class ExplainRequest(BaseModel):
+    """Request model for explaining one witness of a difference region."""
+
+    check: str  # SATSemDiff
+    p: str  # Permalink
+    analysis: Literal["not-current-but-previous", "not-previous-but-current"]
+    assignment: Dict[str, bool]  # the witness, as returned in SATDiffResponse.assignment
+    max_generalizations: int = Field(default=DEFAULT_MAX_GENERALIZATIONS, ge=1, le=256)
 
 
 # --------------------------------------------------
@@ -169,7 +183,9 @@ async def run_sem_analysis(check: str, p: str, analysis: str, filter: str = ""):
                 }
             ),
         )
-        return SATDiffResponse(specId=specId, witness=witness)
+        return SATDiffResponse(
+            specId=specId, witness=witness, assignment=limboole_diff.parse_assignment(witness)
+        )
     except HTTPException:
         raise
     except Exception as e:
@@ -202,7 +218,11 @@ async def get_next_witness(specId: str, p: str):
                 }
             ),
         )
-        return SATDiffResponse(specId=specId, witness=next_witness)
+        return SATDiffResponse(
+            specId=specId,
+            witness=next_witness,
+            assignment=limboole_diff.parse_assignment(next_witness),
+        )
     except HTTPException:
         raise
     except Exception as e:
@@ -210,6 +230,54 @@ async def get_next_witness(specId: str, p: str):
         raise HTTPException(
             status_code=500, detail=f"Error retrieving next witness: {str(e)}"
         )
+
+
+_EXPLAIN_ERROR_STATUS = {"parse_error": 400, "invalid_witness": 400, "invalid_mode": 400}
+
+
+@app.post("/explain")
+def explain(request: ExplainRequest):
+    """Explain a witness of a difference region: abductive explanations and the nearest counterfactual.
+
+    ``not-current-but-previous`` explains models of the previous formula rejected
+    by the current one; ``not-previous-but-current`` the converse.
+    """
+
+    current_formula = get_code_by_permalink(request.check, request.p)
+    previous_metadata = get_metadata_by_permalink(request.check, request.p)
+    if current_formula is None or previous_metadata is None:
+        raise HTTPException(status_code=404, detail="Permalink not found")
+    left_side_code_id = json.loads(previous_metadata).get("meta", {}).get("leftSideCodeId")
+    previous_formula = (get_code_by_id(left_side_code_id) or {}).get("code")
+    if previous_formula is None:
+        raise HTTPException(status_code=404, detail="Previous formula not found")
+    try:
+        result = run_with_timeout(
+            explain_witness,
+            EXPLAIN_TIMEOUT_S,
+            previous=limboole_diff.sanitize_formula(previous_formula),
+            current=limboole_diff.sanitize_formula(current_formula),
+            mode=request.analysis,
+            assignment=request.assignment,
+            max_generalizations=request.max_generalizations,
+            coverage_budget_s=COVERAGE_BUDGET_S,
+        )
+    except AnalysisTimeout as error:
+        log_to_db(request.p, json.dumps({"tool": "SATSemDiff-Explain", "error": "timeout"}))
+        raise HTTPException(status_code=504, detail=str(error))
+    except AnalysisError as error:
+        log_to_db(request.p, json.dumps({"tool": "SATSemDiff-Explain", "error": str(error)}))
+        raise HTTPException(status_code=500, detail=f"Error explaining witness: {error}")
+    if "error" in result:
+        raise HTTPException(
+            status_code=_EXPLAIN_ERROR_STATUS.get(result["error"]["code"], 400),
+            detail=result["error"],
+        )
+    log_to_db(
+        request.p,
+        json.dumps({"tool": "SATSemDiff-Explain", "analysis": request.analysis}),
+    )
+    return result
 
 
 # --------------------------------------------------

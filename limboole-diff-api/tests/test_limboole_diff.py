@@ -116,3 +116,15 @@ def test_get_next_witness():
     specId, witness = store_witness(f1, f2, mode="common")
     next_witness = get_next_witness(specId)
     assert next_witness is not None
+
+
+def test_enumeration_blocks_variables_of_one_formula():
+    # previous & !current == x, with y free: two witnesses that differ only in y,
+    # which occurs only in the current formula (and is wrapped in a <span>).
+    previous = "x"
+    current = "!x & y"
+    specId, first = store_witness(previous, current, analysis="not-current-but-previous")
+    assert specId is not None and "<span" in first
+    second = get_next_witness(specId)
+    assert second is not None
+    assert get_next_witness(specId) is None

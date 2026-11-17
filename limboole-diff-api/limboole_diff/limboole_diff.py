@@ -126,11 +126,29 @@ def semantic_relation(f1: str, f2: str):
         return None
 
 
+_ASSIGNMENT_LINE = re.compile(r"^\s*(\S+)\s*=\s*([01])\s*$")
+_HTML_TAG = re.compile(r"<[^>]+>")
+
+
+def parse_assignment(witness: str | None) -> dict[str, bool] | None:
+    """Return the assignment printed in a (possibly prettified) Limboole witness, or None."""
+
+    if not witness or "SATISFIABLE" not in witness or "UNSATISFIABLE" in witness:
+        return None
+    assignment: dict[str, bool] = {}
+    for line in witness.splitlines():
+        match = _ASSIGNMENT_LINE.match(_HTML_TAG.sub("", line))
+        if match:
+            assignment[match.group(1)] = match.group(2) == "1"
+    return assignment or None
+
+
 def get_formula_from_valuation(valuation: str) -> str:
     lines = valuation.strip().splitlines()
     assignments = []
     for line in lines:
-        line = line.strip()
+        # A prettified witness wraps the variables of only one formula in <span> tags.
+        line = _HTML_TAG.sub("", line).strip()
         if line and not line.startswith("%"):
             if line.endswith("= 1"):
                 assignments.append(line.replace("= 1", "").strip())

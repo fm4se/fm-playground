@@ -19,7 +19,8 @@ def get_executable_path() -> str:
         return "lib/limbooleAPE.exe"
 
 
-LIMBOOLE_EXE = get_executable_path()
+# Absolute: Windows cannot launch a relative path such as 'lib/limboole.exe'.
+LIMBOOLE_EXE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), get_executable_path())
 
 
 MAX_CONCURRENT_REQUESTS = 10
