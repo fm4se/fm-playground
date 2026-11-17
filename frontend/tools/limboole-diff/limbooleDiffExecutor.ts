@@ -14,6 +14,7 @@ import {
 } from '@/atoms';
 import { Permalink } from '@/types';
 import axios from 'axios';
+import { LimbooleAssignment, LimbooleDiffMode, LimbooleExplanation } from './limbooleDiffTypes';
 
 async function getLimbooleDiffWitness(permalink: Permalink, analysis: string, filter?: string) {
     let url = `/diff-limboole/run/?check=${permalink.check}&p=${permalink.permalink}&analysis=${analysis}`;
@@ -36,6 +37,31 @@ export async function getNextLimbooleDiffWitness(specId: string, p: string) {
     } catch (error) {
         throw error;
     }
+}
+
+/** Explain a witness (its assignment) of a difference region: abductive and counterfactual explanations. */
+export async function explainLimbooleDiffWitness(
+    permalink: Permalink,
+    analysis: LimbooleDiffMode,
+    assignment: LimbooleAssignment
+): Promise<LimbooleExplanation> {
+    const response = await axios.post('/diff-limboole/explain', {
+        check: permalink.check,
+        p: permalink.permalink,
+        analysis,
+        assignment,
+    });
+    return response.data;
+}
+
+/** A readable message for a failed request; structured errors name the offending formula. */
+export function limbooleErrorMessage(err: any): string {
+    const detail = err?.response?.data?.detail;
+    if (detail && typeof detail === 'object') {
+        return detail.script ? `Error in the ${detail.script} formula: ${detail.message}` : detail.message;
+    }
+    if (typeof detail === 'string') return detail;
+    return err?.message ?? 'Unknown error';
 }
 
 export const executeLimbooleDiffTool = async () => {
@@ -74,7 +100,8 @@ export const executeLimbooleDiffTool = async () => {
     try {
         // Call the backend to get the first witness with the filter parameter
         const res = await getLimbooleDiffWitness(response.data, limbooleDiffOption, filterExpression);
-        jotaiStore.set(limbooleDiffWitnessAtom, res);
+        // Remember the analysis of this run: Explain needs it even if the option changes later.
+        jotaiStore.set(limbooleDiffWitnessAtom, { ...res, analysis: limbooleDiffOption });
     } catch (err: any) {
         if (err.response?.status === 404) {
             jotaiStore.set(limbooleDiffWitnessAtom, {

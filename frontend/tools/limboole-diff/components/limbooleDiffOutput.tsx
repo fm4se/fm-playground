@@ -1,11 +1,17 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useAtom } from 'jotai';
-import { MDBBtn } from 'mdb-react-ui-kit';
+import { MDBBtn, MDBTabs, MDBTabsItem, MDBTabsLink } from 'mdb-react-ui-kit';
+import { TbListDetails, TbBulb, TbArrowsExchange } from 'react-icons/tb';
 import { isFullScreenAtom, limbooleDiffWitnessAtom } from '@/atoms';
-import { getNextLimbooleDiffWitness } from '../limbooleDiffExecutor';
+import { explainLimbooleDiffWitness, getNextLimbooleDiffWitness, limbooleErrorMessage } from '../limbooleDiffExecutor';
 import { jotaiStore, permalinkAtom } from '@/atoms';
 import { logToDb } from '@/api/playgroundApi';
+import { EXPLAINABLE_MODES, LimbooleDiffMode, LimbooleExplanationEntry } from '../limbooleDiffTypes';
+import { LimbooleAbductivePane, LimbooleCounterfactualPane } from './LimbooleExplanationPanes';
+import '../../smt-diff/components/SMTDiff.css';
+
+type Tab = 'output' | 'abductive' | 'counterfactual';
 
 const LimbooleDiffOutput = () => {
     const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
@@ -31,6 +37,11 @@ const LimbooleDiffOutput = () => {
     const [isLastWitness, setIsLastWitness] = useState(false);
     const [witnessMessage, setWitnessMessage] = useState('');
     const [hasWitness, setHasWitness] = useState(false);
+    // The analysis of the current run, the explanations by witness index, and the shown tab.
+    const [analysis, setAnalysis] = useState<string | null>(null);
+    const [explanations, setExplanations] = useState<Record<number, LimbooleExplanationEntry>>({});
+    const [isExplaining, setIsExplaining] = useState(false);
+    const [activeTab, setActiveTab] = useState<Tab>('output');
 
     /**
      * Update the witness in the state when the API response is received
@@ -43,6 +54,10 @@ const LimbooleDiffOutput = () => {
                 setWitnesses([limbooleDiffWitness]);
                 setCurrentWitnessIndex(0);
                 setIsLastWitness(false); // Reset the last witness flag for new analysis
+                setAnalysis(limbooleDiffWitness.analysis ?? null);
+                setExplanations({});
+                setIsExplaining(false);
+                setActiveTab('output');
             }
 
             if (limbooleDiffWitness.specId) {
@@ -62,6 +77,10 @@ const LimbooleDiffOutput = () => {
             setIsLastWitness(false);
             setWitnessMessage('');
             setHasWitness(false);
+            setAnalysis(null);
+            setExplanations({});
+            setIsExplaining(false);
+            setActiveTab('output');
         }
     }, [limbooleDiffWitness]);
 
@@ -133,67 +152,136 @@ const LimbooleDiffOutput = () => {
         return currentWitness.startsWith('% UNSATISFIABLE formula');
     };
 
+    const currentAssignment = witnesses[currentWitnessIndex]?.assignment ?? null;
+    // Explanations exist for the two difference regions, not for common witnesses or the relation.
+    const explainableRun = hasWitness && analysis !== null && EXPLAINABLE_MODES.includes(analysis);
+    const canExplain = explainableRun && currentAssignment !== null && !isUnsatisfiable();
+    const currentEntry: LimbooleExplanationEntry | undefined = explanations[currentWitnessIndex];
+    const paneHeight = isFullScreen ? '70vh' : '45vh';
+
+    const handleExplain = async () => {
+        if (!canExplain) return;
+        const witnessIndex = currentWitnessIndex;
+        if (activeTab === 'output') setActiveTab('abductive');
+        if (explanations[witnessIndex]?.explanation) return;
+
+        setIsExplaining(true);
+        setExplanations((previous) => ({ ...previous, [witnessIndex]: { witnessIndex } }));
+        let entry: LimbooleExplanationEntry;
+        try {
+            const explanation = await explainLimbooleDiffWitness(
+                permalink,
+                analysis as LimbooleDiffMode,
+                currentAssignment
+            );
+            entry = { witnessIndex, explanation };
+        } catch (error) {
+            entry = { witnessIndex, error: limbooleErrorMessage(error) };
+        }
+        setExplanations((previous) => ({ ...previous, [witnessIndex]: entry }));
+        setIsExplaining(false);
+    };
+
+    const navigation = (
+        <div
+            style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                ...(portalTarget ? { marginTop: '15px', paddingRight: '8px' } : {}),
+            }}
+        >
+            <div style={{ display: 'flex', gap: '8px' }}>
+                <MDBBtn
+                    color='warning'
+                    onClick={handlePreviousWitness}
+                    disabled={currentWitnessIndex === 0 || isUnsatisfiable()}
+                >
+                    Previous
+                </MDBBtn>
+
+                <MDBBtn
+                    color='success'
+                    onClick={handleNextWitness}
+                    disabled={isNextWitnessExecuting || isLastWitness || isUnsatisfiable()}
+                >
+                    {isNextWitnessExecuting ? 'Computing...' : 'Next'}
+                </MDBBtn>
+
+                {explainableRun && (
+                    <MDBBtn color='info' onClick={handleExplain} disabled={!canExplain || isExplaining}>
+                        {isExplaining ? 'Explaining...' : currentEntry?.explanation ? 'Show Explanation' : 'Explain'}
+                    </MDBBtn>
+                )}
+            </div>
+        </div>
+    );
+
     return (
-        <div>
+        <div className='smt-diff'>
             {hasWitness ? (
                 <div>
-                    <pre
-                        className='plain-output-box'
-                        contentEditable={false}
-                        style={{
-                            borderRadius: '8px',
-                            height: isFullScreen ? '70vh' : '45vh',
-                            whiteSpace: 'pre-wrap',
-                            marginBottom: '10px',
-                        }}
-                        dangerouslySetInnerHTML={{ __html: getCurrentWitness() }}
-                    />
+                    {explainableRun && (
+                        <MDBTabs justify>
+                            <MDBTabsItem>
+                                <MDBTabsLink onClick={() => setActiveTab('output')} active={activeTab === 'output'}>
+                                    <TbListDetails /> Output
+                                </MDBTabsLink>
+                            </MDBTabsItem>
+                            <MDBTabsItem>
+                                <MDBTabsLink
+                                    onClick={() => setActiveTab('abductive')}
+                                    active={activeTab === 'abductive'}
+                                >
+                                    <TbBulb /> Abductive Explanation
+                                </MDBTabsLink>
+                            </MDBTabsItem>
+                            <MDBTabsItem>
+                                <MDBTabsLink
+                                    onClick={() => setActiveTab('counterfactual')}
+                                    active={activeTab === 'counterfactual'}
+                                >
+                                    <TbArrowsExchange /> Counterfactual Explanation
+                                </MDBTabsLink>
+                            </MDBTabsItem>
+                        </MDBTabs>
+                    )}
+
+                    {activeTab === 'output' || !explainableRun ? (
+                        <pre
+                            className='plain-output-box'
+                            contentEditable={false}
+                            style={{
+                                borderRadius: '8px',
+                                height: paneHeight,
+                                whiteSpace: 'pre-wrap',
+                                marginBottom: '10px',
+                            }}
+                            dangerouslySetInnerHTML={{ __html: getCurrentWitness() }}
+                        />
+                    ) : (
+                        <div
+                            className='smt-diff-pane'
+                            style={{ height: paneHeight, flex: 'none', marginBottom: '10px' }}
+                        >
+                            {activeTab === 'abductive' ? (
+                                <LimbooleAbductivePane
+                                    entry={currentEntry}
+                                    isExplaining={isExplaining}
+                                    canExplain={canExplain}
+                                />
+                            ) : (
+                                <LimbooleCounterfactualPane
+                                    entry={currentEntry}
+                                    isExplaining={isExplaining}
+                                    canExplain={canExplain}
+                                />
+                            )}
+                        </div>
+                    )}
 
                     {specId !== 'semantic-relation' &&
-                        (portalTarget
-                            ? createPortal(
-                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px', paddingRight: '8px' }}>
-                                      <div style={{ display: 'flex', gap: '8px' }}>
-                                          <MDBBtn
-                                              color='warning'
-                                              onClick={handlePreviousWitness}
-                                              disabled={currentWitnessIndex === 0 || isUnsatisfiable()}
-                                          >
-                                              Previous
-                                          </MDBBtn>
-
-                                          <MDBBtn
-                                              color='success'
-                                              onClick={handleNextWitness}
-                                              disabled={isNextWitnessExecuting || isLastWitness || isUnsatisfiable()}
-                                          >
-                                              {isNextWitnessExecuting ? 'Computing...' : 'Next'}
-                                          </MDBBtn>
-                                      </div>
-                                  </div>,
-                                  portalTarget
-                              )
-                            : (
-                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                      <div style={{ display: 'flex', gap: '8px' }}>
-                                          <MDBBtn
-                                              color='warning'
-                                              onClick={handlePreviousWitness}
-                                              disabled={currentWitnessIndex === 0 || isUnsatisfiable()}
-                                          >
-                                              Previous
-                                          </MDBBtn>
-
-                                          <MDBBtn
-                                              color='success'
-                                              onClick={handleNextWitness}
-                                              disabled={isNextWitnessExecuting || isLastWitness || isUnsatisfiable()}
-                                          >
-                                              {isNextWitnessExecuting ? 'Computing...' : 'Next'}
-                                          </MDBBtn>
-                                      </div>
-                                  </div>
-                              ))}
+                        (portalTarget ? createPortal(navigation, portalTarget) : navigation)}
                     {witnessMessage && <div style={{ textAlign: 'center', color: '#ff0000ff' }}>{witnessMessage}</div>}
                 </div>
             ) : (
