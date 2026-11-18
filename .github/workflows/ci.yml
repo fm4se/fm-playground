@@ -129,3 +129,4 @@ jobs:
             VITE_FMP_VERSION=${{ env.VITE_FMP_VERSION }}
             VITE_COLLAB_ENABLED=true
             VITE_COLLAB_WS_URL=/collab-ws
+            VITE_GLITCHTIP_DSN=https://c89f6c09662f4671a735b549a990f5b6@glitchtip.formal-methods.net/1
