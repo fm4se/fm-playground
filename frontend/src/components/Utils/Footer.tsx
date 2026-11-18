@@ -12,6 +12,9 @@ const Footer = () => {
                     Unless you login, it does not collect any personally identifiable information. Deleting your profile
                     will remove all records of your profile from our servers. The specifications will be unlinked from
                     your profile, but remain on the servers (see first bullet).
+                    To find and fix bugs, errors and anonymous page-load timings are reported to our self-hosted error
+                    monitoring (GlitchTip). These reports contain the error message, browser and operating system, and
+                    the selected tool.
                     <br />
                     &copy; {new Date().getFullYear()} Copyright: Made with ♥ in Bauhaus-Universität Weimar
                     <br />
