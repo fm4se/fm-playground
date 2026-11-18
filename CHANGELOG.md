@@ -1,5 +1,13 @@
 # Change Log
 
+## v2.22.0[2026-11-18]
+
+- Added limboole diff explain
+- Improved site performance with lazy loading
+  - Editor load after the rest of the page has rendered
+  - Library code split from app code in vite build
+- Disabled Z3 WASM for now
+
 ## v2.21.0[2026-11-16]
 
 - Updated SMT Diff with explanationF
@@ -9,9 +17,9 @@
 
 - Added language support for nuxmv based on [vscode-nusmv](https://github.com/LiamWalsh98/vscode-nusmv) (limited to nuxmv)
 - Improved Alloy language support
-- Added type checking for Alloy LSP 
+- Added type checking for Alloy LSP
 - Many fixes for SMT-LIB LSP and added type checking, Z3 extensions
-- Added LSP telemetry for Alloy and SMT-LIB 
+- Added LSP telemetry for Alloy and SMT-LIB
 - Updated Z3 version to 5.3.3
 
 ## v2.19.0[2026-10-28]
