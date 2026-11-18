@@ -23,11 +23,18 @@ import ConfirmModal from '@/components/Utils/Modals/ConfirmModal';
 import FileUploadButton from '@/components/Utils/FileUpload';
 import FileDownload from '@/components/Utils/FileDownload';
 import CopyToClipboardBtn from '@/components/Utils/CopyToClipboardBtn';
-import LspEditor from './LspEditor';
-import Editor from './Editor';
-import { setupAlloyRedundancyCodeLens } from '@/../tools/alloy/features';
-import { setupSmtRedundancyCodeLens } from '@/../tools/smt/features';
 import { additionalInputAreaUiMap, lspSupportMap } from '@/ToolMaps';
+
+// The editors pull in Monaco and the VS Code API (several MB), 
+// So we arte loading it after the rest of the page has rendered.
+const LspEditor = React.lazy(() => import('./LspEditor'));
+const Editor = React.lazy(() => import('./Editor'));
+
+const EditorPlaceholder: React.FC<{ height: string }> = ({ height }) => (
+    <div className='editor-placeholder' style={{ height }} role='status'>
+        Loading editor…
+    </div>
+);
 
 // Collaborative editing - lazy-loaded and gated behind env var
 const COLLAB_ENABLED = import.meta.env.VITE_COLLAB_ENABLED === 'true';
@@ -69,8 +76,9 @@ const InputArea: React.FC<InputAreaProps> = ({ editorTheme, onRunButtonClick, on
         activeEditorRef.current = editor;
         activeMonacoRef.current = monaco;
         setEditorInstanceKey((prev) => prev + 1);
-        setupAlloyRedundancyCodeLens(monaco);
-        setupSmtRedundancyCodeLens(monaco);
+        // Already loaded by the editor chunk, so these resolve immediately.
+        import('@/../tools/alloy/features').then((m) => m.setupAlloyRedundancyCodeLens(monaco));
+        import('@/../tools/smt/features').then((m) => m.setupSmtRedundancyCodeLens(monaco));
     };
 
     const onRunButtonClickRef = useRef(onRunButtonClick);
@@ -289,26 +297,30 @@ const InputArea: React.FC<InputAreaProps> = ({ editorTheme, onRunButtonClick, on
             </div>
             {lspMountedRef.current && (
                 <div style={{ display: shouldShowLsp ? undefined : 'none' }}>
-                    <LspEditor
-                        height={getEditorHeight()}
-                        editorTheme={editorTheme}
-                        setEditorValue={setEditorValue}
-                        editorValue={editorValue}
-                        language={lastLspLanguageRef.current!}
-                        lineToHighlight={lineToHighlight}
-                        setLineToHighlight={setLineToHighlight}
-                        onEditorReady={handleBasicEditorReady}
-                        onRunShortcut={handleRunShortcut}
-                    />
+                    <Suspense fallback={<EditorPlaceholder height={getEditorHeight()} />}>
+                        <LspEditor
+                            height={getEditorHeight()}
+                            editorTheme={editorTheme}
+                            setEditorValue={setEditorValue}
+                            editorValue={editorValue}
+                            language={lastLspLanguageRef.current!}
+                            lineToHighlight={lineToHighlight}
+                            setLineToHighlight={setLineToHighlight}
+                            onEditorReady={handleBasicEditorReady}
+                            onRunShortcut={handleRunShortcut}
+                        />
+                    </Suspense>
                 </div>
             )}
             {!shouldShowLsp && (
-                <Editor
-                    height={getEditorHeight()}
-                    editorTheme={editorTheme}
-                    onEditorReady={handleBasicEditorReady}
-                    onRunShortcut={handleRunShortcut}
-                />
+                <Suspense fallback={<EditorPlaceholder height={getEditorHeight()} />}>
+                    <Editor
+                        height={getEditorHeight()}
+                        editorTheme={editorTheme}
+                        onEditorReady={handleBasicEditorReady}
+                        onRunShortcut={handleRunShortcut}
+                    />
+                </Suspense>
             )}
 
             {CollabEditorBridge && (

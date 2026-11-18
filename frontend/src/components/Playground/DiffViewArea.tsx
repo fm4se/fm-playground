@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useAtom } from 'jotai';
 import { Stack } from '@mui/material';
 import { MDBBtn, MDBIcon } from 'mdb-react-ui-kit';
@@ -22,12 +22,14 @@ import {
 import ConfirmModal from '@/components/Utils/Modals/ConfirmModal';
 import MessageModal from '@/components/Utils/Modals/MessageModal';
 import CopyToClipboardBtn from '@/components/Utils/CopyToClipboardBtn';
-import CodeDiffEditor from './DiffEditor';
 import DiffOutput from './DiffOutput';
 import { getCodeByParmalink } from '@/api/playgroundApi';
 import { saveCode } from '@/api/playgroundApi';
 import { diffToolInputUIMap, toolExecutionMap } from '@/ToolMaps';
 import { fmpConfig } from '@/ToolMaps';
+
+// Loaded on demand: the diff editor pulls in Monaco.
+const CodeDiffEditor = React.lazy(() => import('./DiffEditor'));
 
 interface DiffViewAreaProps {
     editorTheme: string;
@@ -185,7 +187,10 @@ const DiffViewArea: React.FC<DiffViewAreaProps> = ({ editorTheme, onBackToEditin
             const currentTool = toolExecutionMap[language.short + 'Diff'];
             // if currentTool is not in the map, show error modal
             if (currentTool) {
-                currentTool();
+                currentTool().catch(() => {
+                    setIsExecuting(false);
+                    showErrorModal('Could not load the tool. Please check your internet connection and try again.');
+                });
             } else {
                 showErrorModal('You can not perform semantic analysis with different tools.');
                 setIsExecuting(false);
@@ -378,15 +383,23 @@ const DiffViewArea: React.FC<DiffViewAreaProps> = ({ editorTheme, onBackToEditin
                     </div>
                 );
                 const editor = (
-                    <CodeDiffEditor
-                        height={getEditorHeight()}
-                        editorTheme={editorTheme}
-                        originalValue={diffComparisonCode}
-                        modifiedValue={editorValue}
-                        readOnly={false}
-                        showDiffActions={!!diffComparisonCode}
-                        isAnalyzeMode={isAnalyzeMode}
-                    />
+                    <Suspense
+                        fallback={
+                            <div className='editor-placeholder' style={{ height: getEditorHeight() }} role='status'>
+                                Loading editor…
+                            </div>
+                        }
+                    >
+                        <CodeDiffEditor
+                            height={getEditorHeight()}
+                            editorTheme={editorTheme}
+                            originalValue={diffComparisonCode}
+                            modifiedValue={editorValue}
+                            readOnly={false}
+                            showDiffActions={!!diffComparisonCode}
+                            isAnalyzeMode={isAnalyzeMode}
+                        />
+                    </Suspense>
                 );
                 const hasControls = language.short === 'SAT' || language.short === 'SMT' || language.short === 'ALS';
 

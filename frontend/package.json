@@ -45,8 +45,7 @@
     "vscode-uri": "~3.0.8",
     "y-protocols": "^1.0.7",
     "y-websocket": "^3.0.0",
-    "yjs": "^13.6.31",
-    "z3-solver": "^4.12.2"
+    "yjs": "^13.6.31"
   },
   "devDependencies": {
     "@codingame/monaco-vscode-rollup-vsix-plugin": "~25.1.2",

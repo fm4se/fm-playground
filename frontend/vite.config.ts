@@ -31,13 +31,36 @@ export default defineConfig({
         },
     },
     build: {
-        chunkSizeWarningLimit: 1000,
-        rollupOptions: {
+        chunkSizeWarningLimit: 3000,
+        rolldownOptions: {
             onwarn(warning, warn) {
                 if (warning.code === 'MODULE_LEVEL_DIRECTIVE') {
                     return;
                 }
                 warn(warning);
+            },
+            output: {
+                // Keep third-party code out of the app's own chunks so that a deploy
+                // which only changes app code does not invalidate the multi-MB editor
+                // libraries in users' browser caches. `entriesAware` keeps libraries
+                // that are only reached through dynamic import() (e.g. the Monaco
+                // language packs) in their own lazily-loaded chunks.
+                codeSplitting: {
+                    groups: [
+                        {
+                            name: 'vendor-editor',
+                            test: /node_modules[\\/](@codingame|@monaco-editor|monaco-|vscode|langium)/,
+                            priority: 2,
+                            entriesAware: true,
+                        },
+                        {
+                            name: 'vendor',
+                            test: /node_modules[\\/]/,
+                            priority: 1,
+                            entriesAware: true,
+                        },
+                    ],
+                },
             },
         },
     },

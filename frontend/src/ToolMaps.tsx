@@ -1,14 +1,3 @@
-// Tool executors
-import { executeLimboole } from '@/../tools/limboole/limbooleExecutor';
-import { executeZ3WithOptionOnServer } from '@/../tools/smt/z3Executor';
-import { executeNuxmvTool } from '@/../tools/nuxmv/nuxmvExecutor';
-import { executeAlloyTool } from '@/../tools/alloy/alloyExecutor';
-import { executeSpectraTool } from '@/../tools/spectra/spectraExecutor';
-import { executeSmtDiffTool } from '@/../tools/smt-diff/smtDiffExecutor';
-import { executeLimbooleDiffTool } from '@/../tools/limboole-diff/limbooleDiffExecutor';
-import { executeAlloyDiffTool } from '@/../tools/alloy-diff/alloyDiffExecutor';
-import { executeDafnyTool } from '@/../tools/dafny/dafnyExecutor';
-
 // Tool output components
 import TextualOutput from '@/components/Playground/TextualOutput';
 import AlloyOutput from '@/../tools/alloy/components/AlloyOutput';
@@ -43,6 +32,13 @@ import SmtDiffOutput from '@/../tools/smt-diff/components/smtDiffOutput';
 import LimbooleDiffOutput from '@/../tools/limboole-diff/components/limbooleDiffOutput';
 import AlloyDiffOutput from '@/../tools/alloy-diff/components/alloyDiffOutput';
 
+// Diff tool executors. Imported statically: the diff output components above already
+// import helpers from them, and they don't depend on the editor, so a lazy import()
+// would not move them out of the initial bundle.
+import { executeSmtDiffTool } from '@/../tools/smt-diff/smtDiffExecutor';
+import { executeLimbooleDiffTool } from '@/../tools/limboole-diff/limbooleDiffExecutor';
+import { executeAlloyDiffTool } from '@/../tools/alloy-diff/alloyDiffExecutor';
+
 import type { FmpConfig } from '@/types';
 
 export const additionalInputAreaUiMap: Record<string, React.FC<any>> = {
@@ -57,16 +53,36 @@ export const additonalOutputAreaUiMap: Record<string, React.FC<any>> = {
     XMV: NuxmvCopyrightNotice,
 };
 
-export const toolExecutionMap: Record<string, () => void> = {
-    SAT: executeLimboole,
-    SMT: executeZ3WithOptionOnServer,
-    XMV: executeNuxmvTool,
-    ALS: executeAlloyTool,
-    SPECTRA: executeSpectraTool,
-    SMTDiff: executeSmtDiffTool,
-    SATDiff: executeLimbooleDiffTool,
-    ALSDiff: executeAlloyDiffTool,
-    DFY: executeDafnyTool,
+/**
+ * Executors are imported on the first Run instead of at startup: 
+ * several of them depend on the VS Code/Monaco API, which would otherwise be pulled into the initial bundle. 
+ * The returned promise rejects only if the executor's chunk fails to load; 
+ * the executor itself is started without being awaited.
+ */
+const lazyExecutor =
+    (load: () => Promise<() => unknown>) =>
+    async (): Promise<void> => {
+        const execute = await load();
+        execute();
+    };
+
+/** Wraps an already-loaded executor so it fits the same signature as `lazyExecutor`. */
+const eagerExecutor =
+    (execute: () => unknown) =>
+    async (): Promise<void> => {
+        execute();
+    };
+
+export const toolExecutionMap: Record<string, () => Promise<void>> = {
+    SAT: lazyExecutor(() => import('@/../tools/limboole/limbooleExecutor').then((m) => m.executeLimboole)),
+    SMT: lazyExecutor(() => import('@/../tools/smt/z3Executor').then((m) => m.executeZ3WithOptionOnServer)),
+    XMV: lazyExecutor(() => import('@/../tools/nuxmv/nuxmvExecutor').then((m) => m.executeNuxmvTool)),
+    ALS: lazyExecutor(() => import('@/../tools/alloy/alloyExecutor').then((m) => m.executeAlloyTool)),
+    SPECTRA: lazyExecutor(() => import('@/../tools/spectra/spectraExecutor').then((m) => m.executeSpectraTool)),
+    SMTDiff: eagerExecutor(executeSmtDiffTool),
+    SATDiff: eagerExecutor(executeLimbooleDiffTool),
+    ALSDiff: eagerExecutor(executeAlloyDiffTool),
+    DFY: lazyExecutor(() => import('@/../tools/dafny/dafnyExecutor').then((m) => m.executeDafnyTool)),
 };
 
 export const toolOutputMap: Record<string, React.FC<any>> = {

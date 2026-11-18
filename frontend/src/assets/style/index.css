@@ -71,3 +71,14 @@ body {
         opacity: 1;
     }
 }
+
+/* Shown while the (lazily loaded) code editor chunk downloads. */
+.editor-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    background-color: var(--editor-background-color);
+    border: 1px solid var(--border-color);
+    color: var(--secondary-text-color);
+}

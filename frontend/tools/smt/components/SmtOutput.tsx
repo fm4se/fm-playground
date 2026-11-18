@@ -6,7 +6,9 @@ import { getNextSmtModel } from '../smtIterateModels';
 import { jotaiStore, permalinkAtom } from '@/atoms';
 import { logToDb } from '@/api/playgroundApi';
 import { smtCliOptionsAtom } from '@/atoms';
-import { SmtRedundancySummary, smtRedundancySummaryAtom } from '../features';
+// Import directly, not from '../features': that barrel also pulls in the VS Code API.
+import { SmtRedundancySummary } from '../features/redundancy/RedundancySummary';
+import { smtRedundancySummaryAtom } from '../features/redundancy/redundancyAtoms';
 
 const SmtOutput = () => {
     const [smtModel, setSmtModel] = useAtom(smtModelAtom);

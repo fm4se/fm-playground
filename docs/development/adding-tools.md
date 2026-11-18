@@ -199,7 +199,6 @@ After creating your tool files, you need to register them in `ToolMaps.tsx`:
 ```typescript hl_lines="1" linenums="1" title="ToolMaps.tsx"
 import TextualOutput from '@/components/Playground/TextualOutput';
 import { nuxmvConf, nuxmvLang } from '@/../tools/nuxmv/nuxmvTextMateGrammar';
-import { executenuxmvTool } from '@/../tools/nuxmv/nuxmvExecutor';
 import nuxmvOutput from '@/../tools/nuxmv/nuxmvOutput';
 import type { FmpConfig } from '@/types';
 
@@ -207,8 +206,9 @@ export const additionalInputAreaUiMap: Record<string, React.FC<any>> = {};
 export const additonalOutputAreaUiMap: Record<string, React.FC<any>> = {
   XMV: nuxmvOutput,
 };
-export const toolExecutionMap: Record<string, () => void> = {
-  XMV: executenuxmvTool,
+export const toolExecutionMap: Record<string, () => Promise<void>> = {
+  // Loaded on the first Run, so the executor stays out of the initial bundle
+  XMV: lazyExecutor(() => import('@/../tools/nuxmv/nuxmvExecutor').then((m) => m.executenuxmvTool)),
 };
 export const toolOutputMap: Record<string, React.FC<any>> = {
   XMV: TextualOutput,
@@ -253,7 +253,8 @@ export const fmpConfig: FmpConfig = {
 
 - **Purpose**: Maps tool IDs to their execution functions
 - **Critical**: This is the core mapping that enables tool execution
-- **Function signature**: `() => void` - typically async functions that handle the complete execution flow
+- **Function signature**: your executor is a `() => void` function (typically async) that handles the complete execution flow. Register it through `lazyExecutor(() => import(...))` instead of a static import, so the executor and anything it imports (e.g. the VS Code/Monaco API) are only downloaded when the user first runs the tool
+- **Keep the initial bundle small**: modules that `ToolMaps.tsx` imports statically are loaded before the page can render. Don't statically import anything that depends on `vscode`, `monaco-editor` (except `import type`) or `monaco-languageclient` from `ToolMaps.tsx` or the components it registers
 - **Responsibility**: Manages editor content saving, API calls, result handling, and error management
 
 **4. `toolOutputMap`**

@@ -1,4 +1,4 @@
-import * as monacoEditor from 'monaco-editor';
+import type * as monacoEditor from 'monaco-editor';
 
 const limbooleConf: monacoEditor.languages.LanguageConfiguration = {
     comments: {

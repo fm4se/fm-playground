@@ -7,7 +7,8 @@ declare global {
     interface Window {
         Wrappers: any;
     }
-    interface Window {
-        z3Promise?: Promise<any>;
-    }
+    // FIXME: We are currently not using Z3 WASM.
+    // interface Window {
+    //     z3Promise?: Promise<any>;
+    // }
 }

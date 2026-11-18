@@ -176,7 +176,10 @@ const Playground: React.FC<PlaygroundProps> = ({ editorTheme }) => {
             setIsExecuting(true);
             const currentTool = toolExecutionMap[language.short];
             if (currentTool) {
-                currentTool();
+                currentTool().catch(() => {
+                    setIsExecuting(false);
+                    showErrorModal('Could not load the tool. Please check your internet connection and try again.');
+                });
             } else {
                 setIsExecuting(false);
             }

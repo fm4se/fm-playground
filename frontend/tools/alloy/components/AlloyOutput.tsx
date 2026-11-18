@@ -14,7 +14,8 @@ import { getLineToHighlight } from '@/../tools/common/lineHighlightingUtil';
 import { getGraphData, parseAlloyErrorMessage, getTraceLengthAndBackloop } from '@/../tools/alloy/alloyUtils';
 import './AlloyOutput.css';
 import { lineToHighlightAtom, isFullScreenAtom, alloyInstanceAtom } from '@/atoms';
-import { RedundancySummary } from '../features';
+// Import directly, not from '../features': that barrel also pulls in the VS Code API.
+import { RedundancySummary } from '../features/redundancy/RedundancySummary';
 
 async function getAlloyNextInstance(specId: string | null) {
     let url = '/alloy/alloy/nextInstance';
