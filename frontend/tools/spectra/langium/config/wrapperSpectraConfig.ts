@@ -8,12 +8,15 @@ import responseSpectraTm from '../syntaxes/spectra.tmLanguage.json?raw';
 import { configureMonacoWorkers } from '../utils';
 import workerPortUrlSpectra from '../worker/spectra-server-port?worker&url';
 import type { LspConfig } from '@/../tools/common/lspTypes';
+import { monitorWorker } from '@/monitoring';
 
 const loadLangiumWorkerPort = () => {
-    return new Worker(workerPortUrlSpectra, {
-        type: 'module',
-        name: 'Spectra Server Port',
-    });
+    return monitorWorker(
+        new Worker(workerPortUrlSpectra, {
+            type: 'module',
+            name: 'Spectra Server Port',
+        })
+    );
 };
 
 export const createLangiumSpectraConfig = async (): Promise<LspConfig> => {

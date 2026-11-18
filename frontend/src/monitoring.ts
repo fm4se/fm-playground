@@ -52,6 +52,36 @@ export function initMonitoring(): void {
     });
 }
 
+let workerIntegration: ReturnType<typeof Sentry.webWorkerIntegration> | undefined;
+
+/**
+ * Reports uncaught errors and unhandled rejections from a web worker (e.g. a
+ * language server) with full stack traces. The worker must call
+ * `registerWorkerMonitoring` (tools/common/workerMonitoring.ts).
+ *
+ * Call it right after `new Worker(...)`, before adding any message listeners:
+ * the SDK uses the worker's own message channel and hides its messages from
+ * listeners registered later.
+ */
+export function monitorWorker(worker: Worker): Worker {
+    if (!Sentry.getClient()) return worker;
+    if (workerIntegration) {
+        workerIntegration.addWorker(worker);
+    } else {
+        workerIntegration = Sentry.webWorkerIntegration({ worker });
+        Sentry.addIntegration(workerIntegration);
+    }
+    return worker;
+}
+
+/**
+ * Reports a language server that failed to start. The editor falls back to the
+ * basic editor in that case, so without this the failure would go unnoticed.
+ */
+export function reportLspFailure(error: unknown, tool: string): void {
+    Sentry.captureException(error, { tags: { feature: 'lsp', tool } });
+}
+
 /**
  * Errors thrown when a lazily loaded chunk can't be fetched, typically because a
  * new version was deployed while the page was open (or the connection dropped).

@@ -8,13 +8,16 @@ import responseAlloyTm from '../syntaxes/alloy.tmLanguage.json?raw';
 import { configureMonacoWorkers } from '../utils';
 import workerPortUrlAlloy from '../worker/alloy-server-port?worker&url';
 import type { LspConfig } from '@/../tools/common/lspTypes';
+import { monitorWorker } from '@/monitoring';
 import { alloyLspTelemetry } from './alloyLspTelemetry';
 
 const loadLangiumWorkerPort = () => {
-    return new Worker(workerPortUrlAlloy, {
-        type: 'module',
-        name: 'Alloy Server Port',
-    });
+    return monitorWorker(
+        new Worker(workerPortUrlAlloy, {
+            type: 'module',
+            name: 'Alloy Server Port',
+        })
+    );
 };
 
 export const createLangiumAlloyConfig = async (): Promise<LspConfig> => {

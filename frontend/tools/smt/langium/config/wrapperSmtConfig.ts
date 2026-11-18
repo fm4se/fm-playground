@@ -8,13 +8,16 @@ import responseSmtTm from '../syntaxes/smt.tmLanguage.json?raw';
 import { configureMonacoWorkers } from '../utils';
 import workerPortUrlSmt from '../worker/smt-server-port?worker&url';
 import type { LspConfig } from '@/../tools/common/lspTypes';
+import { monitorWorker } from '@/monitoring';
 import { smtLspTelemetry } from './smtLspTelemetry';
 
 const loadLangiumWorkerPort = () => {
-    return new Worker(workerPortUrlSmt, {
-        type: 'module',
-        name: 'Smt Server Port',
-    });
+    return monitorWorker(
+        new Worker(workerPortUrlSmt, {
+            type: 'module',
+            name: 'Smt Server Port',
+        })
+    );
 };
 
 export const createLangiumSmtConfig = async (): Promise<LspConfig> => {

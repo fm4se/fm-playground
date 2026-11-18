@@ -8,12 +8,15 @@ import responseNuXmvTm from '../syntaxes/nusmv.tmLanguage.json?raw';
 import { configureMonacoWorkers } from '../utils';
 import workerPortUrlNuXmv from '../worker/nusmv-server-port?worker&url';
 import type { LspConfig } from '@/../tools/common/lspTypes';
+import { monitorWorker } from '@/monitoring';
 
 const loadLangiumWorkerPort = () => {
-    return new Worker(workerPortUrlNuXmv, {
-        type: 'module',
-        name: 'nuXmv Server Port',
-    });
+    return monitorWorker(
+        new Worker(workerPortUrlNuXmv, {
+            type: 'module',
+            name: 'nuXmv Server Port',
+        })
+    );
 };
 
 export const createLangiumNuXmvConfig = async (): Promise<LspConfig> => {

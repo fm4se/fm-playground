@@ -1,4 +1,5 @@
 import type { LspConfig } from './lspTypes';
+import { reportLspFailure } from '@/monitoring';
 import { createLangiumLimbooleConfig as createLimbooleConfig } from '../limboole/langium/config/wrapperLimbooleConfig';
 import { createLangiumSmtConfig as createSmtConfig } from '../smt/langium/config/wrapperSmtConfig';
 import { createLangiumSpectraConfig as createSpectraConfig } from '../spectra/langium/config/wrapperSpectraConfig';
@@ -54,6 +55,7 @@ export const createDynamicLspConfig = async (languageShort: string): Promise<Lsp
         return config;
     } catch (error) {
         console.warn(`LSP connection failed for ${languageShort}, falling back to basic editor:`, error);
+        reportLspFailure(error, languageShort);
         return null;
     }
 };

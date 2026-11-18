@@ -1,5 +1,7 @@
 /// <reference lib="WebWorker" />
 
+// Must stay the first import (see workerMonitoring.ts).
+import '../../../common/workerMonitoring';
 import { start } from './alloy-server-start.js';
 
 declare const self: DedicatedWorkerGlobalScope;

@@ -5,6 +5,7 @@ import { EditorApp } from 'monaco-languageclient/editorApp';
 import { registerExtension, ExtensionHostKind } from '@codingame/monaco-vscode-api/extensions';
 import { encodeStringOrUrlToDataUrl } from 'monaco-languageclient/common';
 import { createDynamicLspConfig } from '@/../tools/common/dynamicLspWrapperConfig';
+import { reportLspFailure } from '@/monitoring';
 import '../../assets/style/Playground.css';
 import '@codingame/monaco-vscode-theme-defaults-default-extension';
 import type { LanguageProps } from './Tools';
@@ -259,6 +260,7 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
             } catch (error) {
                 if (cancelled) return;
                 console.error('Error initializing LSP editor, falling back to basic editor:', error);
+                reportLspFailure(error, props.language.short);
                 setLspFailed(true);
                 // Clean up failed language client
                 if (lcWrapperInstance) {

@@ -8,12 +8,15 @@ import responseLimbooleTm from '../syntaxes/limboole.tmLanguage.json?raw';
 import { configureMonacoWorkers } from '../utils';
 import workerPortUrlLimboole from '../worker/limboole-server-port?worker&url';
 import type { LspConfig } from '@/../tools/common/lspTypes';
+import { monitorWorker } from '@/monitoring';
 
 const loadLangiumWorkerPort = () => {
-    return new Worker(workerPortUrlLimboole, {
-        type: 'module',
-        name: 'Limboole Server Port',
-    });
+    return monitorWorker(
+        new Worker(workerPortUrlLimboole, {
+            type: 'module',
+            name: 'Limboole Server Port',
+        })
+    );
 };
 
 export const createLangiumLimbooleConfig = async (): Promise<LspConfig> => {
