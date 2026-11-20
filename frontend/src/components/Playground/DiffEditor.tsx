@@ -5,6 +5,7 @@ import { useAtom } from 'jotai';
 import { editorValueAtom, languageAtom, lineToHighlightAtom } from '@/atoms';
 import { fmpConfig, languageConfigMap } from '@/ToolMaps';
 import '@/assets/style/Playground.css';
+import { useCdnMonacoEnvironment } from './monacoEnvironment';
 
 interface DiffCodeEditorProps {
     height: string;
@@ -25,6 +26,8 @@ const CodeDiffEditor: React.FC<DiffCodeEditorProps> = (props: DiffCodeEditorProp
     const [isMobile, setIsMobile] = useState(false);
     const isSettingValueRef = useRef(false);
     const contentListenerRef = useRef<monacoEditor.IDisposable | null>(null);
+    // This editor runs on the CDN Monaco copy; see monacoEnvironment.ts.
+    const handleBeforeMount = useCdnMonacoEnvironment();
 
     // Check screen size on mount and resize for mobile detection
     useEffect(() => {
@@ -69,6 +72,21 @@ const CodeDiffEditor: React.FC<DiffCodeEditorProps> = (props: DiffCodeEditorProp
         return () => {
             contentListenerRef.current?.dispose();
             contentListenerRef.current = null;
+
+            // @monaco-editor/react disposes the text models *before* the diff editor widget,
+            // which throws "TextModel got disposed before DiffEditorWidget model got reset"
+            // (GlitchTip issue 9). It is told to keep the models (keepCurrent*Model below);
+            // here they are detached from the widget first and then disposed.
+            const diffEditor = diffEditorRef.current;
+            diffEditorRef.current = null;
+            const models = diffEditor?.getModel();
+            try {
+                diffEditor?.setModel(null);
+            } catch {
+                // The widget may already be disposed; the models can still be released.
+            }
+            models?.original.dispose();
+            models?.modified.dispose();
         };
     }, []);
 
@@ -198,6 +216,9 @@ const CodeDiffEditor: React.FC<DiffCodeEditorProps> = (props: DiffCodeEditorProp
                     renderOverviewRuler: true,
                     ignoreTrimWhitespace: false,
                 }}
+                keepCurrentOriginalModel
+                keepCurrentModifiedModel
+                beforeMount={handleBeforeMount}
                 onMount={handleDiffEditorDidMount}
             />
         </div>

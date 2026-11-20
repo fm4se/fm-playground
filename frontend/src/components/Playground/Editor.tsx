@@ -19,6 +19,7 @@ import { fmpConfig, languageConfigMap } from '@/ToolMaps';
 import { alloyRedundancyResultsAtom, alloyExplainResultsAtom, triggerAlloyCodeLensUpdate, isAlloyCodeLensEdit } from '@/../tools/alloy/features';
 import { isSmtCodeLensEdit, clearSmtRedundancyLenses } from '@/../tools/smt/features';
 import '@/assets/style/Playground.css';
+import { useCdnMonacoEnvironment } from './monacoEnvironment';
 
 interface BasicCodeEditorProps {
     height: string;
@@ -278,6 +279,9 @@ const CodeEditor: React.FC<BasicCodeEditorProps> = (props: BasicCodeEditorProps)
         }
     };
 
+    // This editor runs on the CDN Monaco copy; see monacoEnvironment.ts.
+    const handleBeforeMount = useCdnMonacoEnvironment();
+
     return (
         <div className='custom-code-editor'>
             <Editor
@@ -298,6 +302,7 @@ const CodeEditor: React.FC<BasicCodeEditorProps> = (props: BasicCodeEditorProps)
                         independentColorPoolPerBracketType: true,
                     },
                 }}
+                beforeMount={handleBeforeMount}
                 onMount={handleEditorDidMount}
                 onChange={handleCodeChange}
             />

@@ -6,6 +6,7 @@ import { registerExtension, ExtensionHostKind } from '@codingame/monaco-vscode-a
 import { encodeStringOrUrlToDataUrl } from 'monaco-languageclient/common';
 import { createDynamicLspConfig } from '@/../tools/common/dynamicLspWrapperConfig';
 import { reportLspFailure } from '@/monitoring';
+import { activateLspMonacoEnvironment, rememberLspMonacoEnvironment } from './monacoEnvironment';
 import '../../assets/style/Playground.css';
 import '@codingame/monaco-vscode-theme-defaults-default-extension';
 import type { LanguageProps } from './Tools';
@@ -140,10 +141,15 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
                 // before Monaco tries to render into it.
                 setLspFailed(false);
 
+                // The CDN editors (diff view, plain editor) replace the global MonacoEnvironment;
+                // put this editor's back before starting anything (see monacoEnvironment.ts).
+                activateLspMonacoEnvironment();
+
                 // Initialize vscode API (only once globally)
                 if (!apiStarted) {
                     apiWrapper = new MonacoVscodeApiWrapper(lspConfig.vscodeApiConfig);
                     await apiWrapper.start();
+                    rememberLspMonacoEnvironment();
                     if (cancelled) return;
                     apiStarted = true;
                     // Track extensions registered during first start
