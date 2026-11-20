@@ -22,7 +22,7 @@ const loadLangiumWorkerPort = () => {
 
 export const createLangiumAlloyConfig = async (options: LspConfigOptions = {}): Promise<LspConfig> => {
     const telemetry = options.telemetry ?? true;
-    if (telemetry) {
+    if (telemetry && (options.startNewTelemetryEpisode ?? true)) {
         alloyLspTelemetry.resetEpisodeCounters();
     }
     const extensionFilesOrContents = new Map<string, string | URL>();

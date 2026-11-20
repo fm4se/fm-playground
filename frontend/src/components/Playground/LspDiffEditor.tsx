@@ -1,9 +1,11 @@
 /**
- * Diff view editor with language support (syntax errors, completion, hover) on the
- * modified (right) side, running on the same Monaco/VS Code API as the main LSP editor.
+ * Diff view editor running on the same Monaco/VS Code API as the main LSP editor, so it has
+ * the same highlighting and theme. With syntax checking on, the modified (right) side also
+ * gets language support (syntax errors, completion, hover).
  *
- * Falls back to the CDN-based CodeDiffEditor when syntax checking is off, the tool has no
- * language server, or the LSP diff editor fails to start.
+ * Falls back to the CDN-based CodeDiffEditor only when the tool has no language server or
+ * the editor itself (VS Code API) fails to start. If just the language server fails, the
+ * diff editor stays, without syntax checking.
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { useAtom } from 'jotai';
@@ -17,7 +19,7 @@ import { reportLspFailure } from '@/monitoring';
 import { createDynamicLspConfig } from '@/../tools/common/dynamicLspWrapperConfig';
 import type { LspConfig } from '@/../tools/common/lspTypes';
 import CodeDiffEditor, { type DiffCodeEditorProps } from './DiffEditor';
-import { ensureVscodeApi, LSP_START_TIMEOUT_MS, terminateLanguageServerWorker, withTimeout } from './lspRuntime';
+import { ensureVscodeApi, LSP_START_TIMEOUT_MS, setEditorDarkTheme, terminateLanguageServerWorker, withTimeout } from './lspRuntime';
 import '@/assets/style/Playground.css';
 
 type DiffEditorInstance = NonNullable<ReturnType<EditorApp['getDiffEditor']>>;
@@ -63,7 +65,9 @@ const useIsMobile = () => {
     return isMobile;
 };
 
-const LspDiffEditorInner: React.FC<DiffCodeEditorProps> = (props) => {
+type LspDiffEditorProps = DiffCodeEditorProps & { languageFeatures: boolean };
+
+const LspDiffEditorInner: React.FC<LspDiffEditorProps> = ({ languageFeatures, ...props }) => {
     const [editorValue, setEditorValue] = useAtom(editorValueAtom);
     const [language] = useAtom(languageAtom);
     const [lineToHighlight, setLineToHighlight] = useAtom(lineToHighlightAtom);
@@ -117,10 +121,6 @@ const LspDiffEditorInner: React.FC<DiffCodeEditorProps> = (props) => {
                 await ensureVscodeApi(lspConfig.vscodeApiConfig);
                 if (cancelled) return teardown();
 
-                languageClient = new LanguageClientWrapper(restrictToModifiedSide(lspConfig.languageClientConfig));
-                await withTimeout(languageClient.start(), LSP_START_TIMEOUT_MS, 'Starting the language client');
-                if (cancelled) return teardown();
-
                 const ext = fileExtension(lspConfig);
                 const initial = initialRef.current;
                 editorApp = new EditorApp({
@@ -164,6 +164,30 @@ const LspDiffEditorInner: React.FC<DiffCodeEditorProps> = (props) => {
                 reportLspFailure(error, language.short, 'diff');
                 teardown();
                 setFailed(true);
+                return;
+            }
+
+            // The editor works; now the language server, if syntax checking is on. If it
+            // fails, the diff editor stays usable without syntax checking.
+            const clientConfig = lspConfig.languageClientConfig;
+            if (!languageFeatures || lspConfig.languageServerError) {
+                terminateLanguageServerWorker(clientConfig);
+                if (languageFeatures && lspConfig.languageServerError) {
+                    reportLspFailure(lspConfig.languageServerError, language.short, 'diff');
+                }
+                return;
+            }
+            languageClient = new LanguageClientWrapper(restrictToModifiedSide(clientConfig));
+            try {
+                await withTimeout(languageClient.start(), LSP_START_TIMEOUT_MS, 'Starting the language client');
+                if (cancelled) return teardown();
+            } catch (error) {
+                if (cancelled) return teardown();
+                console.error('Language server failed to start in the diff view; continuing without syntax checking:', error);
+                reportLspFailure(error, language.short, 'diff');
+                const failedClient = languageClient;
+                languageClient = null;
+                failedClient.dispose(true).catch(() => {});
             }
         };
 
@@ -204,6 +228,11 @@ const LspDiffEditorInner: React.FC<DiffCodeEditorProps> = (props) => {
         diffEditorRef.current?.getModifiedEditor().updateOptions({ readOnly: props.readOnly ?? false });
     }, [ready, props.readOnly]);
 
+    // Colour theme follows the app's dark mode (shared with the main editor).
+    useEffect(() => {
+        setEditorDarkTheme(props.editorTheme === 'vs-dark');
+    }, [props.editorTheme]);
+
     // Line highlights (e.g. from a run) on the modified side.
     useEffect(() => {
         decorationsRef.current?.set(
@@ -220,12 +249,15 @@ const LspDiffEditorInner: React.FC<DiffCodeEditorProps> = (props) => {
     return <div ref={containerRef} className='custom-diff-editor' style={{ height: props.height }} />;
 };
 
-/** Uses the LSP diff editor when syntax checking is on and the tool has a language server. */
+/**
+ * Uses the VS Code-based diff editor for tools with a language server; syntax checking only
+ * decides whether it gets a language client. Other tools use the CDN-based diff editor.
+ */
 const DiffCodeEditor: React.FC<DiffCodeEditorProps> = (props) => {
     const [enableLsp] = useAtom(enableLspAtom);
     const [language] = useAtom(languageAtom);
-    if (enableLsp && lspSupportMap[language.short]) {
-        return <LspDiffEditorInner key={language.short} {...props} />;
+    if (lspSupportMap[language.short]) {
+        return <LspDiffEditorInner key={`${language.short}-${enableLsp}`} languageFeatures={enableLsp} {...props} />;
     }
     return <CodeDiffEditor {...props} />;
 };

@@ -127,17 +127,17 @@ const InputArea: React.FC<InputAreaProps> = ({ editorTheme, onRunButtonClick, on
     // Check if current language supports LSP using the configuration from ToolMaps
     const isLspSupported = lspSupportMap[language.short] ?? false;
 
-    // Keep LspEditor mounted permanently once first used, to preserve
-    // the global monaco-vscode-api state that can't be re-initialized.
-    // When a non-LSP tool is selected, LspEditor is hidden (not unmounted)
-    // and receives the last LSP-supported language to avoid re-initialization.
+    // Tools with a language server always use LspEditor. "Syntax checking" only switches its
+    // language client on/off (languageFeatures), so highlighting and theme stay the same.
+    // Once mounted, LspEditor stays mounted (hidden) while a tool without a language server
+    // is selected, keeping the last supported language to avoid re-initialization.
     const lastLspLanguageRef = useRef(isLspSupported ? language : null);
     const lspMountedRef = useRef(false);
-    if (enableLsp && isLspSupported) {
+    if (isLspSupported) {
         lastLspLanguageRef.current = language;
         lspMountedRef.current = true;
     }
-    const shouldShowLsp = enableLsp && isLspSupported;
+    const shouldShowLsp = isLspSupported;
 
     // Calculate editor height based on screen size and fullscreen state
     const getEditorHeight = () => {
@@ -304,6 +304,7 @@ const InputArea: React.FC<InputAreaProps> = ({ editorTheme, onRunButtonClick, on
                             setEditorValue={setEditorValue}
                             editorValue={editorValue}
                             language={lastLspLanguageRef.current!}
+                            languageFeatures={enableLsp}
                             lineToHighlight={lineToHighlight}
                             setLineToHighlight={setLineToHighlight}
                             onEditorReady={handleBasicEditorReady}

@@ -1,7 +1,9 @@
 /**
  * State shared by the LSP editors (LspEditor and LspDiffEditor): the VS Code API, which
- * can only be started once per page, and the language extensions registered with it.
+ * can only be started once per page, the language extensions registered with it, and the
+ * editor colour theme.
  */
+import * as vscode from 'vscode';
 import { MonacoVscodeApiWrapper } from 'monaco-languageclient/vscodeApiWrapper';
 import type { MonacoVscodeApiConfig } from 'monaco-languageclient/vscodeApiWrapper';
 import type { LanguageClientConfig } from 'monaco-languageclient/lcwrapper';
@@ -10,6 +12,44 @@ import { encodeStringOrUrlToDataUrl } from 'monaco-languageclient/common';
 import { activateLspMonacoEnvironment, rememberLspMonacoEnvironment } from './monacoEnvironment';
 
 let apiStart: Promise<void> | null = null;
+let apiReady = false;
+
+/* ---------- Colour theme ---------- */
+
+const LIGHT_THEME = 'Default Light Modern';
+const DARK_THEME = 'Default Dark Modern';
+let darkTheme = false;
+
+/** Applies the app's dark/light mode to all editors on this Monaco (one global VS Code theme). */
+export function setEditorDarkTheme(dark: boolean): void {
+    darkTheme = dark;
+    if (apiReady) applyColorTheme();
+}
+
+function applyColorTheme(): void {
+    const theme = darkTheme ? DARK_THEME : LIGHT_THEME;
+    const settings = vscode.workspace.getConfiguration('workbench');
+    if (settings.get('colorTheme') !== theme) {
+        settings.update('colorTheme', theme, vscode.ConfigurationTarget.Global).then(undefined, (error: unknown) => {
+            console.warn('Could not switch the editor colour theme:', error);
+        });
+    }
+}
+
+/** Starts the API with the current theme already set, so the editor doesn't flash light first. */
+function withCurrentTheme(config: MonacoVscodeApiConfig): MonacoVscodeApiConfig {
+    const json = config.userConfiguration?.json;
+    if (!json) return config;
+    try {
+        const settings = JSON.parse(json);
+        settings['workbench.colorTheme'] = darkTheme ? DARK_THEME : LIGHT_THEME;
+        return { ...config, userConfiguration: { ...config.userConfiguration, json: JSON.stringify(settings) } };
+    } catch {
+        return config;
+    }
+}
+
+/* ---------- VS Code API ---------- */
 /** Extension id -> promise that resolves once the extension is registered and ready. */
 const extensions = new Map<string, Promise<void>>();
 
@@ -27,9 +67,12 @@ export async function ensureVscodeApi(config: MonacoVscodeApiConfig): Promise<vo
     if (!apiStart) {
         // The extensions in the first config are registered by the API start itself.
         const started = (async () => {
-            const wrapper = new MonacoVscodeApiWrapper(config);
+            const wrapper = new MonacoVscodeApiWrapper(withCurrentTheme(config));
             await wrapper.start();
             rememberLspMonacoEnvironment();
+            apiReady = true;
+            // The theme may have been toggled while the API was starting.
+            applyColorTheme();
         })();
         for (const ext of config.extensions ?? []) {
             extensions.set(extensionId(ext), started);

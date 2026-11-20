@@ -22,7 +22,7 @@ const loadLangiumWorkerPort = () => {
 
 export const createLangiumSmtConfig = async (options: LspConfigOptions = {}): Promise<LspConfig> => {
     const telemetry = options.telemetry ?? true;
-    if (telemetry) {
+    if (telemetry && (options.startNewTelemetryEpisode ?? true)) {
         smtLspTelemetry.resetEpisodeCounters();
     }
     const extensionFilesOrContents = new Map<string, string | URL>();

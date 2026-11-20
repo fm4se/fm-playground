@@ -29,10 +29,13 @@ export const createDafnyLspConfig = async (): Promise<LspConfig> => {
     // Wait a bit to check if connection fails
     await new Promise((resolve) => setTimeout(resolve, 500));
 
+    // If the proxy is unreachable, still return the config: the editor works (highlighting,
+    // theme) and only the language client is skipped (see LspConfig.languageServerError).
+    let languageServerError: Error | undefined;
     if (dafnyWorker.isConnectionFailed()) {
         console.warn('Dafny LSP connection failed, LSP features will not be available');
         dafnyWorker.terminate();
-        throw new Error('Dafny LSP connection failed');
+        languageServerError = new Error('Dafny LSP connection failed');
     }
 
     // Create message channel for the worker
@@ -44,6 +47,7 @@ export const createDafnyLspConfig = async (): Promise<LspConfig> => {
     const dafnyWriter = new BrowserMessageWriter(dafnyChannel.port1);
 
     return {
+        languageServerError,
         vscodeApiConfig: {
             $type: 'extended',
             viewsConfig: { $type: 'EditorService' },

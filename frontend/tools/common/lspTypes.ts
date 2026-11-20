@@ -10,10 +10,21 @@ export interface LspConfigOptions {
      * counts toward the main editor's episode.
      */
     telemetry?: boolean;
+    /**
+     * With telemetry: start a new episode (reset the counters). Default: true. False when
+     * syntax checking is switched back on, which continues the current episode.
+     */
+    startNewTelemetryEpisode?: boolean;
 }
 
 export interface LspConfig {
     vscodeApiConfig: MonacoVscodeApiConfig;
     editorAppConfig: EditorAppConfig;
     languageClientConfig: LanguageClientConfig;
+    /**
+     * Set when the language server is known to be unreachable (e.g. the Dafny proxy is
+     * down). The editor parts of the config are still usable: the editor starts without
+     * a language client instead of falling back to the CDN editor.
+     */
+    languageServerError?: Error;
 }
