@@ -7,7 +7,7 @@ import smtLanguageConfig from './language-configuration.json?raw';
 import responseSmtTm from '../syntaxes/smt.tmLanguage.json?raw';
 import { configureMonacoWorkers } from '../utils';
 import workerPortUrlSmt from '../worker/smt-server-port?worker&url';
-import type { LspConfig } from '@/../tools/common/lspTypes';
+import type { LspConfig, LspConfigOptions } from '@/../tools/common/lspTypes';
 import { monitorWorker } from '@/monitoring';
 import { smtLspTelemetry } from './smtLspTelemetry';
 
@@ -20,8 +20,11 @@ const loadLangiumWorkerPort = () => {
     );
 };
 
-export const createLangiumSmtConfig = async (): Promise<LspConfig> => {
-    smtLspTelemetry.resetEpisodeCounters();
+export const createLangiumSmtConfig = async (options: LspConfigOptions = {}): Promise<LspConfig> => {
+    const telemetry = options.telemetry ?? true;
+    if (telemetry) {
+        smtLspTelemetry.resetEpisodeCounters();
+    }
     const extensionFilesOrContents = new Map<string, string | URL>();
     extensionFilesOrContents.set(`/smt-configuration.json`, smtLanguageConfig);
     extensionFilesOrContents.set(`/smt-grammar.json`, responseSmtTm);
@@ -117,7 +120,7 @@ export const createLangiumSmtConfig = async (): Promise<LspConfig> => {
             },
             clientOptions: {
                 documentSelector: ['smt'],
-                middleware: smtLspTelemetry.createMiddleware(),
+                middleware: telemetry ? smtLspTelemetry.createMiddleware() : undefined,
             },
         },
     };

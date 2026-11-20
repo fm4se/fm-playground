@@ -7,7 +7,7 @@ import { fmpConfig, languageConfigMap } from '@/ToolMaps';
 import '@/assets/style/Playground.css';
 import { useCdnMonacoEnvironment } from './monacoEnvironment';
 
-interface DiffCodeEditorProps {
+export interface DiffCodeEditorProps {
     height: string;
     editorTheme: string;
     originalValue?: string;

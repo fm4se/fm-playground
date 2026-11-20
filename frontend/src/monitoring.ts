@@ -77,9 +77,10 @@ export function monitorWorker(worker: Worker): Worker {
 /**
  * Reports a language server that failed to start. The editor falls back to the
  * basic editor in that case, so without this the failure would go unnoticed.
+ * `view` tells the main editor and the diff view apart.
  */
-export function reportLspFailure(error: unknown, tool: string): void {
-    Sentry.captureException(error, { tags: { feature: 'lsp', tool } });
+export function reportLspFailure(error: unknown, tool: string, view: 'editor' | 'diff' = 'editor'): void {
+    Sentry.captureException(error, { tags: { feature: 'lsp', tool, view } });
 }
 
 /**

@@ -7,7 +7,7 @@ import alloyLanguageConfig from './language-configuration.json?raw';
 import responseAlloyTm from '../syntaxes/alloy.tmLanguage.json?raw';
 import { configureMonacoWorkers } from '../utils';
 import workerPortUrlAlloy from '../worker/alloy-server-port?worker&url';
-import type { LspConfig } from '@/../tools/common/lspTypes';
+import type { LspConfig, LspConfigOptions } from '@/../tools/common/lspTypes';
 import { monitorWorker } from '@/monitoring';
 import { alloyLspTelemetry } from './alloyLspTelemetry';
 
@@ -20,8 +20,11 @@ const loadLangiumWorkerPort = () => {
     );
 };
 
-export const createLangiumAlloyConfig = async (): Promise<LspConfig> => {
-    alloyLspTelemetry.resetEpisodeCounters();
+export const createLangiumAlloyConfig = async (options: LspConfigOptions = {}): Promise<LspConfig> => {
+    const telemetry = options.telemetry ?? true;
+    if (telemetry) {
+        alloyLspTelemetry.resetEpisodeCounters();
+    }
     const extensionFilesOrContents = new Map<string, string | URL>();
     extensionFilesOrContents.set(`/alloy-configuration.json`, alloyLanguageConfig);
     extensionFilesOrContents.set(`/alloy-grammar.json`, responseAlloyTm);
@@ -117,7 +120,7 @@ export const createLangiumAlloyConfig = async (): Promise<LspConfig> => {
             },
             clientOptions: {
                 documentSelector: ['alloy'],
-                middleware: alloyLspTelemetry.createMiddleware(),
+                middleware: telemetry ? alloyLspTelemetry.createMiddleware() : undefined,
             },
         },
     };

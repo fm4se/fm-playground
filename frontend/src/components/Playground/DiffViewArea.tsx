@@ -28,8 +28,9 @@ import { saveCode } from '@/api/playgroundApi';
 import { diffToolInputUIMap, toolExecutionMap } from '@/ToolMaps';
 import { fmpConfig } from '@/ToolMaps';
 
-// Loaded on demand: the diff editor pulls in Monaco.
-const CodeDiffEditor = React.lazy(() => import('./DiffEditor'));
+// Loaded on demand: the diff editor pulls in Monaco. LspDiffEditor uses the language-server
+// editor when available and falls back to the CDN-based DiffEditor otherwise.
+const CodeDiffEditor = React.lazy(() => import('./LspDiffEditor'));
 
 interface DiffViewAreaProps {
     editorTheme: string;

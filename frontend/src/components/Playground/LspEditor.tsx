@@ -1,12 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { MonacoVscodeApiWrapper } from 'monaco-languageclient/vscodeApiWrapper';
 import { LanguageClientWrapper } from 'monaco-languageclient/lcwrapper';
 import { EditorApp } from 'monaco-languageclient/editorApp';
-import { registerExtension, ExtensionHostKind } from '@codingame/monaco-vscode-api/extensions';
-import { encodeStringOrUrlToDataUrl } from 'monaco-languageclient/common';
 import { createDynamicLspConfig } from '@/../tools/common/dynamicLspWrapperConfig';
+import type { LspConfig } from '@/../tools/common/lspTypes';
 import { reportLspFailure } from '@/monitoring';
-import { activateLspMonacoEnvironment, rememberLspMonacoEnvironment } from './monacoEnvironment';
+import { ensureVscodeApi, LSP_START_TIMEOUT_MS, terminateLanguageServerWorker, withTimeout } from './lspRuntime';
 import '../../assets/style/Playground.css';
 import '@codingame/monaco-vscode-theme-defaults-default-extension';
 import type { LanguageProps } from './Tools';
@@ -41,12 +39,9 @@ type LspEditorProps = {
     onRunShortcut?: () => void;
 };
 
-// Global instances for v10 API
-let apiWrapper: MonacoVscodeApiWrapper | null = null;
-let apiStarted = false;
+// Global instances for v10 API (the VS Code API itself is started in lspRuntime.ts)
 let lcWrapperInstance: LanguageClientWrapper | null = null;
 let editorAppInstance: EditorApp | null = null;
-const registeredExtensions = new Set<string>();
 
 const LspEditor: React.FC<LspEditorProps> = (props) => {
     const editorRef = useRef<any>(null);
@@ -111,9 +106,9 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
                 return;
             }
 
-            // Dispose existing instances
+            // Dispose existing instances (true: also terminate the language server worker)
             if (lcWrapperInstance) {
-                await lcWrapperInstance.dispose();
+                await lcWrapperInstance.dispose(true);
                 lcWrapperInstance = null;
             }
             if (cancelled) return;
@@ -126,10 +121,14 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
 
             isInitializedRef.current = false;
 
+            let lspConfig: LspConfig | null = null;
             try {
-                const lspConfig = await createDynamicLspConfig(props.language.short);
+                lspConfig = await createDynamicLspConfig(props.language.short);
 
-                if (cancelled) return;
+                if (cancelled) {
+                    if (lspConfig) terminateLanguageServerWorker(lspConfig.languageClientConfig);
+                    return;
+                }
 
                 if (!lspConfig) {
                     console.warn(`LSP not available for ${props.language.short}, falling back to basic editor`);
@@ -141,43 +140,16 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
                 // before Monaco tries to render into it.
                 setLspFailed(false);
 
-                // The CDN editors (diff view, plain editor) replace the global MonacoEnvironment;
-                // put this editor's back before starting anything (see monacoEnvironment.ts).
-                activateLspMonacoEnvironment();
-
-                // Initialize vscode API (only once globally)
-                if (!apiStarted) {
-                    apiWrapper = new MonacoVscodeApiWrapper(lspConfig.vscodeApiConfig);
-                    await apiWrapper.start();
-                    rememberLspMonacoEnvironment();
-                    if (cancelled) return;
-                    apiStarted = true;
-                    // Track extensions registered during first start
-                    for (const ext of lspConfig.vscodeApiConfig.extensions ?? []) {
-                        const extId = `${ext.config.publisher}.${ext.config.name}`;
-                        registeredExtensions.add(extId);
-                    }
-                } else {
-                    // Register new language extensions dynamically for subsequent switches
-                    for (const ext of lspConfig.vscodeApiConfig.extensions ?? []) {
-                        const extId = `${ext.config.publisher}.${ext.config.name}`;
-                        if (!registeredExtensions.has(extId)) {
-                            const result = registerExtension(ext.config, ExtensionHostKind.LocalProcess);
-                            if (ext.filesOrContents) {
-                                for (const [path, content] of ext.filesOrContents) {
-                                    (result as any).registerFileUrl(path, encodeStringOrUrlToDataUrl(content));
-                                }
-                            }
-                            await result.whenReady();
-                            if (cancelled) return;
-                            registeredExtensions.add(extId);
-                        }
-                    }
+                // Start the VS Code API (once per page) or register this tool's extension
+                await ensureVscodeApi(lspConfig.vscodeApiConfig);
+                if (cancelled) {
+                    terminateLanguageServerWorker(lspConfig.languageClientConfig);
+                    return;
                 }
 
                 // Create and start language client
                 lcWrapperInstance = new LanguageClientWrapper(lspConfig.languageClientConfig);
-                await lcWrapperInstance.start();
+                await withTimeout(lcWrapperInstance.start(), LSP_START_TIMEOUT_MS, 'Starting the language client');
                 if (cancelled) return;
 
                 // Create and start editor app
@@ -268,10 +240,12 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
                 console.error('Error initializing LSP editor, falling back to basic editor:', error);
                 reportLspFailure(error, props.language.short);
                 setLspFailed(true);
-                // Clean up failed language client
+                // Clean up failed language client and its worker
                 if (lcWrapperInstance) {
-                    await lcWrapperInstance.dispose();
+                    await lcWrapperInstance.dispose(true);
                     lcWrapperInstance = null;
+                } else if (lspConfig) {
+                    terminateLanguageServerWorker(lspConfig.languageClientConfig);
                 }
                 // We do not dispose editorAppInstance here - it preserves the
                 // global monaco-vscode-api state. It will be properly
@@ -297,12 +271,13 @@ const LspEditor: React.FC<LspEditorProps> = (props) => {
             });
             shortcutDisposablesRef.current = [];
 
-            // Only dispose the language client on unmount/language change.
+            // Only dispose the language client on unmount/language change. `true` also
+            // terminates its language server worker; a new one is created on the next start.
             const lc = lcWrapperInstance;
             lcWrapperInstance = null;
             isInitializedRef.current = false;
 
-            lc?.dispose().catch(console.error);
+            lc?.dispose(true).catch(console.error);
         };
     }, [props.language?.id]); // Only depend on language ID for initialization
     useEffect(() => {

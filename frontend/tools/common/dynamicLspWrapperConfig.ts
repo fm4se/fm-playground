@@ -1,4 +1,4 @@
-import type { LspConfig } from './lspTypes';
+import type { LspConfig, LspConfigOptions } from './lspTypes';
 import { reportLspFailure } from '@/monitoring';
 import { createLangiumLimbooleConfig as createLimbooleConfig } from '../limboole/langium/config/wrapperLimbooleConfig';
 import { createLangiumSmtConfig as createSmtConfig } from '../smt/langium/config/wrapperSmtConfig';
@@ -10,7 +10,7 @@ import { createDafnyLspConfig as createDafnyConfig } from '../dafny/lsp/lspWrapp
 
 // Type for language configuration
 interface LanguageConfig {
-    configCreator: (params?: any) => Promise<LspConfig>;
+    configCreator: (options?: LspConfigOptions) => Promise<LspConfig>;
     languageId: string;
 }
 
@@ -42,7 +42,11 @@ const languageConfigMap: Record<string, LanguageConfig | null> = {
     },
 };
 
-export const createDynamicLspConfig = async (languageShort: string): Promise<LspConfig | null> => {
+export const createDynamicLspConfig = async (
+    languageShort: string,
+    options?: LspConfigOptions,
+    view: 'editor' | 'diff' = 'editor'
+): Promise<LspConfig | null> => {
     const languageConfig = languageConfigMap[languageShort as keyof typeof languageConfigMap];
 
     if (!languageConfig) {
@@ -51,11 +55,11 @@ export const createDynamicLspConfig = async (languageShort: string): Promise<Lsp
     }
 
     try {
-        const config = await languageConfig.configCreator();
+        const config = await languageConfig.configCreator(options);
         return config;
     } catch (error) {
         console.warn(`LSP connection failed for ${languageShort}, falling back to basic editor:`, error);
-        reportLspFailure(error, languageShort);
+        reportLspFailure(error, languageShort, view);
         return null;
     }
 };
